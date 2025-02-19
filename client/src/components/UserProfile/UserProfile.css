@@ -1,0 +1,28 @@
+.user-profile-toggle {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border: none;
+  background: transparent !important;
+  color: #333;
+}
+
+.user-profile-toggle:hover,
+.user-profile-toggle:focus {
+  color: #0D6EFD;
+}
+
+.user-profile-menu {
+  min-width: 220px;
+  padding: 0.5rem 0;
+  margin-top: 0.5rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.user-info {
+  background-color: #f8f9fa;
+}
+
+.dropdown-item:hover {
+  background-color: #f0f0f0;
+}
