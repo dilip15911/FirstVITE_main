@@ -7,25 +7,31 @@ const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: '',
-    password: ''
+    password: '',
   });
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await axios.post('/api/admin/login', formData);
-      localStorage.setItem('adminToken', response.data.token);
-      navigate('/admin/dashboard');
+      if (response.data.token) {
+        localStorage.setItem('adminToken', response.data.token);
+        navigate('/admin/dashboard');
+      } else {
+        setError('Invalid credentials');
+      }
     } catch (err) {
-      setError('Invalid credentials');
+      console.error(err);
+      setError(err.response?.data?.message || 'Invalid credentials');
     }
   };
 

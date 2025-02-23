@@ -16,10 +16,11 @@ const Signup = () => {
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -32,15 +33,17 @@ const Signup = () => {
     }
 
     try {
+      const { username, email, password, fullName, signupCode } = formData;
       await axios.post('/api/admin/signup', {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
-        fullName: formData.fullName,
-        signupCode: formData.signupCode
+        username,
+        email,
+        password,
+        fullName,
+        signupCode,
       });
       navigate('/admin/login');
     } catch (err) {
+      console.error(err);
       setError(err.response?.data?.message || 'Error creating account');
     }
   };
@@ -116,7 +119,9 @@ const Signup = () => {
               onChange={handleChange}
               required
             />
-            <small className="help-text">Contact super admin for the signup code</small>
+            <small className="help-text">
+              Contact super admin for the signup code
+            </small>
           </div>
           <button type="submit" className="login-button">
             Create Account

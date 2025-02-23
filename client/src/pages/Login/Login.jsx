@@ -48,7 +48,7 @@ const Login = () => {
       } else {
         localStorage.removeItem('rememberedEmail');
       }
-
+    
       login(response.data.token, response.data.user);
       navigate('/dashboard', { replace: true });
     } catch (error) {
@@ -87,19 +87,19 @@ const Login = () => {
       if (!/^\d{6}$/.test(otp)) {
         throw new Error('Please enter a valid 6-digit OTP');
       }
-
+    
       const response = await api.post('/user/verify-login-otp', { 
         email, 
         otp
       });
-
+    
       if (response.data.token && response.data.user) {
         if (rememberMe) {
           localStorage.setItem('rememberedEmail', email);
         } else {
           localStorage.removeItem('rememberedEmail');
         }
-
+    
         login(response.data.token, response.data.user);
         navigate('/dashboard', { replace: true });
       } else {
@@ -133,7 +133,6 @@ const Login = () => {
       setLoading(false);
     }
   };
-
   const verifyLoginLink = async (token) => {
     setLoading(true);
     setError('');
@@ -165,174 +164,174 @@ const Login = () => {
         <p>Please enter your details to sign in</p>
 
         {error && <div className="error-message">{error}</div>}
-        {message && <div className="success-message">{message}</div>}
+    {message && <div className="success-message">{message}</div>}
 
-        <div className="login-toggle">
-          <button
-            type="button"
-            className={loginMethod === 'password' ? 'active' : ''}
-            onClick={() => toggleLoginMethod('password')}
-          >
-            Password
-          </button>
-          <button
-            type="button"
-            className={loginMethod === 'otp' ? 'active' : ''}
-            onClick={() => toggleLoginMethod('otp')}
-          >
-            OTP
-          </button>
-          <button
-            type="button"
-            className={loginMethod === 'link' ? 'active' : ''}
-            onClick={() => toggleLoginMethod('link')}
-          >
-            Magic Link
-          </button>
-        </div>
-
-        {loginMethod === 'password' && (
-          <form onSubmit={handlePasswordLogin}>
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Password</label>
-              <div className="password-input-container">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  required
-                />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
-                </button>
-              </div>
-            </div>
-            <div className="form-options">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                />
-                Remember me
-              </label>
-              <Link to="/forgot-password">Forgot Password?</Link>
-            </div>
-            <button type="submit" className="login-button" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign in'}
-            </button>
-          </form>
-        )}
-
-        {loginMethod === 'otp' && (
-          <form onSubmit={otpSent ? handleOtpLogin : handleSendOtp}>
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-                disabled={otpSent}
-              />
-            </div>
-            {otpSent && (
-              <div className="form-group">
-                <label>OTP</label>
-                <input
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="Enter OTP sent to your email"
-                  required
-                  maxLength="6"
-                  pattern="[0-9]{6}"
-                  title="Please enter a 6-digit OTP"
-                />
-              </div>
-            )}
-            {otpSent && (
-              <div className="form-options">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                  />
-                  Remember me
-                </label>
-              </div>
-            )}
-            <button type="submit" className="login-button" disabled={loading}>
-              {loading
-                ? 'Processing...'
-                : otpSent
-                ? 'Verify OTP'
-                : 'Send OTP'}
-            </button>
-            {otpSent && (
-              <button
-                type="button"
-                className="resend-button"
-                onClick={handleSendOtp}
-                disabled={loading}
-              >
-                Resend OTP
-              </button>
-            )}
-          </form>
-        )}
-
-        {loginMethod === 'link' && (
-          <form onSubmit={handleSendLoginLink}>
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-                disabled={linkSent}
-              />
-            </div>
-            <button type="submit" className="login-button" disabled={loading || linkSent}>
-              {loading ? 'Sending...' : linkSent ? 'Link Sent!' : 'Send Login Link'}
-            </button>
-            {linkSent && (
-              <button
-                type="button"
-                className="resend-button"
-                onClick={handleSendLoginLink}
-                disabled={loading}
-              >
-                Resend Login Link
-              </button>
-            )}
-          </form>
-        )}
-
-        <p className="signup-link">
-          Don't have an account? <Link to="/signup">Create an Account</Link>
-        </p>
-      </div>
+    <div className="login-toggle">
+      <button
+        type="button"
+        className={loginMethod === 'password' ? 'active' : ''}
+        onClick={() => toggleLoginMethod('password')}
+      >
+        Password
+      </button>
+      <button
+        type="button"
+        className={loginMethod === 'otp' ? 'active' : ''}
+        onClick={() => toggleLoginMethod('otp')}
+      >
+        OTP
+      </button>
+      <button
+        type="button"
+        className={loginMethod === 'link' ? 'active' : ''}
+        onClick={() => toggleLoginMethod('link')}
+      >
+        Magic Link
+      </button>
     </div>
+
+    {loginMethod === 'password' && (
+      <form onSubmit={handlePasswordLogin}>
+        <div className="form-group">
+          <label>Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label>Password</label>
+          <div className="password-input-container">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              required
+            />
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+            </button>
+          </div>
+        </div>
+        <div className="form-options">
+          <label>
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+            />
+            Remember me
+          </label>
+          <Link to="/forgot-password">Forgot Password?</Link>
+        </div>
+        <button type="submit" className="login-button" disabled={loading}>
+          {loading ? 'Signing in...' : 'Sign in'}
+        </button>
+      </form>
+    )}
+
+    {loginMethod === 'otp' && (
+      <form onSubmit={otpSent ? handleOtpLogin : handleSendOtp}>
+        <div className="form-group">
+          <label>Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
+            required
+            disabled={otpSent}
+          />
+        </div>
+        {otpSent && (
+          <div className="form-group">
+            <label>OTP</label>
+            <input
+              type="text"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="Enter OTP sent to your email"
+              required
+              maxLength="6"
+              pattern="[0-9]{6}"
+              title="Please enter a 6-digit OTP"
+            />
+          </div>
+        )}
+        {otpSent && (
+          <div className="form-options">
+            <label>
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              Remember me
+            </label>
+          </div>
+        )}
+        <button type="submit" className="login-button" disabled={loading}>
+          {loading
+            ? 'Processing...'
+            : otpSent
+            ? 'Verify OTP'
+            : 'Send OTP'}
+        </button>
+        {otpSent && (
+          <button
+            type="button"
+            className="resend-button"
+            onClick={handleSendOtp}
+            disabled={loading}
+          >
+            Resend OTP
+          </button>
+        )}
+      </form>
+    )}
+
+    {loginMethod === 'link' && (
+      <form onSubmit={handleSendLoginLink}>
+        <div className="form-group">
+          <label>Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
+            required
+            disabled={linkSent}
+          />
+        </div>
+        <button type="submit" className="login-button" disabled={loading || linkSent}>
+          {loading ? 'Sending...' : linkSent ? 'Link Sent!' : 'Send Login Link'}
+        </button>
+        {linkSent && (
+          <button
+            type="button"
+            className="resend-button"
+            onClick={handleSendLoginLink}
+            disabled={loading}
+          >
+            Resend Login Link
+          </button>
+        )}
+      </form>
+    )}
+
+    <p className="signup-link">
+      Don't have an account? <Link to="/signup">Create an Account</Link>
+    </p>
+  </div>
+</div>
   );
 };
 

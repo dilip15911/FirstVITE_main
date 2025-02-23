@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
@@ -9,6 +9,12 @@ import LoadingSpinner from './components/LoadingSpinner/LoadingSpinner';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Program from './pages/Programs/AllPrograms';
+// import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
+import AdminRoutes from './components/AdminRoutes/AdminRoutes';
+import { SignIn, SignUp, SignInPage, SignUpPage } from "@clerk/clerk-react";
+import { useUser } from "@clerk/clerk-react";
+
+
 
 // Lazy load pages for better performance
 const Home = React.lazy(() => import('./pages/Home'));
@@ -26,14 +32,40 @@ const Corporate = React.lazy(() => import("./pages/Corporate/Corporate"));
 // Load admin components
 const AdminLayout = React.lazy(() => import('./components/AdminLayout/AdminLayout'));
 const ProtectedRoute = React.lazy(() => import('./components/ProtectedRoute/ProtectedRoute'));
+// const SignIn = React.lazy(() => import('@clerk/clerk-react/dist/SignIn'));
+// const SignUp = React.lazy(() => import('@clerk/clerk-react/dist/SignUp'));
+// const SignInPage = React.lazy(() => import('@clerk/clerk-react/dist/SignInPage'));
+// const SignUpPage = React.lazy(() => import('@clerk/clerk-react/dist/SignUpPage'));
 
-const AdminRoutes = () => (
-  <Suspense fallback={<LoadingSpinner />}>
-    <ProtectedRoute>
-      <AdminLayout />
-    </ProtectedRoute>
-  </Suspense>
-);
+
+console.log("App is starting...");
+
+
+
+
+
+function AuthPage() {
+  return (
+    <div>
+      <h1>Sign In</h1>
+      <SignIn />
+      <h1>Sign Up</h1>
+      <SignUp />
+    </div>
+  );
+}
+
+
+
+
+
+// const AdminRoutes = () => (
+//   <Suspense fallback={<LoadingSpinner />}>
+//     <ProtectedRoute>
+//       <AdminLayout />
+//     </ProtectedRoute>
+//   </Suspense>
+// );
 
 // Layout component to conditionally render Navbar and Footer
 const Layout = ({ children }) => {
@@ -52,6 +84,8 @@ const Layout = ({ children }) => {
 
 function App() {
   return (
+
+
     <ErrorBoundary>
       <ToastProvider>
         <AuthProvider>

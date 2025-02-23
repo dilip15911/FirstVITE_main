@@ -4,10 +4,21 @@ const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const userRoutes = require('./routes/user');
+const adminRoutes = require('./routes/admin');
 const pool = require('./database/db');
-
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+
+const authMiddleware = require("./middleware/authMiddleware");
+const errorHandler = require("./middleware/errorHandler");
+
+
+//  Test Route (No Auth Required)
+app.get("/", (req, res) => {
+  res.send("Hello, Express is working!");
+});
+
 
 // Middleware
 app.use(helmet({
@@ -25,6 +36,10 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
+//  Middleware for Error Handling
+app.use(errorHandler);
+
 // Test database connection
 const testDbConnection = async () => {
   try {
@@ -40,6 +55,19 @@ const testDbConnection = async () => {
 
 // Routes
 app.use('/api/user', userRoutes);
+app.use('/api/admin', adminRoutes);
+
+
+//  Protected Route (JWT required)
+app.use('/api/user/protected', authMiddleware, (req, res) => {
+  res.json({ message: "Access granted!", user: req.user });
+});
+
+
+
+//  Middlewares
+app.use(express.json()); // JSON parsing
+app.use(cors()); // Enable CORS
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -129,3 +157,42 @@ process.on('SIGINT', () => {
 });
 
 startServer();
+
+
+// const express = require("express");
+// const mongoose = require("mongoose");
+// const dotenv = require("dotenv");
+// const cors = require("cors");
+
+// const authMiddleware = require("./middlewares/authMiddleware");
+// const errorHandler = require("./middlewares/errorHandler");
+
+// dotenv.config();
+// const app = express();
+
+// // ✅ Middlewares
+// app.use(express.json()); // JSON parsing
+// app.use(cors()); // Enable CORS
+
+// // ✅ Test Route (No Auth Required)
+// app.get("/", (req, res) => {
+//   res.send("Hello, Express is working!");
+// });
+
+// // ✅ Protected Route (JWT required)
+// app.get("/protected", authMiddleware, (req, res) => {
+//   res.json({ message: "Access granted!", user: req.user });
+// });
+
+// // ✅ Middleware for Error Handling
+// app.use(errorHandler);
+
+// // ✅ Database Connection (MongoDB)
+// mongoose
+//   .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+//   .then(() => console.log("✅ MongoDB Connected"))
+//   .catch((err) => console.error("❌ MongoDB Connection Error:", err));
+
+// // ✅ Start Server
+// const PORT = process.env.PORT || 3001;
+// app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

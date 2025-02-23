@@ -104,6 +104,7 @@ const Signup = () => {
       });
     } catch (err) {
       console.error('Signup error:', err);
+      console.log(err.response?.data);
       setError(err.response?.data?.message || 'An error occurred during registration');
     } finally {
       setLoading(false);
