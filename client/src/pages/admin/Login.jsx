@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Admin.css';
 
@@ -22,7 +22,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/api/admin/login', formData);
+      const response = await axios.post('http://localhost:5000/api/admin/login', formData);
       if (response.data.token) {
         localStorage.setItem('adminToken', response.data.token);
         navigate('/admin/dashboard');
@@ -31,7 +31,7 @@ const Login = () => {
       }
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || 'Invalid credentials');
+      setError(err.response?.data?.message || 'An error occurred during login. Please try again.');
     }
   };
 
@@ -67,11 +67,6 @@ const Login = () => {
             Login
           </button>
         </form>
-        <div className="auth-links">
-          <Link to="/admin/signup" className="signup-link">
-            Create Admin Account
-          </Link>
-        </div>
       </div>
     </div>
   );

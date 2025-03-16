@@ -1,74 +1,61 @@
 import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Card } from 'react-bootstrap';
 import axios from 'axios';
-import './Admin.css';
+import './Dashboard.css';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
     totalUsers: 0,
-    totalProducts: 0,
-    recentOrders: []
+    activePrograms: 0,
+    totalRevenue: 0
   });
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchDashboardStats = async () => {
       try {
-        const response = await axios.get('/api/admin/stats');
+        const token = localStorage.getItem('adminToken');
+        const response = await axios.get('http://localhost:5000/api/admin/dashboard', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         setStats(response.data);
       } catch (error) {
-        console.error('Error fetching stats:', error);
+        console.error('Error fetching dashboard stats:', error);
       }
     };
 
-    fetchStats();
+    fetchDashboardStats();
   }, []);
 
   return (
-    <div className="admin-dashboard">
-      <div className="stats-grid">
-        <div className="stat-card">
-          <h3>Total Users</h3>
-          <p className="stat-number">{stats.totalUsers}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Total Products</h3>
-          <p className="stat-number">{stats.totalProducts}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Recent Orders</h3>
-          <p className="stat-number">{stats.recentOrders.length}</p>
-        </div>
-      </div>
-
-      <div className="recent-activity">
-        <h2>Recent Orders</h2>
-        <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Amount</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stats.recentOrders.map((order) => (
-                <tr key={order.id}>
-                  <td>#{order.id}</td>
-                  <td>{order.customer}</td>
-                  <td>${order.amount}</td>
-                  <td>
-                    <span className={`status ${order.status.toLowerCase()}`}>
-                      {order.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+    <Container className="dashboard-container">
+      <h1 className="dashboard-title">Admin Dashboard</h1>
+      <Row className="mt-4">
+        <Col md={4}>
+          <Card className="dashboard-card">
+            <Card.Body>
+              <Card.Title>Total Users</Card.Title>
+              <Card.Text className="stat-number">{stats.totalUsers}</Card.Text>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={4}>
+          <Card className="dashboard-card">
+            <Card.Body>
+              <Card.Title>Active Programs</Card.Title>
+              <Card.Text className="stat-number">{stats.activePrograms}</Card.Text>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={4}>
+          <Card className="dashboard-card">
+            <Card.Body>
+              <Card.Title>Total Revenue</Card.Title>
+              <Card.Text className="stat-number">₹{stats.totalRevenue}</Card.Text>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 

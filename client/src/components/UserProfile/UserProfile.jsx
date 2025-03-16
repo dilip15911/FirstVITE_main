@@ -1,39 +1,122 @@
-import React from 'react';
-import { Dropdown } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Card, Button, Form } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser, faEnvelope, faPencilAlt, faSave, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../../context/AuthContext';
-import { FaUser } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 import './UserProfile.css';
 
 const UserProfile = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user, updateProfile } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    name: user?.name || '',
+    email: user?.email || ''
+  });
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await updateProfile(formData);
+      setIsEditing(false);
+      toast.success('Profile updated successfully');
+    } catch (error) {
+      toast.error('Failed to update profile');
+    }
   };
 
   return (
-    <Dropdown align="end">
-      <Dropdown.Toggle variant="light" id="user-profile-dropdown" className="user-profile-toggle">
-        <FaUser className="me-2" />
-        {user?.name || 'User'}
-      </Dropdown.Toggle>
-
-      <Dropdown.Menu className="user-profile-menu">
-        <div className="px-3 py-2 user-info">
-          <h6 className="mb-0">{user?.name}</h6>
-          <small className="text-muted">{user?.email}</small>
+    <Card className="user-profile-card">
+      <Card.Body>
+        <div className="profile-header">
+          <h3>
+            <FontAwesomeIcon icon={faUser} className="me-2" />
+            Profile Information
+          </h3>
+          {!isEditing && (
+            <Button
+              variant="outline-primary"
+              onClick={() => setIsEditing(true)}
+              className="edit-button"
+            >
+              <FontAwesomeIcon icon={faPencilAlt} className="me-2" />
+              Edit
+            </Button>
+          )}
         </div>
-        <Dropdown.Divider />
-        <Dropdown.Item href="/profile">My Profile</Dropdown.Item>
-        <Dropdown.Item href="/my-courses">My Courses</Dropdown.Item>
-        <Dropdown.Item href="/settings">Settings</Dropdown.Item>
-        <Dropdown.Divider />
-        <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
-      </Dropdown.Menu>
-    </Dropdown>
+
+        {isEditing ? (
+          <Form onSubmit={handleSubmit}>
+            <Form.Group className="mb-3">
+              <Form.Label>
+                <FontAwesomeIcon icon={faUser} className="me-2" />
+                Name
+              </Form.Label>
+              <Form.Control
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>
+                <FontAwesomeIcon icon={faEnvelope} className="me-2" />
+                Email
+              </Form.Label>
+              <Form.Control
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                disabled
+              />
+              <Form.Text className="text-muted">
+                Email cannot be changed
+              </Form.Text>
+            </Form.Group>
+
+            <div className="d-flex gap-2">
+              <Button variant="primary" type="submit">
+                <FontAwesomeIcon icon={faSave} className="me-2" />
+                Save Changes
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setIsEditing(false);
+                  setFormData({
+                    name: user?.name || '',
+                    email: user?.email || ''
+                  });
+                }}
+              >
+                <FontAwesomeIcon icon={faTimes} className="me-2" />
+                Cancel
+              </Button>
+            </div>
+          </Form>
+        ) : (
+          <div className="profile-info">
+            <p>
+              <FontAwesomeIcon icon={faUser} className="me-2" />
+              <strong>Name:</strong> {user?.name}
+            </p>
+            <p>
+              <FontAwesomeIcon icon={faEnvelope} className="me-2" />
+              <strong>Email:</strong> {user?.email}
+            </p>
+          </div>
+        )}
+      </Card.Body>
+    </Card>
   );
 };
 

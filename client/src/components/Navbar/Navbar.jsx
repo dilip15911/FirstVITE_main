@@ -1,108 +1,104 @@
-"use client";
-import React from "react";
-import Button from "react-bootstrap/Button"; // Bootstrap Button component
-import Container from "react-bootstrap/Container"; // Bootstrap Container component
-import Form from "react-bootstrap/Form"; // Bootstrap Form component
-import Nav from "react-bootstrap/Nav"; // Bootstrap Nav component
-import Navbar from "react-bootstrap/Navbar"; // Bootstrap Navbar component
-import NavDropdown from "react-bootstrap/NavDropdown"; // Bootstrap NavDropdown component
-import { FaSearch } from "react-icons/fa";
-import { Link } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
-import SearchBar from "../SearchBar/SearchBar";
-import { useAuth } from "../../context/AuthContext";
-import UserProfile from "../UserProfile/UserProfile";
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Navbar as BootstrapNavbar, Nav, NavDropdown, Container, Button } from 'react-bootstrap';
+import { useAuth } from '../../context/AuthContext';
+import './Navbar.css';
 
-const NavbarWrapper = () => {
-  const { user } = useAuth();
+const Navbar = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [expanded, setExpanded] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+    setExpanded(false);
+  };
+
   return (
-    <Navbar
-      expand="lg"
-      className="bg-body-tertiary p-0"
-      style={{ position: "fixed", width: "100%", zIndex: "10" }}
+    <BootstrapNavbar 
+      bg="light" 
+      expand="lg" 
+      fixed="top" 
+      className="shadow-sm"
+      expanded={expanded}
+      onToggle={() => setExpanded(!expanded)}
     >
-      <Container fluid>
-        <Navbar.Brand className="mx-2" as={Link} to="/">
-          <span
-            style={{
-              color: "#F47C26",
-              fontWeight: "bolder",
-              fontSize: "1.5em",
-            }}
-          >
-            First
-          </span>
-          <span
-            style={{
-              color: "#1E90FF",
-              fontWeight: "bolder",
-              fontSize: "1.5em",
-            }}
-          >
-            VITE
-          </span>
-        </Navbar.Brand>
-        <Navbar.Toggle aria-controls="navbarScroll" />
-        <Navbar.Collapse id="navbarScroll">
-          <Nav
-            className="me-auto my-2 my-lg-0 justify-content-center w-100"
-            style={{ maxHeight: "100px" }}
-            navbarScroll
-          >
-            <Nav.Link as={Link} to={"/"}>
+      <Container>
+        <BootstrapNavbar.Brand as={Link} to="/" onClick={() => setExpanded(false)}>
+          <span style={{ color: '#F47C26', fontWeight: 'bold' }}>First</span>
+          <span style={{ color: '#000', fontWeight: 'bold' }}>VITE</span>
+        </BootstrapNavbar.Brand>
+        
+        <BootstrapNavbar.Toggle aria-controls="navbar-nav" />
+        <BootstrapNavbar.Collapse id="navbar-nav">
+          <Nav className="me-auto">
+            <Nav.Link as={Link} to="/" onClick={() => setExpanded(false)}>
               Home
             </Nav.Link>
-            <NavDropdown title="All courses" id="navbarScrollingDropdown">
-              <NavDropdown.Item as={Link} to={"generative-ai"}>
+            
+            <NavDropdown title="All Courses" id="courses-dropdown">
+              <NavDropdown.Item as={Link} to="/courses/generative-ai" onClick={() => setExpanded(false)}>
                 Generative AI
               </NavDropdown.Item>
-              <NavDropdown.Item href="#action4">
-                Data Science & Business Analytics
+              <NavDropdown.Item as={Link} to="/courses/web-development" onClick={() => setExpanded(false)}>
+                Web Development
               </NavDropdown.Item>
-              <NavDropdown.Item href="#action5">
-                Project Management
+              <NavDropdown.Item as={Link} to="/courses/data-science" onClick={() => setExpanded(false)}>
+                Data Science
               </NavDropdown.Item>
-              {/* Add other courses */}
             </NavDropdown>
-            <Nav.Link as={Link} to="/corporate-traning">
+
+            <Nav.Link as={Link} to="/corporate-training" onClick={() => setExpanded(false)}>
               Corporate Training
             </Nav.Link>
-            <NavDropdown title="For Business" id="basic-nav-dropdown">
-              {/* Business related links */}
-              <NavDropdown.Item href="#action3">
-                Become a Trainer
+
+            <NavDropdown title="Resources" id="resources-dropdown">
+              <NavDropdown.Item as={Link} to="/blog" onClick={() => setExpanded(false)}>
+                Blog
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/tutorials" onClick={() => setExpanded(false)}>
+                Tutorials
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/documentation" onClick={() => setExpanded(false)}>
+                Documentation
               </NavDropdown.Item>
             </NavDropdown>
-            <NavDropdown title="More" id="basic-nav-dropdown">
-              {/* Other links */}
-              <NavDropdown.Item href="#action3">Alumuni</NavDropdown.Item>
-              <NavDropdown.Item href="#action3">
-                Resume Builder
-              </NavDropdown.Item>
-              <NavDropdown.Item href="#action3">Resourses</NavDropdown.Item>
-            </NavDropdown>
-            <Nav.Link href="#Blog">Blog</Nav.Link>
           </Nav>
 
-          <div className="d-flex align-items-center gap-3">
-            <SearchBar />
-            {user ? (
-              <UserProfile />
+          <Nav>
+            {!user ? (
+              <>
+                <Nav.Link as={Link} to="/login" onClick={() => setExpanded(false)}>
+                  Login
+                </Nav.Link>
+                <Nav.Link as={Link} to="/signup" onClick={() => setExpanded(false)}>
+                  Signup
+                </Nav.Link>
+              </>
             ) : (
-              <Button
-                as={Link}
-                to="/login"
-                variant="primary"
-                className="rounded-pill px-4"
-              >
-                Login
-              </Button>
+              <>
+                <Nav.Link as={Link} to="/dashboard" onClick={() => setExpanded(false)}>
+                  Dashboard
+                </Nav.Link>
+                <Nav.Link as={Link} to="/profile" onClick={() => setExpanded(false)}>
+                  Profile
+                </Nav.Link>
+                <Button 
+                  variant="outline-danger" 
+                  size="sm" 
+                  onClick={handleLogout}
+                  className="ms-2 my-1"
+                >
+                  Logout
+                </Button>
+              </>
             )}
-          </div>
-        </Navbar.Collapse>
+          </Nav>
+        </BootstrapNavbar.Collapse>
       </Container>
-    </Navbar>
+    </BootstrapNavbar>
   );
 };
 
-export default NavbarWrapper;
+export default Navbar;

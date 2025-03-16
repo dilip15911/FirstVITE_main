@@ -1,5 +1,5 @@
-import React from "react";
-import { Accordion, Card } from "react-bootstrap";
+import React from 'react';
+import { Accordion } from 'react-bootstrap';
 
 const FAQHome = () => {
   const faqs = [
@@ -57,7 +57,7 @@ const FAQHome = () => {
   return (
     <div className="container mt-5 mb-5">
       <h2 className="text-center mb-4">Frequently Asked Questions</h2>
-      <Accordion>
+      <Accordion defaultActiveKey="0">
         {faqs.map((faq, index) => (
           <Accordion.Item eventKey={index.toString()} key={index}>
             <Accordion.Header>{faq.question}</Accordion.Header>

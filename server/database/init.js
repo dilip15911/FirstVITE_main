@@ -1,86 +1,116 @@
-const fs = require('fs');
-const path = require('path');
-const mysql = require('mysql2/promise');
-const bcrypt = require('bcryptjs');
-const dbConfig = require('./config');
+const mysql = require('mysql2');
+const dotenv = require('dotenv');
 
-const initDatabase = async () => {
-  let connection;
+dotenv.config();
 
-  try {
-    console.log('Attempting to connect to MySQL server...');
-    
-    // Create connection without database
-    connection = await mysql.createConnection({
-      host: dbConfig.host,
-      user: dbConfig.user,
-      password: dbConfig.password,
-    });
-    
-    console.log('Successfully connected to MySQL server');
+const connection = mysql.createConnection({
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  multipleStatements: true
+});
 
-    // Create database if it doesn't exist
-    console.log(`Creating database if not exists: ${dbConfig.database}`);
-    await connection.query(`CREATE DATABASE IF NOT EXISTS ${dbConfig.database}`);
-    
-    // Use the database
-    console.log(`Using database: ${dbConfig.database}`);
-    await connection.query(`USE ${dbConfig.database}`);
+// Create database and tables
+const initDatabase = `
+CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME || 'firstvitenew'};
+USE ${process.env.DB_NAME || 'firstvitenew'};
 
-    // Read and execute schema
-    console.log('Reading schema file...');
-    const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
-    const statements = schema.split(';').filter(statement => statement.trim());
-    
-    console.log('Executing schema statements...');
-    for (const statement of statements) {
-      if (statement.trim()) {
-        await connection.query(statement);
-      }
-    }
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  role ENUM('user', 'admin') DEFAULT 'user',
+  stripe_customer_id VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 
-    // Check if super admin exists
-    const [admins] = await connection.query('SELECT * FROM admin_users WHERE role = "super_admin"');
-    
-    // Create default super admin if none exists
-    if (!admins.length) {
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(process.env.SUPER_ADMIN_PASSWORD || 'admin123', salt);
-      
-      await connection.query(
-        'INSERT INTO admin_users (username, email, password, full_name, role) VALUES (?, ?, ?, ?, ?)',
-        ['superadmin', 'admin@example.com', hashedPassword, 'Super Admin', 'super_admin']
-      );
-      
-      console.log('Created default super admin account');
-    }
+CREATE TABLE IF NOT EXISTS programs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  duration VARCHAR(100),
+  price DECIMAL(10, 2),
+  stripe_product_id VARCHAR(255),
+  stripe_price_id VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 
-    console.log('Database initialization completed successfully');
-    return true;
-  } catch (error) {
-    console.error('Database initialization error:', {
-      message: error.message,
-      code: error.code,
-      errno: error.errno,
-      sqlState: error.sqlState,
-      sqlMessage: error.sqlMessage
-    });
-    throw error;
-  } finally {
-    if (connection) {
-      await connection.end();
-    }
+CREATE TABLE IF NOT EXISTS program_materials (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  program_id INT,
+  title VARCHAR(255) NOT NULL,
+  file_path VARCHAR(255) NOT NULL,
+  file_type VARCHAR(50),
+  uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS enrollments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  program_id INT,
+  enrollment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  status ENUM('active', 'completed', 'cancelled') DEFAULT 'active',
+  payment_status ENUM('pending', 'completed', 'failed', 'refunded') DEFAULT 'pending',
+  payment_id VARCHAR(255),
+  payment_amount DECIMAL(10, 2),
+  payment_date TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS corporate_requests (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  company_name VARCHAR(255) NOT NULL,
+  contact_person VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  phone VARCHAR(20),
+  employee_count INT,
+  preferred_program VARCHAR(255),
+  custom_requirements TEXT,
+  preferred_dates TEXT,
+  status ENUM('pending', 'approved', 'rejected', 'in_progress', 'completed') DEFAULT 'pending',
+  payment_status ENUM('pending', 'completed', 'failed', 'refunded') DEFAULT 'pending',
+  payment_id VARCHAR(255),
+  payment_amount DECIMAL(10, 2),
+  payment_date TIMESTAMP,
+  admin_notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  stripe_payment_id VARCHAR(255) NOT NULL,
+  amount DECIMAL(10, 2) NOT NULL,
+  currency VARCHAR(3) DEFAULT 'inr',
+  status ENUM('pending', 'completed', 'failed', 'refunded') DEFAULT 'pending',
+  payment_method VARCHAR(50),
+  payment_type ENUM('program', 'corporate') NOT NULL,
+  reference_id INT NOT NULL,
+  user_id INT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+`;
+
+connection.connect((err) => {
+  if (err) {
+    console.error('Error connecting to MySQL:', err);
+    process.exit(1);
   }
-};
-
-// Run if this file is executed directly
-if (require.main === module) {
-  initDatabase()
-    .then(() => process.exit(0))
-    .catch((error) => {
-      console.error('Failed to initialize database:', error);
+  
+  connection.query(initDatabase, (err, results) => {
+    if (err) {
+      console.error('Error initializing database:', err);
       process.exit(1);
-    });
-}
-
-module.exports = initDatabase;
+    }
+    
+    console.log('Database and tables created successfully');
+    connection.end();
+  });
+});

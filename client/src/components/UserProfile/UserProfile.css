@@ -1,28 +1,39 @@
-.user-profile-toggle {
+.user-profile-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.user-profile {
   display: flex;
   align-items: center;
-  padding: 0.5rem 1rem;
-  border: none;
-  background: transparent !important;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.user-profile:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.profile-pic {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-icon {
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  color: #6c757d;
+}
+
+.username {
+  font-weight: 500;
   color: #333;
-}
-
-.user-profile-toggle:hover,
-.user-profile-toggle:focus {
-  color: #0D6EFD;
-}
-
-.user-profile-menu {
-  min-width: 220px;
-  padding: 0.5rem 0;
-  margin-top: 0.5rem;
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-}
-
-.user-info {
-  background-color: #f8f9fa;
-}
-
-.dropdown-item:hover {
-  background-color: #f0f0f0;
+  margin: 0;
 }

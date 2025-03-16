@@ -1,0 +1,250 @@
+.payment-form {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-row {
+  margin-bottom: 20px;
+}
+
+.form-row label {
+  display: block;
+  margin-bottom: 8px;
+  color: #424770;
+  font-weight: 500;
+}
+
+.form-row input,
+.form-row select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  font-size: 16px;
+  color: #424770;
+}
+
+.form-row input:focus,
+.form-row select:focus {
+  outline: none;
+  border-color: #6772e5;
+  box-shadow: 0 0 0 1px #6772e5;
+}
+
+.error-message {
+  color: #df1b41;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+button {
+  background: #5469d4;
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  background: #4a5cd1;
+}
+
+button:disabled {
+  background: #879fff;
+  cursor: not-allowed;
+}
+
+/* Stripe Elements custom styling */
+.StripeElement {
+  padding: 12px;
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  background: white;
+}
+
+.StripeElement--focus {
+  border-color: #6772e5;
+  box-shadow: 0 0 0 1px #6772e5;
+}
+
+.StripeElement--invalid {
+  border-color: #df1b41;
+}
+
+/* Payment success animation */
+.payment-success {
+  text-align: center;
+  padding: 20px;
+}
+
+.payment-success svg {
+  width: 60px;
+  height: 60px;
+  color: #2ecc71;
+  margin-bottom: 16px;
+}
+
+/* Payment summary section */
+.payment-summary {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f8faff;
+  border-radius: 4px;
+}
+
+.payment-summary h3 {
+  margin: 0 0 12px;
+  color: #424770;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: #525f7f;
+}
+
+.summary-row.total {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e6e6e6;
+  font-weight: 600;
+  color: #424770;
+}
+
+/* Payment History Styles */
+.payment-history {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.payment-list {
+  display: grid;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.payment-item {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.payment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.payment-header h3 {
+  margin: 0;
+  color: #424770;
+}
+
+.status {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.status.completed {
+  background: #e3fcef;
+  color: #0e6245;
+}
+
+.status.pending {
+  background: #fff7e6;
+  color: #946800;
+}
+
+.status.failed {
+  background: #ffe8e8;
+  color: #c92a2a;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #525f7f;
+}
+
+.refund-button {
+  margin-top: 16px;
+  background: #f7fafc;
+  color: #4a5568;
+  border: 1px solid #e2e8f0;
+}
+
+.refund-button:hover {
+  background: #edf2f7;
+}
+
+.refund-status {
+  margin-top: 12px;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.refund-status.pending {
+  background: #fff7e6;
+  color: #946800;
+}
+
+.refund-status.approved {
+  background: #e3fcef;
+  color: #0e6245;
+}
+
+.refund-status.rejected {
+  background: #ffe8e8;
+  color: #c92a2a;
+}
+
+/* Loading and Error States */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #525f7f;
+}
+
+.error-message {
+  background: #ffe8e8;
+  color: #c92a2a;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .payment-history {
+    padding: 10px;
+  }
+
+  .payment-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .status {
+    align-self: flex-start;
+  }
+}

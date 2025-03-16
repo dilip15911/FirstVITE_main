@@ -1,13 +1,5 @@
 import React from "react";
-import {
-  Container,
-  Navbar,
-  Nav,
-  Button,
-  Row,
-  Col,
-  Dropdown,
-} from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 const TermAndCondition = () => {
   return (
@@ -15,21 +7,21 @@ const TermAndCondition = () => {
       <footer className="bg-dark text-light py-4">
         <div className="container text-center">
           <div className="mb-2 mt-5">
-            <a href="#" className="text-light me-3">
+            <Link to="#" className="text-light me-3">
               Terms and Conditions
-            </a>
+            </Link>
             <span className="text-light">•</span>
-            <a href="#" className="text-light mx-3">
+            <Link to="#" className="text-light mx-3">
               Privacy Policy
-            </a>
+            </Link>
             <span className="text-light">•</span>
-            <a href="#" className="text-light mx-3">
+            <Link to="#" className="text-light mx-3">
               Refund Policy
-            </a>
+            </Link>
             <span className="text-light">•</span>
-            <a href="#" className="text-light ms-3">
+            <Link to="#" className="text-light ms-3">
               Country
-            </a>
+            </Link>
             <img
               src="https://upload.wikimedia.org/wikipedia/en/4/41/Flag_of_India.svg"
               alt="India Flag"

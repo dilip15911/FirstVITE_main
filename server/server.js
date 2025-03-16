@@ -1,198 +1,116 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
-const userRoutes = require('./routes/user');
-const adminRoutes = require('./routes/admin');
-const pool = require('./database/db');
+const rateLimit = require('express-rate-limit');
+const hpp = require('hpp');
+const xss = require('xss-clean');
+const path = require('path');
+require('dotenv').config();
+
+if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'development') {
+  console.error('NODE_ENV is not set to production or development');
+  process.exit(1);
+}
+
+const connection = require('./config/db');
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+
 const app = express();
-const PORT = process.env.PORT || 3001;
 
+// Security Middleware
+app.use(helmet());
+app.use(cors());
+app.use(xss());
+app.use(hpp());
 
-const authMiddleware = require("./middleware/authMiddleware");
-const errorHandler = require("./middleware/errorHandler");
-
-
-//  Test Route (No Auth Required)
-app.get("/", (req, res) => {
-  res.send("Hello, Express is working!");
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
 });
+app.use(limiter);
 
-
-// Middleware
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
-
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
-app.use(morgan('dev'));
+// Body Parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Create uploads directory if it doesn't exist
+const uploadDir = path.join(__dirname, 'uploads', 'profile-pictures');
+const fs = require('fs');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
-//  Middleware for Error Handling
-app.use(errorHandler);
+// Static files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Test database connection
-const testDbConnection = async () => {
-  try {
-    const connection = await pool.getConnection();
-    console.log('✓ Database connection successful');
-    connection.release();
-    return true;
-  } catch (error) {
-    console.error('✗ Database connection failed:', error);
-    return false;
-  }
-};
+// Logging
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
 
-// Routes
-app.use('/api/user', userRoutes);
-app.use('/api/admin', adminRoutes);
-
-
-//  Protected Route (JWT required)
-app.use('/api/user/protected', authMiddleware, (req, res) => {
-  res.json({ message: "Access granted!", user: req.user });
+// Database middleware
+app.use((req, res, next) => {
+  req.db = connection;
+  next();
 });
 
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes); // Keep it consistent
 
-
-//  Middlewares
-app.use(express.json()); // JSON parsing
-app.use(cors()); // Enable CORS
+// Test route
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API is working!' });
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
-  
-  if (err.name === 'ValidationError') {
+
+  if (err.name === 'MulterError') {
     return res.status(400).json({
-      message: err.message
+      message: 'File upload error',
+      error: err.message
     });
   }
-  
-  if (err.name === 'UnauthorizedError') {
-    return res.status(401).json({
-      message: 'Invalid token'
+
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({
+      message: 'File too large',
+      error: 'Maximum file size is 5MB'
     });
   }
-  
-  res.status(500).json({
-    message: process.env.NODE_ENV === 'development' 
-      ? err.message 
-      : 'An unexpected error occurred'
+
+  res.status(err.status || 500).json({
+    message: err.message || 'Something went wrong!',
+    error: process.env.NODE_ENV === 'development' ? err.stack : {}
   });
 });
 
-// Function to find an available port
-const findAvailablePort = async (startPort) => {
-  const net = require('net');
-  
-  return new Promise((resolve, reject) => {
-    const server = net.createServer();
-    
-    server.listen(startPort, () => {
-      const { port } = server.address();
-      server.close(() => resolve(port));
-    });
+// Handle 404
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
 
-    server.on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        // Port is in use, try the next one
-        findAvailablePort(startPort + 1)
-          .then(resolve)
-          .catch(reject);
-      } else {
-        reject(err);
-      }
-    });
-  });
-};
+const PORT = process.env.PORT || 5000;
 
 // Start server
 const startServer = async () => {
   try {
-    // Test database connection first
-    const dbConnected = await testDbConnection();
-    if (!dbConnected) {
-      console.error('✗ Failed to connect to database. Please check your database configuration.');
-      process.exit(1);
-    }
+    // Test database connection
+    await connection.query('SELECT 1');
+    console.log('Database connection successful');
 
-    // Find available port
-    const availablePort = await findAvailablePort(PORT);
-    
-    // Start the server
-    app.listen(availablePort, () => {
-      console.log(`✓ Server is running on port ${availablePort}`);
-      if (availablePort !== PORT) {
-        console.log(`Note: Original port ${PORT} was in use, using port ${availablePort} instead`);
-      }
-      console.log(`✓ Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
     });
-
   } catch (error) {
-    console.error('✗ Failed to start server:', error);
+    console.error('Unable to connect to the database:', error);
     process.exit(1);
   }
 };
 
-// Handle process termination
-process.on('SIGTERM', () => {
-  console.log('Received SIGTERM. Performing graceful shutdown...');
-  process.exit(0);
-});
-
-process.on('SIGINT', () => {
-  console.log('Received SIGINT. Performing graceful shutdown...');
-  process.exit(0);
-});
-
 startServer();
-
-
-// const express = require("express");
-// const mongoose = require("mongoose");
-// const dotenv = require("dotenv");
-// const cors = require("cors");
-
-// const authMiddleware = require("./middlewares/authMiddleware");
-// const errorHandler = require("./middlewares/errorHandler");
-
-// dotenv.config();
-// const app = express();
-
-// // ✅ Middlewares
-// app.use(express.json()); // JSON parsing
-// app.use(cors()); // Enable CORS
-
-// // ✅ Test Route (No Auth Required)
-// app.get("/", (req, res) => {
-//   res.send("Hello, Express is working!");
-// });
-
-// // ✅ Protected Route (JWT required)
-// app.get("/protected", authMiddleware, (req, res) => {
-//   res.json({ message: "Access granted!", user: req.user });
-// });
-
-// // ✅ Middleware for Error Handling
-// app.use(errorHandler);
-
-// // ✅ Database Connection (MongoDB)
-// mongoose
-//   .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-//   .then(() => console.log("✅ MongoDB Connected"))
-//   .catch((err) => console.error("❌ MongoDB Connection Error:", err));
-
-// // ✅ Start Server
-// const PORT = process.env.PORT || 3001;
-// app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

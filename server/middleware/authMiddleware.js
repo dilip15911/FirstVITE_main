@@ -1,32 +1,46 @@
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
+const mysql = require('mysql2/promise');
+const { dbConfig } = require('../config/database');
 
-const authMiddleware = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
+const pool = mysql.createPool(dbConfig);
 
-  if (!token) {
-    console.log("🚫 No token provided");
-    return res.status(401).json({ message: "Token missing" });
-  }
+exports.protect = async (req, res, next) => {
+  try {
+    let token;
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      console.error("❌ JWT Error:", err.name, "-", err.message);
-      
-      if (err.name === "JsonWebTokenError") {
-        return res.status(401).json({ message: "Invalid token" });
-      }
-      
-      if (err.name === "TokenExpiredError") {
-        return res.status(401).json({ message: "Token expired" });
-      }
-      
-      return res.status(401).json({ message: "Unauthorized" });
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
     }
 
-    console.log("✅ Token Verified:", decoded);
-    req.user = decoded;
-    next();
-  });
-};
+    if (!token) {
+      return res.status(401).json({ message: 'Not authorized, no token' });
+    }
 
-module.exports = authMiddleware;
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const connection = await pool.getConnection();
+
+      try {
+        const [users] = await connection.execute(
+          'SELECT id, name, email FROM users WHERE id = ?',
+          [decoded.id]
+        );
+
+        if (users.length === 0) {
+          return res.status(401).json({ message: 'User not found' });
+        }
+
+        req.user = users[0];
+        next();
+      } finally {
+        connection.release();
+      }
+    } catch (error) {
+      console.error('Token verification error:', error);
+      return res.status(401).json({ message: 'Not authorized, token failed' });
+    }
+  } catch (error) {
+    console.error('Auth middleware error:', error);
+    res.status(500).json({ message: 'Server error in auth middleware' });
+  }
+};
