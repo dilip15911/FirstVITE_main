@@ -15,14 +15,14 @@ const features = [
 
 const WhyUs = () => {
   return (
-    <Container className="py-5">
+    <Container className="py-1">
       <h2 className="text-center mb-4">Why Us?</h2>
       <Row>
         {features.map((feature, index) => (
           <Col md={6} lg={3} key={index} className="mb-4">
             <Card
-              style={{ backgroundColor: feature.color, border: "none" }}
-              className="text-center p-3 shadow"
+              style={{ backgroundColor: feature.color, border: "none", height: "100%" }}
+              className="text-center p-3 shadow d-flex flex-column"
             >
               <Card.Img
                 variant="top"
@@ -30,9 +30,9 @@ const WhyUs = () => {
                 className="mx-auto"
                 style={{ width: "50px" }}
               />
-              <Card.Body>
+              <Card.Body className="d-flex flex-column justify-content-between h-100">
                 <Card.Title>{feature.title}</Card.Title>
-                <a href="">
+                <a href="/">
                   <Button variant="light">Learn More</Button>
                 </a>
               </Card.Body>

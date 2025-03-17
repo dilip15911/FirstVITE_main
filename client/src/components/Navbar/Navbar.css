@@ -2,11 +2,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
   background-color: #ffffff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.navbar-nav {
+  gap: 10px;
+}
 .navbar-brand {
   display: flex;
   align-items: center;
@@ -15,6 +17,26 @@
 .navbar-logo {
   height: 40px;
   margin-right: 0.5rem;
+}
+
+.nav-item {
+  background-color: #F47C26;
+  border-radius: 4px;
+  color: white;
+  /* padding: 0.5rem 1rem; */
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.nav-item:hover {
+  background-color: #F47C26;
+  border-color: #F47C26;
+  color: white;
+}
+
+.nav-link {
+  padding: 0.3rem 0.8rem !important;
 }
 
 .nav-links {
@@ -118,6 +140,45 @@
 @media (max-width: 768px) {
   .navbar {
     padding: 1rem;
+  }
+
+  .nav-links {
+    gap: 1rem;
+  }
+
+  .auth-buttons {
+    gap: 0.5rem;
+  }
+
+  .login-btn, .signup-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .username {
+    display: none;
+  }
+}
+
+
+/* Mobile Responsive */
+@media (max-width: 991px) {
+  .navbar {
+    padding: 0px 0.5rem !important;
+  }
+
+  .navbar-brand {
+    margin: 0px 2rem 0px 0px !important;
+    font-size: 0.9rem !important;
+  }
+
+  .navbar-toggler {
+    border: none !important;
+  }
+
+  .navbar-toggler-icon {
+    width: 24px !important;
+    height: 24px !important;
   }
 
   .nav-links {

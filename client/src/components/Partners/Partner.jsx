@@ -39,10 +39,10 @@ const partnerLogos = [
 
 const Partner = () => {
   return (
-    <Container className="text-center py-4 partner">
-      <h2>
+    <Container className="text-center py-1 partner">
+      <h3>
         Our Affiliations with the world's leading universities and companies
-      </h2>
+      </h3>
       <div className="marquee">
         <div className="marquee-content">
           {partnerLogos.map((logo, index) => (

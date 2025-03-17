@@ -7,6 +7,7 @@ import RootLayout from './layouts/RootLayout';
 import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import Home from './pages/Home';
 
 
 // Lazy load components
@@ -19,7 +20,7 @@ const Dashboard = React.lazy(() => import('./pages/Dashboard/Dashboard'));
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<RootLayout />}>
-      <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+      <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/verify-otp" element={<VerifyOTP />} />
@@ -32,26 +33,26 @@ const router = createBrowserRouter(
 function App() {
   return (
     <AuthProvider>
-        <Suspense fallback={
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-          </div>
-        }>
-          <RouterProvider router={router} />
-          <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-          />
-        </Suspense>
-  
+      <Suspense fallback={
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+        </div>
+      }>
+        <RouterProvider router={router} />
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
+      </Suspense>
+
     </AuthProvider>
   );
 }

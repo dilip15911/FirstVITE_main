@@ -55,7 +55,7 @@ const FAQHome = () => {
   ];
 
   return (
-    <div className="container mt-5 mb-5">
+    <div className="container mt-3 mb-3">
       <h2 className="text-center mb-4">Frequently Asked Questions</h2>
       <Accordion defaultActiveKey="0">
         {faqs.map((faq, index) => (
