@@ -1,0 +1,66 @@
+.corporate {
+    /* background-color: #fffcb; */
+    color: black;
+    padding: 50px 0;
+}
+    
+/* Features Section */
+.features {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin: 0 auto;
+}
+
+.feature-card {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    background-color: aliceblue;
+    border: 1px solid black;
+    border-radius: 10px;
+}
+
+/* Brochure & Contact Section */
+.corporate-brochure {
+    /* background-color: #fffcb; */
+    padding: 20px;
+    margin: 0 auto;
+    text-align: center;
+    border: 1px solid black;
+    border-radius: 10px;
+}   
+
+
+.corporate-contact button{
+    color: blue;
+    border: 1px solid black;
+    border-radius: 10px;
+}
+/* Floating Contact Button */
+
+
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(10px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.floating-contact-button {
+    animation: float 2s ease-in-out infinite;
+}
+
+
+@media (max-width: 768px) {
+    .corporate-contact {
+        flex-direction: column;
+    }
+}

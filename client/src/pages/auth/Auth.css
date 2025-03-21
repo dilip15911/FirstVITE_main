@@ -1,16 +1,17 @@
 .auth-container {
+  margin-top: -30px;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* background: linear-gradient(135deg, #F47C26 0%, #f36500 100%); */
   position: relative;
   overflow: hidden;
-}
+} 
 
 .auth-container::before {
   content: '';
   position: absolute;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 50%);
+  /* background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 50%); */
   animation: rotate 30s linear infinite;
   top: -50%;
   left: -50%;
@@ -36,7 +37,7 @@
 }
 
 .auth-card:hover {
-  transform: translateY(-5px);
+  /* transform: translateY(-5px); */
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
@@ -46,7 +47,7 @@
 }
 
 .auth-header h2 {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #F47C26 0%, #f36500 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -131,7 +132,7 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #F47C26 0%, #f36500 100%);
   border: none;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
@@ -443,6 +444,7 @@
   border: 1px solid #e0e0e0;
   background-color: #f8f9fa;
   color: #667eea;
+  background: linear-gradient(135deg, #F47C26 0%, #f36500 100%);
 }
 
 .text-decoration-none {
@@ -492,7 +494,7 @@
 }
 
 .auth-container {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
   min-height: 100vh;
 }
 

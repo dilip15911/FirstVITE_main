@@ -1,0 +1,40 @@
+/* body {
+    background: linear-gradient(to right, #1e3c72, #2a5298);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.email-form {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.email-form input,
+.email-form textarea {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+}
+
+.email-form input::placeholder,
+.email-form textarea::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.email-form button {
+    background: linear-gradient(to right, #4facfe, #00f2fe);
+    border: none;
+}
+
+.email-form button:hover {
+    transform: scale(1.05);
+    transition: 0.3s ease-in-out;
+} */

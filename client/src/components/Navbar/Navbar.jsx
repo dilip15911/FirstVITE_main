@@ -63,16 +63,19 @@ const Navbar = () => {
               </NavDropdown.Item>
             </NavDropdown>
 
-            <Nav.Link as={Link} to="/corporate-training" onClick={() => setExpanded(false)}>
+            <Nav.Link as={Link} to="/corporate" onClick={() => setExpanded(false)} style={{ backgroundColor: "white" }}>
               Corporate Training
             </Nav.Link>
 
             <NavDropdown title="Resources" id="resources-dropdown">
-              <NavDropdown.Item as={Link} to="/blog" onClick={() => setExpanded(false)}>
+              {/* <NavDropdown.Item as={Link} to="/blog" onClick={() => setExpanded(false)}>
                 Blog
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/tutorials" onClick={() => setExpanded(false)}>
+              </NavDropdown.Item> */}
+              {/* <NavDropdown.Item as={Link} to="/tutorials" onClick={() => setExpanded(false)}>
                 Tutorials
+              </NavDropdown.Item> */}
+              <NavDropdown.Item as={Link} to="/courses" onClick={() => setExpanded(false)}>
+                Courses
               </NavDropdown.Item>
               <NavDropdown.Item as={Link} to="/documentation" onClick={() => setExpanded(false)}>
                 Documentation
@@ -86,8 +89,11 @@ const Navbar = () => {
               <NavDropdown.Item as={Link} to="/hire-from-us" onClick={() => setExpanded(false)}>
                 Hire From Us
               </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/reviews" onClick={() => setExpanded(false)}>
+              <NavDropdown.Item as={Link} to="/review" onClick={() => setExpanded(false)}>
                 Reviews
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/send-email" onClick={() => setExpanded(false)}>
+                Send Email
               </NavDropdown.Item>
             </NavDropdown>
           </Nav>

@@ -16,6 +16,15 @@ const Signup = React.lazy(() => import('./pages/auth/Signup'));
 const VerifyOTP = React.lazy(() => import('./pages/auth/VerifyOTP'));
 const Profile = React.lazy(() => import('./pages/user/Profile'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard/Dashboard'));
+const SendEmail = React.lazy(() => import('./pages/SendEmail.jsx'));
+const Corporate = React.lazy(() => import('./pages/Corporate/Corporate'));
+const Blog = React.lazy(() => import('./pages/blog/blog'));
+const Tutorials = React.lazy(() => import('./pages/Tutorials/Tutorials'));
+const Documentation = React.lazy(() => import('./pages/Documentation/Documentation'));
+const BecomeATeacher = React.lazy(() => import('./pages/BecomeATeacher/BecomeATeacher'));
+const Contact = React.lazy(() => import('./pages/Contact/Contact'));
+const HireFromUs = React.lazy(() => import('./pages/HireFromUs/HireFromUs'));
+const Review = React.lazy(() => import('./pages/Review/Review'));
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -26,6 +35,15 @@ const router = createBrowserRouter(
       <Route path="/verify-otp" element={<VerifyOTP />} />
       <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
       <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+      <Route path="/send-email" element={<SendEmail />} />
+      <Route path="/corporate" element={<Corporate />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/tutorials" element={<Tutorials />} />
+      <Route path="/documentation" element={<Documentation />} />
+      <Route path="/become-a-teacher" element={<BecomeATeacher />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/hire-from-us" element={<HireFromUs />} />
+      <Route path="/review" element={<Review />} />
     </Route>
   )
 );

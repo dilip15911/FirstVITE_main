@@ -30,8 +30,8 @@
 }
 
 .nav-item:hover {
-  background-color: #F47C26;
-  border-color: #F47C26;
+  background-color: #f47c26c5;
+  border-color: #f47c26c5;
   color: white;
 }
 
@@ -81,9 +81,13 @@
   transition: all 0.3s ease;
 }
 
-.login-btn {
-  color: #007bff;
+.nav-link {
+  background-color: #007bff;
   border: 1px solid #007bff;
+  color: white;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-weight: 500;
 }
 
 .login-btn:hover {

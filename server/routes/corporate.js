@@ -96,4 +96,10 @@ router.put('/request/:id', authMiddleware, async (req, res) => {
   });
 });
 
+// Admin Dashboard Route
+router.get('/admin/dashboard', authMiddleware, (req, res) => {
+    // Placeholder for admin dashboard
+    res.json({ message: 'Welcome to the Admin Dashboard' });
+});
+
 module.exports = router;
