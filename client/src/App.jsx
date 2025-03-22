@@ -10,6 +10,7 @@ import './App.css';
 import Home from './pages/Home';
 
 
+
 // Lazy load components
 const Login = React.lazy(() => import('./pages/auth/Login'));
 const Signup = React.lazy(() => import('./pages/auth/Signup'));
@@ -25,6 +26,7 @@ const BecomeATeacher = React.lazy(() => import('./pages/BecomeATeacher/BecomeATe
 const Contact = React.lazy(() => import('./pages/Contact/Contact'));
 const HireFromUs = React.lazy(() => import('./pages/HireFromUs/HireFromUs'));
 const Review = React.lazy(() => import('./pages/Review/Review'));
+const Courses = React.lazy(() => import('./pages/Courses/Courses'));
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -44,6 +46,7 @@ const router = createBrowserRouter(
       <Route path="/contact" element={<Contact />} />
       <Route path="/hire-from-us" element={<HireFromUs />} />
       <Route path="/review" element={<Review />} />
+      <Route path="/courses" element={<Courses />} />
     </Route>
   )
 );
