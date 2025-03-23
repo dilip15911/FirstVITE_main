@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar/Navbar';
 import Footer from '../components/Footer/Footer';
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useLocation } from 'react-router-dom';
+import ScrollToTop from "../components/ScrollToTop"; 
 
 const RootLayout = () => {
   const location = useLocation();
@@ -12,6 +13,7 @@ const RootLayout = () => {
 
   return (
     <div className="app">
+      <ScrollToTop />
       {!hideNavbarFooter && <Navbar />}
       <main className="main-content">
         <Outlet />

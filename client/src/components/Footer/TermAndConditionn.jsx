@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const TermAndCondition = () => {
   return (
     <>
-      <footer className="bg-dark text-light py-4">
+      <footer className="bg-dark text-light pb-4">
         <div className="container text-center">
           <div className="mb-2 mt-5">
             <Link to="#" className="text-light me-3">

@@ -11,6 +11,7 @@ import Home from './pages/Home';
 
 
 
+
 // Admin Route
 const Admin = React.lazy(() => import('./pages/admin/Home.jsx'));
 const Sidebar = React.lazy(() => import('./components/Admin/Sidebar/Sidebar'));
@@ -80,11 +81,14 @@ const router = createBrowserRouter(
 function App() {
   return (
     <AuthProvider>
-      <Suspense fallback={
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-        </div>
-      }>
+      <Suspense
+        fallback={
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+          </div>
+        }
+      >
+        {/* <ScrollToTop /> */}
         <RouterProvider router={router} />
         <ToastContainer
           position="top-right"
@@ -99,7 +103,6 @@ function App() {
           theme="light"
         />
       </Suspense>
-
     </AuthProvider>
   );
 }
