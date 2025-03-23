@@ -11,6 +11,14 @@ import Home from './pages/Home';
 
 
 
+// Admin Route
+const Admin = React.lazy(() => import('./pages/admin/Home.jsx'));
+const Sidebar = React.lazy(() => import('./components/Admin/Sidebar/Sidebar'));
+const AdminNavbar = React.lazy(()=> import('./components/Admin/Navbar/Navbar.jsx'))
+
+
+
+
 // Lazy load components
 const Login = React.lazy(() => import('./pages/auth/Login'));
 const Signup = React.lazy(() => import('./pages/auth/Signup'));
@@ -30,6 +38,9 @@ const Courses = React.lazy(() => import('./pages/Courses/Courses'));
 const GenerativeAI = React.lazy(() => import('./pages/GenerativeAI/GenerativeAipage'));
 const GenerativeAIcard = React.lazy(() => import('./pages/GenerativeAI/GenerativeAIcard'));
 const GenerativeAipagedetails = React.lazy(() => import('./pages/GenerativeAI/GenerativeAipagedetails'));
+
+
+
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -53,6 +64,11 @@ const router = createBrowserRouter(
       <Route path="/generative-ai" element={<GenerativeAI />} />
       <Route path="/generative-ai-card" element={<GenerativeAIcard />} />
       <Route path="/generative-ai-details" element={<GenerativeAipagedetails />} />
+      
+
+
+      {/* Admin Route */}
+      <Route path="/admin" element={<PrivateRoute><Admin /> <Sidebar /> <AdminNavbar /></PrivateRoute>} />
     </Route>
   )
 );
