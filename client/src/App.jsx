@@ -27,6 +27,9 @@ const Contact = React.lazy(() => import('./pages/Contact/Contact'));
 const HireFromUs = React.lazy(() => import('./pages/HireFromUs/HireFromUs'));
 const Review = React.lazy(() => import('./pages/Review/Review'));
 const Courses = React.lazy(() => import('./pages/Courses/Courses'));
+const GenerativeAI = React.lazy(() => import('./pages/GenerativeAI/GenerativeAipage'));
+const GenerativeAIcard = React.lazy(() => import('./pages/GenerativeAI/GenerativeAIcard'));
+const GenerativeAipagedetails = React.lazy(() => import('./pages/GenerativeAI/GenerativeAipagedetails'));
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -47,6 +50,9 @@ const router = createBrowserRouter(
       <Route path="/hire-from-us" element={<HireFromUs />} />
       <Route path="/review" element={<Review />} />
       <Route path="/courses" element={<Courses />} />
+      <Route path="/generative-ai" element={<GenerativeAI />} />
+      <Route path="/generative-ai-card" element={<GenerativeAIcard />} />
+      <Route path="/generative-ai-details" element={<GenerativeAipagedetails />} />
     </Route>
   )
 );

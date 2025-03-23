@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Form, Button, Container, Row, Col, Card, InputGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faEnvelope, faLock, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import './Auth.css';
 
@@ -14,6 +14,8 @@ const Signup = () => {
     password: '',
     confirmPassword: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signup } = useAuth();
   const navigate = useNavigate();
@@ -42,14 +44,12 @@ const Signup = () => {
 
     const { name, email, password, confirmPassword } = formData;
 
-    // Validate passwords match
     if (password !== confirmPassword) {
       toast.error('Passwords do not match');
       setLoading(false);
       return;
     }
 
-    // Validate password requirements
     const passwordError = validatePassword(password);
     if (passwordError) {
       toast.error(passwordError);
@@ -61,7 +61,6 @@ const Signup = () => {
       const result = await signup(name, email, password);
       
       if (result.success) {
-        // Navigate to OTP verification page with required data
         navigate('/verify-otp', {
           state: {
             userId: result.userId,
@@ -120,32 +119,48 @@ const Signup = () => {
                   />
                 </InputGroup>
 
+                {/* Password Field with Eye Icon */}
                 <InputGroup className="mb-3">
                   <InputGroup.Text>
                     <FontAwesomeIcon icon={faLock} />
                   </InputGroup.Text>
                   <Form.Control
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="Password"
                     required
                   />
+                  <Button
+                    variant="outline-secondary"
+                    onClick={() => setShowPassword(!showPassword)}
+                    type="button"
+                  >
+                    <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                  </Button>
                 </InputGroup>
 
+                {/* Confirm Password Field with Eye Icon */}
                 <InputGroup className="mb-4">
                   <InputGroup.Text>
                     <FontAwesomeIcon icon={faLock} />
                   </InputGroup.Text>
                   <Form.Control
-                    type="password"
+                    type={showConfirmPassword ? 'text' : 'password'}
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     placeholder="Confirm Password"
                     required
                   />
+                  <Button
+                    variant="outline-secondary"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    type="button"
+                  >
+                    <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
+                  </Button>
                 </InputGroup>
 
                 <div className="d-grid gap-2">
@@ -155,11 +170,7 @@ const Signup = () => {
                     disabled={loading}
                     className="py-2"
                   >
-                    {loading ? (
-                      <span className="loading-dots">Creating Account</span>
-                    ) : (
-                      'Sign Up'
-                    )}
+                    {loading ? 'Creating Account...' : 'Sign Up'}
                   </Button>
 
                   <p className="text-center mt-3">

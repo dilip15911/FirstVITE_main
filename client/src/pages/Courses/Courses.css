@@ -1,0 +1,15 @@
+.card-img-top {
+    height: 200px; 
+    width: 100%;
+    max-width: 200px;
+    object-fit: cover;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+  
+  @media (max-width: 768px) {
+    .card-img-top {
+      height: 150px;
+    }
+  }
+  

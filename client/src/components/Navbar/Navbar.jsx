@@ -12,7 +12,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
     setExpanded(false);
   };
 
@@ -52,6 +52,30 @@ const Navbar = () => {
             </Nav.Link>
 
             <NavDropdown title="All Courses" id="courses-dropdown">
+              <NavDropdown.Item as={Link} to="/generative-ai" onClick={() => setExpanded(false)}>
+                Generative AI
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/web-development" onClick={() => setExpanded(false)}>
+                Web Development
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/data-science" onClick={() => setExpanded(false)}>
+                Data Science
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/cloud-devops" onClick={() => setExpanded(false)}>
+                Cloud Computing and DevOps
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/cybersecurity" onClick={() => setExpanded(false)}>
+                Cybersecurity
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/agile-scrum" onClick={() => setExpanded(false)}>
+                Agile and Scrum
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/software-development" onClick={() => setExpanded(false)}>
+                Software Development
+              </NavDropdown.Item>
+            </NavDropdown>
+
+            {/* <NavDropdown title="All Resources" id="resources-dropdown">
               <NavDropdown.Item as={Link} to="/courses/generative-ai" onClick={() => setExpanded(false)}>
                 Generative AI
               </NavDropdown.Item>
@@ -61,10 +85,24 @@ const Navbar = () => {
               <NavDropdown.Item as={Link} to="/courses/data-science" onClick={() => setExpanded(false)}>
                 Data Science
               </NavDropdown.Item>
-            </NavDropdown>
-
-            <Nav.Link as={Link} to="/corporate" onClick={() => setExpanded(false)} style={{ backgroundColor: "white" }}>
-              Corporate Training
+              <NavDropdown.Item as={Link} to="/courses/cloud-devops" onClick={() => setExpanded(false)}>
+                Cloud Computing and DevOps
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/courses/cybersecurity" onClick={() => setExpanded(false)}>
+                Cybersecurity
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/courses/agile-scrum" onClick={() => setExpanded(false)}>
+                Agile and Scrum
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/courses/software-development" onClick={() => setExpanded(false)}>
+                Software Development
+              </NavDropdown.Item>
+            </NavDropdown> */}
+            {/* <NavDropdown as={Link} to="/corporate" onClick={() => setExpanded(false)} title="Corporate Training  " id="corporate-dropdown" style={{ backgroundColor: "white" }}>
+                Corporate Training
+            </NavDropdown> */}
+            <Nav.Link as={Link} to="/corporate" onClick={() => setExpanded(false)}>
+              Corporate  Training
             </Nav.Link>
 
             <NavDropdown title="Resources" id="resources-dropdown">
