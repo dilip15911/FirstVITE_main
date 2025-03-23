@@ -33,6 +33,8 @@ const Documentation = React.lazy(() => import('./pages/Documentation/Documentati
 const BecomeATeacher = React.lazy(() => import('./pages/BecomeATeacher/BecomeATeacher'));
 const Contact = React.lazy(() => import('./pages/Contact/Contact'));
 const HireFromUs = React.lazy(() => import('./pages/HireFromUs/HireFromUs'));
+const GetStarted = React.lazy(()=> import('./pages/HireFromUs/GetStarted.jsx'));
+const OurStudent = React.lazy(()=> import('./pages/HireFromUs/OurStudents.jsx'));
 const Review = React.lazy(() => import('./pages/Review/Review'));
 const Courses = React.lazy(() => import('./pages/Courses/Courses'));
 const GenerativeAI = React.lazy(() => import('./pages/GenerativeAI/GenerativeAipage'));
@@ -59,6 +61,8 @@ const router = createBrowserRouter(
       <Route path="/become-a-teacher" element={<BecomeATeacher />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/hire-from-us" element={<HireFromUs />} />
+      <Route path='/get-started' element={<GetStarted/>}/>
+      <Route path='/our-student' element={<OurStudent/>}/>
       <Route path="/review" element={<Review />} />
       <Route path="/courses" element={<Courses />} />
       <Route path="/generative-ai" element={<GenerativeAI />} />

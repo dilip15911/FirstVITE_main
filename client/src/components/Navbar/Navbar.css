@@ -4,14 +4,17 @@
   align-items: center;
   background-color: #ffffff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
 }
 
 .navbar-nav {
   gap: 10px;
 }
+
 .navbar-brand {
   display: flex;
   align-items: center;
+  font-size: 1rem;
 }
 
 .navbar-logo {
@@ -23,7 +26,6 @@
   background-color: #F47C26;
   border-radius: 4px;
   color: white;
-  /* padding: 0.5rem 1rem; */
   transition: all 0.3s ease;
   cursor: pointer;
   font-weight: 500;
@@ -33,10 +35,6 @@
   background-color: #f47c26c5;
   border-color: #f47c26c5;
   color: white;
-}
-
-.nav-link {
-  padding: 0.3rem 0.8rem !important;
 }
 
 .nav-links {
@@ -54,26 +52,19 @@
   transition: color 0.3s ease;
 }
 
-.nav-links a:hover {
-  color: #007bff;
-}
-
+.nav-links a:hover,
 .nav-links a.active {
   color: #007bff;
 }
 
-/* Auth Styles */
-.nav-auth {
-  display: flex;
-  align-items: center;
-}
-
+/* Authentication Buttons */
 .auth-buttons {
   display: flex;
   gap: 1rem;
 }
 
-.login-btn, .signup-btn {
+.login-btn,
+.signup-btn {
   padding: 0.5rem 1rem;
   border-radius: 4px;
   text-decoration: none;
@@ -81,20 +72,7 @@
   transition: all 0.3s ease;
 }
 
-.nav-link {
-  background-color: #007bff;
-  border: 1px solid #007bff;
-  color: white;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.login-btn:hover {
-  background-color: #007bff;
-  color: white;
-}
-
+.login-btn:hover,
 .signup-btn {
   background-color: #007bff;
   color: white;
@@ -106,7 +84,7 @@
   border-color: #0056b3;
 }
 
-/* User Menu Styles */
+/* User Menu */
 .user-menu {
   display: flex;
   align-items: center;
@@ -125,6 +103,7 @@
   font-weight: 500;
 }
 
+/* Logout Button */
 .logout-btn {
   padding: 0.5rem 1rem;
   border: none;
@@ -141,39 +120,9 @@
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
-  .navbar {
-    padding: 1rem;
-  }
-
-  .nav-links {
-    gap: 1rem;
-  }
-
-  .auth-buttons {
-    gap: 0.5rem;
-  }
-
-  .login-btn, .signup-btn {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
-  }
-
-  .username {
-    display: none;
-  }
-}
-
-
-/* Mobile Responsive */
 @media (max-width: 991px) {
   .navbar {
     padding: 0px 0.5rem !important;
-  }
-
-  .navbar-brand {
-    margin: 0px 2rem 0px 0px !important;
-    font-size: 0.9rem !important;
   }
 
   .navbar-toggler {
@@ -193,7 +142,8 @@
     gap: 0.5rem;
   }
 
-  .login-btn, .signup-btn {
+  .login-btn,
+  .signup-btn {
     padding: 0.4rem 0.8rem;
     font-size: 0.9rem;
   }

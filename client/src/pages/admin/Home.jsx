@@ -1,5 +1,4 @@
-import React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { faTrash, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "../../App.css";
@@ -8,12 +7,8 @@ export default function Home() {
   const [data, setData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    getAllUser();
-  }, [searchQuery]);
-
-  // Fetch all users
-  const getAllUser = () => {
+  // Fetch all users (Memoized to prevent re-renders)
+  const getAllUser = useCallback(() => {
     fetch(`http://localhost:5000/getAllUser?search=${searchQuery}`, {
       method: "GET",
     })
@@ -22,7 +17,11 @@ export default function Home() {
         console.log(data, "userData");
         setData(data.data);
       });
-  };
+  }, [searchQuery]); // Dependency array includes only searchQuery
+
+  useEffect(() => {
+    getAllUser();
+  }, [getAllUser]); // Now `useEffect` correctly includes `getAllUser`
 
   // Logout function
   const logOut = () => {

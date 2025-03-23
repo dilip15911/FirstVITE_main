@@ -83,7 +83,7 @@ const AllPrograms = () => {
   const [selectedCategory, setSelectedCategory] = useState(ProgramCategories[0] || { name: "", description: "", courses: [] });
 
   return (
-    <div className="container program-container" style={{ paddingBottom: "5px" }}>
+    <div className="container program-container" style={{ paddingBottom: "5px", marginTop: "-40px" }}>
       <div className="row">
         {/* Sidebar Section */}
         <div className="col-lg-3 col-12 p-3 bg-light program-sidebar">

@@ -2,10 +2,9 @@ import React, { useState, useRef } from "react";
 import emailjs from "@emailjs/browser";
 import './pages.css';
 
-
 const SendEmail = () => {
     const [formData, setFormData] = useState({
-        email: "",
+        emails: "",  // Multiple emails comma-separated
         subject: "",
         message: "",
     });
@@ -16,59 +15,59 @@ const SendEmail = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const sendEmail = (e) => {
+    const sendEmail = async (e) => {
         e.preventDefault();
 
-        console.log("Form Data Before Sending:", formData);
+        let emailList = formData.emails.split(",").map(email => email.trim()).filter(email => email);
 
-        if (!formData.email.trim()) {
-            alert("Recipient email cannot be empty!");
+        if (emailList.length === 0) {
+            alert("At least one recipient email is required!");
             return;
         }
 
-        emailjs.send(
-            "service_igcqvgk",
-            "template_xpbbsvl",
-            {
-                email: formData.email, // Ensure correct variable name
-                subject: formData.subject,
-                message: formData.message,
-            },
-            "YCsa5TmyzhY6ja5Lh"
-        )
-            .then(
-                (response) => {
-                    console.log("Email sent successfully!", response);
-                    alert("Email sent successfully!");
-                    setFormData({ email: "", subject: "", message: "" });
-                },
-                (error) => {
-                    console.error("Failed to send email:", error);
-                    alert("Failed to send email: " + error.text);
-                }
-            );
-    };
+        console.log("Sending emails to:", emailList);
 
+        try {
+            for (let email of emailList) {
+                await emailjs.send(
+                    "service_igcqvgk",
+                    "template_xpbbsvl",
+                    {
+                        email: email,
+                        subject: formData.subject,
+                        message: formData.message,
+                    },
+                    "YCsa5TmyzhY6ja5Lh"
+                );
+                console.log(`Email sent to: ${email}`);
+            }
+            alert("Emails sent successfully!");
+            setFormData({ emails: "", subject: "", message: "" });
+        } catch (error) {
+            console.error("Failed to send emails:", error);
+            alert("Failed to send emails: " + error.text);
+        }
+    };
 
     return (
         <div className="container d-flex justify-content-center mt-5">
             <div className="card p-4 shadow-lg" style={{ width: "400px" }}>
-                <h2 className="text-center mb-3">📧 Send an Email</h2>
+                <h2 className="text-center mb-3">📧 Send Multiple Emails</h2>
                 <form ref={formRef} onSubmit={sendEmail}>
                     <div className="mb-3">
-                        Required
+                        <label>Recipient Emails (comma-separated) *</label>
                         <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
+                            type="text"
+                            name="emails"
+                            value={formData.emails}
                             onChange={handleChange}
-                            placeholder="Recipient Email"
+                            placeholder="Enter multiple emails separated by commas"
                             required
                             className="form-control"
                         />
                     </div>
                     <div className="mb-3">
-                        Optional
+                        <label>Subject (Optional)</label>
                         <input
                             type="text"
                             name="subject"
@@ -79,7 +78,7 @@ const SendEmail = () => {
                         />
                     </div>
                     <div className="mb-3">
-                        Optional
+                        <label>Message (Optional)</label>
                         <textarea
                             name="message"
                             value={formData.message}
@@ -93,13 +92,11 @@ const SendEmail = () => {
                         type="submit"
                         className="btn btn-primary w-100 d-flex align-items-center justify-content-center"
                     >
-                        🚀 <span className="ms-2">Send Email</span>
+                        🚀 <span className="ms-2">Send Emails</span>
                     </button>
                 </form>
             </div>
         </div>
-
-
     );
 };
 
