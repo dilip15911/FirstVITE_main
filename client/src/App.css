@@ -22,14 +22,14 @@ body {
   flex-direction: column;
 }
 
-/* .container {
+.container {
   flex: 1;
   padding: 2rem 1rem;
 }
 
 .main-content {
   padding-top: 30px;
-} */
+}
 
 @media (min-width: 768px) {
   .container {
