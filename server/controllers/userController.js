@@ -35,6 +35,49 @@ const upload = multer({
   }
 }).single('profilePicture');
 
+// Get all users
+const getAllUsers = async (req, res) => {
+  try {
+    const { search } = req.query;
+    let query = 'SELECT id, name, email, role, profile_picture, created_at FROM users';
+    let params = [];
+
+    if (search) {
+      query += ' WHERE name LIKE ? OR email LIKE ?';
+      params = [`%${search}%`, `%${search}%`];
+    }
+
+    query += ' ORDER BY created_at DESC';
+
+    const [users] = await db.execute(query, params);
+    res.json({ data: users });
+  } catch (error) {
+    console.error('Get all users error:', error);
+    res.status(500).json({ message: 'Error fetching users' });
+  }
+};
+
+// Delete user
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Verify user exists
+    const [rows] = await db.execute('SELECT id FROM users WHERE id = ?', [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Delete user
+    await db.execute('DELETE FROM users WHERE id = ?', [id]);
+    
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({ message: 'Error deleting user' });
+  }
+};
+
 // Get user profile
 const getProfile = async (req, res) => {
   try {
@@ -199,5 +242,7 @@ module.exports = {
   getUserHistory,
   restoreUserData,
   uploadProfilePicture,
-  deleteProfilePicture
+  deleteProfilePicture,
+  getAllUsers,
+  deleteUser
 };

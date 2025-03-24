@@ -7,14 +7,20 @@ const hpp = require('hpp');
 const rateLimit = require('express-rate-limit');
 const mysql = require('mysql2/promise');
 require('dotenv').config();
+
+// Set default JWT secret if not defined in env
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = 'your-secret-key-change-this-in-production';
+}
+
 const path = require('path');
 
 // Database connection
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',  // XAMPP MySQL default has no password
+  database: process.env.DB_NAME || 'firstvite_app',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -28,14 +34,20 @@ pool.getConnection()
   })
   .catch(err => {
     console.error('Error connecting to the database:', err);
+    console.log('Please make sure XAMPP MySQL service is running');
+    process.exit(1); // Exit process if database connection fails
   });
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 // Initialize express app
 const app = express();
+
+// Set database connection on app
+app.set('db', pool);
 
 // Security middleware
 app.use(helmet());
@@ -60,12 +72,6 @@ if (process.env.NODE_ENV === 'development') {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Make db available in request
-app.use((req, res, next) => {
-  req.db = pool;
-  next();
-});
-
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -78,6 +84,7 @@ if (!require('fs').existsSync(uploadDir)) {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {
@@ -91,7 +98,7 @@ app.use((req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Server error:', err);
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({
     success: false,
@@ -103,4 +110,7 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  // Initialize admin user
+  const { setupAdmin } = require('./utils/setupAdmin');
+  setupAdmin().catch(console.error);
 });

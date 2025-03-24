@@ -34,7 +34,7 @@ const setupAxiosInterceptors = (token) => {
 };
 
 // Auth routes
-export const login = async (email, password) => {
+const login = async (email, password) => {
   try {
     const response = await axios.post('/auth/login', { email, password });
     if (response.data.token) {
@@ -46,7 +46,7 @@ export const login = async (email, password) => {
   }
 };
 
-export const signup = async (name, email, password) => {
+const signup = async (name, email, password) => {
   try {
     const response = await axios.post('/auth/signup', { name, email, password });
     return response.data;
@@ -55,7 +55,7 @@ export const signup = async (name, email, password) => {
   }
 };
 
-export const verifyEmail = async (userId, otp) => {
+const verifyEmail = async (userId, otp) => {
   try {
     const response = await axios.post('/auth/verify', { userId, otp });
     return response.data;
@@ -64,7 +64,7 @@ export const verifyEmail = async (userId, otp) => {
   }
 };
 
-export const resendVerification = async (userId) => {
+const resendVerification = async (userId) => {
   try {
     const response = await axios.post('/auth/resend-otp', { userId });
     return response.data;
@@ -73,7 +73,7 @@ export const resendVerification = async (userId) => {
   }
 };
 
-export const getProfile = async () => {
+const getProfile = async () => {
   try {
     const response = await axios.get('/auth/profile');
     return response.data;
@@ -82,7 +82,7 @@ export const getProfile = async () => {
   }
 };
 
-export const updateProfile = async (data) => {
+const updateProfile = async (data) => {
   try {
     const response = await axios.put('/auth/profile', data);
     return response.data;
@@ -91,7 +91,7 @@ export const updateProfile = async (data) => {
   }
 };
 
-export const getUserHistory = async () => {
+const getUserHistory = async () => {
   try {
     const response = await axios.get('/auth/history');
     return response.data;
@@ -100,11 +100,23 @@ export const getUserHistory = async () => {
   }
 };
 
-export const restoreProfile = async (historyId) => {
+const restoreProfile = async (historyId) => {
   try {
-    const response = await axios.post('/auth/restore', { historyId });
+    const response = await axios.post(`/auth/history/${historyId}/restore`);
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Failed to restore profile' };
   }
+};
+
+export {
+  login,
+  signup,
+  verifyEmail,
+  resendVerification,
+  getProfile,
+  updateProfile,
+  getUserHistory,
+  restoreProfile,
+  setupAxiosInterceptors
 };

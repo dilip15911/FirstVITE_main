@@ -6,20 +6,12 @@ const AdminLogin = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-
-    // const handleSubmit = (e) => {
-    //     e.preventDefault();
-    //     if (password !== '12345') {
-    //         setError('Invalid password should be 12345');
-    //     } else {
-    //         setError('');
-    //         window.location.href = "/admin";
-    //     }
-    // };
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
+        setLoading(true);
         
         try {
             const response = await axios.post(`${process.env.REACT_APP_API_URL}/admin/login`, {
@@ -32,6 +24,10 @@ const AdminLogin = () => {
         } catch (err) {
             console.error('Login error:', err.response?.data);
             setError(err.response?.data?.error || "Login failed");
+            // Log the error details for debugging
+            console.error('Error details:', err.response?.data?.details);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -51,20 +47,23 @@ const AdminLogin = () => {
                                         placeholder="Enter username"
                                         value={username}
                                         onChange={(e) => setUsername(e.target.value)}
+                                        required
                                     />
                                 </Form.Group>
 
-                                <Form.Group controlId="formBasicPassword">
+                                <Form.Group controlId="formBasicPassword" className="mt-3">
                                     <Form.Label>Password</Form.Label>
                                     <Form.Control
                                         type="password"
-                                        placeholder="Password"
+                                        placeholder="Enter password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
+                                        required
                                     />
                                 </Form.Group>
-                                <Button variant="primary" type="submit">
-                                    Login
+
+                                <Button variant="primary" className="w-100 mt-3" type="submit" disabled={loading}>
+                                    {loading ? 'Logging in...' : 'Login'}
                                 </Button>
                             </Form>
                         </Card.Body>

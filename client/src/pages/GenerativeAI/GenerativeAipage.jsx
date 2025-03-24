@@ -19,7 +19,7 @@ const GenerativeAipage = () => {
               <Card>
                 <Card.Body>
                   <Card.Text>
-                    ✅ Program completion certificate from Purdue University Online and Simplilearn
+                    ✅ Program completion certificate from Purdue University Online and firstVITE
                   </Card.Text>
                 </Card.Body>
               </Card>
@@ -82,7 +82,7 @@ const GenerativeAipage = () => {
               <Card>
                 <Card.Body>
                   <Card.Text>
-                    ✅ Simplilearn’s JobAssist helps you get noticed by top hiring companies
+                    ✅ firstVITE’s JobAssist helps you get noticed by top hiring companies
                   </Card.Text>
                 </Card.Body>
               </Card>

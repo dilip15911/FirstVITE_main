@@ -9,7 +9,9 @@ const {
   getUserHistory,
   restoreUserData,
   uploadProfilePicture,
-  deleteProfilePicture
+  deleteProfilePicture,
+  getAllUsers,
+  deleteUser
 } = require('../controllers/userController');
 
 // Configure multer for file uploads
@@ -44,5 +46,7 @@ router.get('/history', verifyToken, getUserHistory);
 router.post('/restore/:historyId', verifyToken, restoreUserData);
 router.post('/profile/picture', verifyToken, upload.single('profile_picture'), uploadProfilePicture);
 router.delete('/profile/picture', verifyToken, deleteProfilePicture);
+router.get('/', verifyToken, getAllUsers);
+router.delete('/:id', verifyToken, deleteUser);
 
 module.exports = router;

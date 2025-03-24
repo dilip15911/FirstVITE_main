@@ -27,6 +27,19 @@ async function setupAdmin() {
       console.log('Admin user created successfully');
     } else {
       console.log('Admin user already exists');
+      // Verify the stored password
+      const admin = rows[0];
+      const isValidPassword = await bcrypt.compare('Admin@123', admin.password);
+      console.log('Stored password is valid:', isValidPassword);
+      if (!isValidPassword) {
+        console.log('Updating admin password');
+        const hashedPassword = await hashPassword('Admin@123');
+        await db.query(
+          'UPDATE admin_users SET password = ? WHERE username = ?',
+          [hashedPassword, 'admin']
+        );
+        console.log('Admin password updated successfully');
+      }
     }
 
   } catch (error) {

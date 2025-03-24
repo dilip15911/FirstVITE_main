@@ -10,29 +10,31 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch all users (Memoized to prevent re-renders)
-  const getAllUser = useCallback(() => {
+  const getAllUser = useCallback(async () => {
     setLoading(true);
     setError(null);
-    fetch(`http://localhost:5000/getAllUser?search=${searchQuery}`, {
-      method: "GET",
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('Network response was not ok');
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/users?search=${searchQuery}`, {
+        method: "GET",
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
-        return res.json();
-      })
-      .then((responseData) => {
-        console.log(responseData, "userData");
-        setData(responseData.data || []);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Error fetching users:', err);
-        setError('Failed to fetch user data');
-        setData([]);
-        setLoading(false);
       });
+      
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const responseData = await response.json();
+      console.log(responseData, "userData");
+      setData(responseData.data || []);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching users:', err);
+      setError('Failed to fetch user data');
+      setData([]);
+      setLoading(false);
+    }
   }, [searchQuery]);
 
   useEffect(() => {
@@ -61,28 +63,35 @@ export default function Home() {
     window.location.href = "/login";
   };
 
-  // Delete user function
-  const deleteUser = (id, name) => {
+  async function deleteUser(id, name) {
     if (window.confirm(`Are you sure you want to delete ${name}?`)) {
-      fetch("http://localhost:5000/deleteUser", {
-        method: "POST",
-        crossDomain: true,
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({
-          userid: id,
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          alert(data.data);
-          getAllUser();
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/deleteUser`, {
+          method: "POST",
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify({
+            userid: id,
+          }),
         });
+        
+        if (!response.ok) {
+          throw new Error('Failed to delete user');
+        }
+
+        const data = await response.json();
+        alert(data.data);
+        getAllUser();
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        alert('Failed to delete user');
+      }
     }
-  };
+  }
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -100,6 +109,7 @@ export default function Home() {
           <input
             type="text"
             placeholder="Search..."
+            value={searchQuery}
             onChange={handleSearch}
             style={{
               padding: "8px 32px 8px 32px",
