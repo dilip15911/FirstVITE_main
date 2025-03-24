@@ -13,10 +13,11 @@ import Home from './pages/Home';
 
 
 // Admin Route
-const Sidebar = React.lazy(() => import('./pages/AdminSidebar/sidebar.jsx'));
+const Sidebar = React.lazy(() => import('./pages/admin/AdminSidebar/sidebar.jsx'));
 const AdminNavbar = React.lazy(()=> import('./components/Admin/Navbar/Navbar.jsx'))
 const AdminLogin = React.lazy(() => import('./pages/admin/Login/AdminLogin'));
 const AdminHome = React.lazy(() => import('./pages/admin/Home.jsx'));
+const AdminLayout = React.lazy(() => import('./pages/admin/AdminLayout.jsx'));
 
 
 
@@ -76,10 +77,7 @@ const router = createBrowserRouter(
 
       {/* Admin Route */}
       <Route path="/admin/login" element={<AdminLogin />} />
-      <Route path="/admin" element={<>
-        <AdminHome />
-        <Sidebar />
-      </>}>
+      <Route path="/admin" element={<AdminLayout/>}>
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<AdminHome />} />
       </Route>
