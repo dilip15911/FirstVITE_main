@@ -21,6 +21,13 @@ const Instructors = React.lazy(() => import('./pages/admin/Instructors'));
 const Categories = React.lazy(() => import('./pages/admin/Categories'));
 const Reports = React.lazy(() => import('./pages/admin/Reports'));
 const Settings = React.lazy(() => import('./pages/admin/Settings'));
+const CreateEmployee = React.lazy(() => import('./pages/admin/Employee/CreateEmployee'));
+const ManageEmployees = React.lazy(()=> import('./pages/admin/Employee/ManageEmployees.jsx'))
+const ViewEmployees = React.lazy(()=> import('./pages/admin/Employee/ViewEmployees.jsx'))
+const CreateJobRole = React.lazy(() => import('./pages/admin/Employee/CreateJobRole'));
+const ManageJobRoles = React.lazy(() => import('./pages/admin/Employee/ManageJobRoles'));
+const ViewJobRoles = React.lazy(() => import('./pages/admin/Employee/ViewJobRoles'));
+
 
 // Lazy load components
 const Login = React.lazy(() => import('./pages/auth/Login'));
@@ -81,6 +88,15 @@ const router = createBrowserRouter(
         <Route path="categories" element={<Categories />} />
         <Route path="reports" element={<Reports />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="employee">
+          <Route index element={<Navigate to="create-employee" replace />} />
+          <Route path="create-employee" element={<CreateEmployee />} />
+          <Route path="manage-employee" element={<ManageEmployees />} />
+          <Route path="view-employee" element={<ViewEmployees />} />
+          <Route path="create-jobrole" element={<CreateJobRole />} />
+          <Route path="manage-jobrole" element={<ManageJobRoles />} />
+          <Route path="view-jobrole" element={<ViewJobRoles />} />
+        </Route>
       </Route>
     </Route>
   )
