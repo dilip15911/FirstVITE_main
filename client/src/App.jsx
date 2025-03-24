@@ -79,7 +79,6 @@ const router = createBrowserRouter(
       <Route path="/admin" element={<>
         <AdminHome />
         <Sidebar />
-        <AdminNavbar />
       </>}>
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<AdminHome />} />

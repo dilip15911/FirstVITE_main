@@ -9,7 +9,7 @@ import ScrollToTop from "../components/ScrollToTop";
 const RootLayout = () => {
   const location = useLocation();
   // Hide Navbar & Footer on these paths
-  const hideNavbarFooter = ["/login", "/signup", "/verify-otp"].includes(location.pathname);
+  const hideNavbarFooter = ["/login", "/signup", "/verify-otp", "/admin", "/admin/*"].includes(location.pathname);
 
   return (
     <div className="app">
