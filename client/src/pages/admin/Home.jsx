@@ -42,7 +42,7 @@ export default function Home() {
 
   const logOut = () => {
     localStorage.clear();
-    window.location.href = "/login";
+    window.location.href = "/admin/login";
   };
 
   const deleteUser = async (id, name) => {
