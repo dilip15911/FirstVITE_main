@@ -4,29 +4,61 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "../../App.css";
 
 export default function Home() {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch all users (Memoized to prevent re-renders)
   const getAllUser = useCallback(() => {
+    setLoading(true);
+    setError(null);
     fetch(`http://localhost:5000/getAllUser?search=${searchQuery}`, {
       method: "GET",
     })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data, "userData");
-        setData(data.data);
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return res.json();
+      })
+      .then((responseData) => {
+        console.log(responseData, "userData");
+        setData(responseData.data || []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Error fetching users:', err);
+        setError('Failed to fetch user data');
+        setData([]);
+        setLoading(false);
       });
-  }, [searchQuery]); // Dependency array includes only searchQuery
+  }, [searchQuery]);
 
   useEffect(() => {
     getAllUser();
-  }, [getAllUser]); // Now `useEffect` correctly includes `getAllUser`
+  }, [getAllUser]);
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   // Logout function
   const logOut = () => {
     window.localStorage.clear();
-    window.location.href = "./login";
+    window.location.href = "/login";
   };
 
   // Delete user function

@@ -41,11 +41,21 @@ const validateProfile = [
     .withMessage('Course must be a valid string')
 ];
 
+// Admin Login Validation
+const adminLoginValidation = [
+  body('username').trim().notEmpty().withMessage('Username is required'),
+  body('password').trim().notEmpty().withMessage('Password is required')
+];
+
 // Auth routes
 router.post('/signup', signupValidation, authController.signup);
 router.post('/login', loginValidation, authController.login);
 router.post('/verify', verifyEmailValidation, authController.verifyEmail);
 router.post('/resend-otp', resendOtpValidation, authController.resendVerification);
+router.post('/admin/login', adminLoginValidation, authController.adminLogin);
+
+// Get all users
+router.get('/getAllUser', authController.getAllUser);
 
 // Protected routes (require authentication)
 router.get('/profile', verifyToken, authController.getProfile);

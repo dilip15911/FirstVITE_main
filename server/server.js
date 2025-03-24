@@ -6,7 +6,11 @@ const rateLimit = require('express-rate-limit');
 const hpp = require('hpp');
 const xss = require('xss-clean');
 const path = require('path');
+const verifyToken = require("./authMiddleware");
 require('dotenv').config();
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const mysql = require('mysql');
 
 if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'development') {
   console.error('NODE_ENV is not set to production or development');
@@ -16,7 +20,8 @@ if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'developme
 const connection = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
-
+const adminRoutes = require('./routes/adminRoutes');
+const { setupAdmin } = require('./utils/setupAdmin');
 const app = express();
 
 // Security Middleware
@@ -51,15 +56,24 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Database middleware
-app.use((req, res, next) => {
-  req.db = connection;
-  next();
+// Database connection
+const pool = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
+
+// Set database connection on app
+app.set('db', pool);
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes); // Keep it consistent
+app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {
@@ -101,14 +115,18 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
     // Test database connection
-    await connection.query('SELECT 1');
+    await pool.query('SELECT 1');
     console.log('Database connection successful');
+
+    // Setup admin user
+    await setupAdmin();
+    console.log('Admin user setup completed');
 
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
   } catch (error) {
-    console.error('Unable to connect to the database:', error);
+    console.error('Error starting server:', error);
     process.exit(1);
   }
 };

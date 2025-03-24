@@ -1,20 +1,37 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
-
+import axios from 'axios';
 
 const AdminLogin = () => {
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [secretCode, setSecretCode] = useState('');
     const [error, setError] = useState('');
 
-    const handleSubmit = (e) => {
+    // const handleSubmit = (e) => {
+    //     e.preventDefault();
+    //     if (password !== '12345') {
+    //         setError('Invalid password should be 12345');
+    //     } else {
+    //         setError('');
+    //         window.location.href = "/admin";
+    //     }
+    // };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (secretCode !== '12345') {
-            setError('Invalid secret code');
-        } else {
-            setError('');
-            // Handle login logic here
+        setError("");
+        
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL}/admin/login`, {
+                username,
+                password
+            });
+
+            localStorage.setItem("token", response.data.token);
+            window.location.href = "/admin";
+        } catch (err) {
+            console.error('Login error:', err.response?.data);
+            setError(err.response?.data?.error || "Login failed");
         }
     };
 
@@ -27,13 +44,13 @@ const AdminLogin = () => {
                         <Card.Body>
                             {error && <Alert variant="danger">{error}</Alert>}
                             <Form onSubmit={handleSubmit}>
-                                <Form.Group controlId="formBasicEmail">
-                                    <Form.Label>Email address</Form.Label>
+                                <Form.Group controlId="formBasicUsername">
+                                    <Form.Label>Username</Form.Label>
                                     <Form.Control
-                                        type="email"
-                                        placeholder="Enter email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        type="text"
+                                        placeholder="Enter username"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
                                     />
                                 </Form.Group>
 
@@ -46,17 +63,6 @@ const AdminLogin = () => {
                                         onChange={(e) => setPassword(e.target.value)}
                                     />
                                 </Form.Group>
-
-                                <Form.Group controlId="formBasicSecretCode">
-                                    <Form.Label>Secret Code</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Enter secret code"
-                                        value={secretCode}
-                                        onChange={(e) => setSecretCode(e.target.value)}
-                                    />
-                                </Form.Group>
-
                                 <Button variant="primary" type="submit">
                                     Login
                                 </Button>

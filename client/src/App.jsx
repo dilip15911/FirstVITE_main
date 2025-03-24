@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { RouterProvider, createBrowserRouter, createRoutesFromElements, Route } from 'react-router-dom';
+import { RouterProvider, createBrowserRouter, createRoutesFromElements, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ToastContainer } from 'react-toastify';
 import PrivateRoute from './components/PrivateRoute';
@@ -10,11 +10,12 @@ import './App.css';
 import Home from './pages/Home';
 
 
-
 // Admin Route
-const Admin = React.lazy(() => import('./pages/admin/Home.jsx'));
-const Sidebar = React.lazy(() => import('./components/Admin/Sidebar/Sidebar'));
+const Sidebar = React.lazy(() => import('./pages/AdminSidebar/sidebar.jsx'));
 const AdminNavbar = React.lazy(()=> import('./components/Admin/Navbar/Navbar.jsx'))
+const AdminLogin = React.lazy(() => import('./pages/admin/Login/AdminLogin'));
+const AdminHome = React.lazy(() => import('./pages/admin/Home.jsx'));
+
 
 
 
@@ -72,7 +73,15 @@ const router = createBrowserRouter(
 
 
       {/* Admin Route */}
-      <Route path="/admin" element={<PrivateRoute><Admin /> <Sidebar /> <AdminNavbar /></PrivateRoute>} />
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/admin" element={<>
+        <AdminHome />
+        <Sidebar />
+        <AdminNavbar />
+      </>}>
+        <Route index element={<Navigate to="home" replace />} />
+        <Route path="home" element={<AdminHome />} />
+      </Route>
     </Route>
   )
 );

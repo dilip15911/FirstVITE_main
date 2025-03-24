@@ -3,6 +3,54 @@ const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const db = require('../config/db');
 const { sendVerificationEmail } = require('../utils/email');
+const connection = require("../config/db");
+
+// Admin Login Controller
+exports.adminLogin = async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // First check if admin exists
+    const [rows] = await db.query("SELECT * FROM admin_users WHERE username = ?", [username]);
+
+    if (rows.length === 0) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    const admin = rows[0];
+
+    // Verify password
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ 
+      id: admin.id, 
+      username: admin.username,
+      role: "admin" 
+    }, process.env.JWT_SECRET, { 
+      expiresIn: "24h" 
+    });
+
+    res.json({ 
+      token, 
+      message: "Admin login successful",
+      admin: {
+        id: admin.id,
+        username: admin.username
+      }
+    });
+  } catch (error) {
+    console.error('Admin login error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 
 // Helper function to generate OTP
 const generateOTP = () => {
@@ -403,6 +451,29 @@ exports.restoreProfile = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error'
+    });
+  }
+};
+
+// Get all users
+exports.getAllUser = async (req, res) => {
+  try {
+    const searchQuery = req.query.search || '';
+    
+    const [rows] = await db.query(
+      'SELECT id, name, email, mobile, course FROM users WHERE name LIKE ? OR email LIKE ? OR mobile LIKE ? OR course LIKE ?',
+      [`%${searchQuery}%`, `%${searchQuery}%`, `%${searchQuery}%`, `%${searchQuery}%`]
+    );
+
+    res.json({
+      success: true,
+      data: rows
+    });
+  } catch (error) {
+    console.error('Error getting all users:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch user data'
     });
   }
 };
