@@ -1,5 +1,6 @@
 import React from "react";
 import { Container, Row, Col, Button, Dropdown } from "react-bootstrap";
+import { Link } from "react-router-dom";
 import {
   FaFacebook,
   FaTwitter,
@@ -16,19 +17,24 @@ import TermAndCondition from "./TermAndConditionn";
 
 const Footer = () => {
   return (
-    <footer className="bg-dark text-white py-4  ">
-      <Container className="mb-5 ">
+    <footer className="bg-dark text-white py-4">
+      <Container className="footer-top">
         <Row>
-          {/* <Col md={4}>
-              <h5>Trending Resources</h5>
-              <p>
-                Python Tutorial | JavaScript Tutorial | Java Tutorial | Angular Tutorial | Node.js Tutorial |
-                Docker Tutorial | Git Tutorial | Kubernetes Tutorial | Power BI Tutorial | CSS Tutorial
-              </p>
-            </Col> */}
           <Col md={6}>
             <h5>Policies</h5>
-            <p>Terms and Conditions | Privacy Policy | Refund Policy</p>
+            <p>
+              <Link to="/terms-and-conditions" className="text-white">
+                Terms and Conditions
+              </Link>{" "}
+              |{" "}
+              <Link to="/privacy-policy" className="text-white">
+                Privacy Policy
+              </Link>{" "}
+              |{" "}
+              <Link to="/refund-policy" className="text-white">
+                Refund Policy
+              </Link>
+            </p>
           </Col>
           <Col md={6}>
             <h5>Country </h5>
@@ -36,108 +42,175 @@ const Footer = () => {
               <Dropdown.Toggle variant="secondary" id="dropdown-basic">
                 🇮🇳 India
               </Dropdown.Toggle>
-
-              {/* <Dropdown.Menu>
-                  <Dropdown.Item href="#">USA</Dropdown.Item>
-                  <Dropdown.Item href="#">UK</Dropdown.Item>
-                  <Dropdown.Item href="#">Canada</Dropdown.Item>
-                </Dropdown.Menu> */}
             </Dropdown>
             <p>
-              Address: H-161 BSI Business Park Sector-63 Noida gautam Budh Nagar
-              Uttar pardesh 201301
+              Address: H-161 BSI Business Park, Sector-63, Noida, Gautam Budh
+              Nagar, Uttar Pradesh 201301
             </p>
-            <p>Phone No: 9810585808</p>
+            <p>
+              Phone No:{" "}
+              <Link to="/contact" className="text-white">
+                9810585808
+              </Link>
+            </p>
           </Col>
         </Row>
       </Container>
 
       <Container>
-        <Row className="flex-wrap footer-bottom">
-          <Col md={2} sm={4} xs={6}>
-            <h5>Follow us!</h5>
-            <Button variant="outline-light" className="mb-2">
+        {/* Footer Middle */}
+        <Row className="g-4 text-center text-md-start">
+          <Col md={2} sm={6}>
+            <h5>Follow Us</h5>
+            <Button variant="outline-light" className="w-100 mb-2">
               Refer and Earn
             </Button>
-            <div className="container p-0 ">
-              <div className="row">
-                <div className="col d-flex gap-4   justify-content:space-evenly ">
-                  <FaFacebook size={24} />
-                  <FaTwitter size={24} />
-                  <FaInstagram size={24} />
-                </div>
-                <div className="col d-flex gap-4 justify-content:space-evenly mt-2">
-                  <FaLinkedin size={24} />
-                  <FaTelegram size={24} />
-                  <FaYoutube size={24} />
-                </div>
-              </div>
+            <div className="d-flex justify-content-center justify-content-md-start gap-2">
+              <Link to="/facebook">
+                <FaFacebook size={20} />
+              </Link>
+              <Link to="/twitter">
+                <FaTwitter size={20} />
+              </Link>
+              <Link to="/instagram">
+                <FaInstagram size={20} />
+              </Link>
+              <Link to="/linkedin">
+                <FaLinkedin size={20} />
+              </Link>
+              <Link to="/telegram">
+                <FaTelegram size={20} />
+              </Link>
+              <Link to="/youtube">
+                <FaYoutube size={20} />
+              </Link>
             </div>
           </Col>
 
-          <Col md={2} sm={4} xs={6}>
+          <Col md={2} sm={6}>
             <h5>Company</h5>
             <ul className="list-unstyled">
-              <li>About us</li>
-              <li>Careers</li>
-              <li>Newsroom</li>
-              <li>Alumni speak</li>
-              <li>Grievance redressal</li>
-              <li>Contact us</li>
+              <li>
+                <Link to="/about-us" className="text-white">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/careers" className="text-white">
+                  Careers
+                </Link>
+              </li>
+              <li>
+                <Link to="/newsroom" className="text-white">
+                  Newsroom
+                </Link>
+              </li>
+              <li>
+                <Link to="/alumni" className="text-white">
+                  Alumni Speak
+                </Link>
+              </li>
+              <li>
+                <Link to="/grievance" className="text-white">
+                  Grievance
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact-us" className="text-white">
+                  Contact Us
+                </Link>
+              </li>
             </ul>
           </Col>
 
-          <Col md={2} sm={4} xs={6}>
-            <h5>Work with us</h5>
+          <Col md={2} sm={6}>
+            <h5>Work With Us</h5>
             <ul className="list-unstyled">
-              <li>Become an instructor</li>
-              <li>Blog as guest</li>
+              <li>
+                <Link to="/become-instructor" className="text-white">
+                  Become an Instructor
+                </Link>
+              </li>
+              <li>
+                <Link to="/blog" className="text-white">
+                  Blog as Guest
+                </Link>
+              </li>
             </ul>
           </Col>
 
-          <Col md={2} sm={4} xs={6}>
+          <Col md={2} sm={6}>
             <h5>Discover</h5>
             <ul className="list-unstyled">
-              <li>Free Courses</li>
-              <li>Skillup Sitemap</li>
-              <li>Resources</li>
-              <li>RSS feed</li>
-              <li>City Sitemap</li>
+              <li>
+                <Link to="/free-courses" className="text-white">
+                  Free Courses
+                </Link>
+              </li>
+              <li>
+                <Link to="/sitemap" className="text-white">
+                  Sitemap
+                </Link>
+              </li>
+              <li>
+                <Link to="/resources" className="text-white">
+                  Resources
+                </Link>
+              </li>
+              <li>
+                <Link to="/rss" className="text-white">
+                  RSS Feed
+                </Link>
+              </li>
             </ul>
           </Col>
 
-          <Col md={2} sm={4} xs={6}>
-            <h5>For Businesses</h5>
+          <Col md={2} sm={6}>
+            <h5>For Business</h5>
             <ul className="list-unstyled">
-              <li>Corporate training</li>
-              <li>Simplilearn Learning Hub+</li>
-              <li>Guaranteed-to-run Classes</li>
-              <li>Partners</li>
+              <li>
+                <Link to="/corporate" className="text-white">
+                  Corporate Training
+                </Link>
+              </li>
+              <li>
+                <Link to="/learning-hub" className="text-white">
+                  Learning Hub+
+                </Link>
+              </li>
+              <li>
+                <Link to="/guaranteed-classes" className="text-white">
+                  Guaranteed Classes
+                </Link>
+              </li>
+              <li>
+                <Link to="/partners" className="text-white">
+                  Partners
+                </Link>
+              </li>
             </ul>
           </Col>
 
-          <Col md={2} sm={4} xs={6}>
-            <h5>Learn On the Go!</h5>
-            {/* <Button variant="outline-light" className="d-flex align-items-center mb-2">
-                            <FaAndroid className="me-2" /> Get Android App
-                        </Button> */}
-            <Button
-              variant="outline-light"
-              className="d-flex align-items-center"
-            >
-              <FaApple className="me-2" /> Get iOS App
+          <Col md={2} sm={6}>
+            <h5>Get the App</h5>
+            <Button variant="outline-light" className="w-100 mb-2">
+              <FaApple className="me-2" />
+              <Link to="/ios-app" className="text-white">
+                iOS App
+              </Link>
             </Button>
-            <Button
-              variant="outline-light"
-              className="d-flex align-items-center"
-            >
-              <FaAndroid className="me-2" /> Get Android
+            <Button variant="outline-light" className="w-100">
+              <FaAndroid className="me-2" />
+              <Link to="/android-app" className="text-white">
+                Android App
+              </Link>
             </Button>
           </Col>
         </Row>
       </Container>
+
       <section className="term-condition">
-        <TermAndCondition/>
+        <TermAndCondition />
       </section>
     </footer>
   );

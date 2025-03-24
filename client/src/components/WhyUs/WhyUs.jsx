@@ -24,12 +24,12 @@ const WhyUs = () => {
               style={{ backgroundColor: feature.color, border: "none", height: "100%" }}
               className="text-center p-3 shadow d-flex flex-column"
             >
-              <Card.Img
+              {/* <Card.Img
                 variant="top"
                 src={feature.img}
                 className="mx-auto"
                 style={{ width: "50px" }}
-              />
+              /> */}
               <Card.Body className="d-flex flex-column justify-content-between h-100">
                 <Card.Title>{feature.title}</Card.Title>
                 <a href="/">

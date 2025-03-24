@@ -10,6 +10,11 @@ import './App.css';
 import Home from './pages/Home';
 
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> e4cd810ee870b2815504b5731c28ea0c4ca409f3
 // Admin Route
 const Sidebar = React.lazy(() => import('./pages/AdminSidebar/sidebar.jsx'));
 const AdminNavbar = React.lazy(()=> import('./components/Admin/Navbar/Navbar.jsx'))
@@ -89,11 +94,14 @@ const router = createBrowserRouter(
 function App() {
   return (
     <AuthProvider>
-      <Suspense fallback={
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-        </div>
-      }>
+      <Suspense
+        fallback={
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+          </div>
+        }
+      >
+        {/* <ScrollToTop /> */}
         <RouterProvider router={router} />
         <ToastContainer
           position="top-right"
@@ -108,7 +116,6 @@ function App() {
           theme="light"
         />
       </Suspense>
-
     </AuthProvider>
   );
 }
