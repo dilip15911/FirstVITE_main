@@ -13,9 +13,9 @@ const PrivateRoute = ({ children }) => {
   // Check if this is an admin route
   const isAdminRoute = location.pathname.startsWith('/admin');
   
-  // Allow access to admin routes without login
-  if (isAdminRoute) {
-    return children;
+  // If it's an admin route and user is not logged in, redirect to admin login
+  if (isAdminRoute && !user) {
+    return <Navigate to="/admin/login" />;
   }
 
   // For non-admin routes, use existing logic
