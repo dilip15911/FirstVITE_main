@@ -1,123 +1,283 @@
 import { Link, useLocation } from "react-router-dom";
-import { FaUserGraduate, FaBook, FaList, FaChartBar, FaCog, FaBars, FaTachometerAlt, FaHome, FaUsers, FaUserPlus, FaClipboardList, FaBriefcase } from "react-icons/fa";
-import { useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { 
+  FaUserGraduate, FaBook, FaList, FaChartBar, FaCog, FaBars, FaTachometerAlt, 
+  FaHome, FaUsers, FaUserPlus, FaClipboardList, FaBriefcase, FaChalkboardTeacher, 
+  FaGraduationCap, FaFileAlt, FaChartLine, FaFolder, FaHeadset, FaCreditCard,
+  FaChevronDown, FaChevronRight, FaPlus, FaClipboard, FaChartPie, FaMoneyBillWave,
+  FaExchangeAlt, FaCogs, FaHistory
+} from "react-icons/fa";
+import { useState, useEffect } from "react";
+import "../../../styles/adminTheme.css";
 
-const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(true);
-  const [isEmployeeOpen, setIsEmployeeOpen] = useState(false); // Employee dropdown toggle
+const Sidebar = ({ isOpen, toggleSidebar }) => {
+  const [isEmployeeOpen, setIsEmployeeOpen] = useState(false);
+  const [isCourseOpen, setIsCourseOpen] = useState(false);
+  const [isAssessmentOpen, setIsAssessmentOpen] = useState(false);
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const location = useLocation();
 
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
+  useEffect(() => {
+    // Auto-expand relevant dropdown based on current path
+    if (location.pathname.includes('/admin/course-management') || location.pathname === '/admin/courses') {
+      setIsCourseOpen(true);
+    }
+    
+    if (location.pathname.includes('/admin/employee')) {
+      setIsEmployeeOpen(true);
+    }
 
-  const toggleEmployeeDropdown = () => {
+    if (location.pathname.includes('/admin/assessments')) {
+      setIsAssessmentOpen(true);
+    }
+    
+    if (location.pathname.includes('/admin/payments')) {
+      setIsPaymentOpen(true);
+    }
+  }, [location.pathname]);
+
+  const toggleEmployeeDropdown = (e) => {
+    e.preventDefault();
     setIsEmployeeOpen(!isEmployeeOpen);
   };
 
+  const toggleCourseDropdown = (e) => {
+    e.preventDefault();
+    setIsCourseOpen(!isCourseOpen);
+  };
+
+  const toggleAssessmentDropdown = (e) => {
+    e.preventDefault();
+    setIsAssessmentOpen(!isAssessmentOpen);
+  };
+  
+  const togglePaymentDropdown = (e) => {
+    e.preventDefault();
+    setIsPaymentOpen(!isPaymentOpen);
+  };
+
   return (
-    <div className={`d-flex flex-column bg-dark text-white vh-100 ${isOpen ? "p-3 w-25" : "p-2 w-10"}`}>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <span className="fs-4 fw-bold">{isOpen ? "Admin Panel" : ""}</span>
-        <button onClick={toggleSidebar} className="btn text-white">
-          <FaBars size={24} />
-        </button>
+    <div className="sidebar-menu">
+      <div className="menu-item">
+        <Link to="/admin/dashboard" className={location.pathname === "/admin/dashboard" ? "active" : ""}>
+          <span className="menu-icon"><FaTachometerAlt /></span>
+          {isOpen && "Dashboard"}
+        </Link>
       </div>
-      <nav>
-        <ul className="nav flex-column">
-          <li className="nav-item">
-            <Link to="/admin/dashboard" className={`nav-link text-white d-flex align-items-center ${location.pathname === "/admin/dashboard" ? "bg-secondary" : ""}`}>
-              <FaTachometerAlt size={20} className="me-2" />
-              {isOpen && "Dashboard"}
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/admin/home" className={`nav-link text-white d-flex align-items-center ${location.pathname === "/admin/home" ? "bg-secondary" : ""}`}>
-              <FaHome size={20} className="me-2" />
-              {isOpen && "Home"}
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/admin/students" className={`nav-link text-white d-flex align-items-center ${location.pathname === "/admin/students" ? "bg-secondary" : ""}`}>
-              <FaUserGraduate size={20} className="me-2" />
-              {isOpen && "Students"}
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/admin/courses" className={`nav-link text-white d-flex align-items-center ${location.pathname === "/admin/courses" ? "bg-secondary" : ""}`}>
-              <FaBook size={20} className="me-2" />
-              {isOpen && "Courses"}
-            </Link>
-          </li>
+      
+      <div className="menu-item">
+        <Link to="/admin/home" className={location.pathname === "/admin/home" ? "active" : ""}>
+          <span className="menu-icon"><FaHome /></span>
+          {isOpen && "Home"}
+        </Link>
+      </div>
+      
+      <div className="menu-item">
+        <Link to="/admin/students" className={location.pathname === "/admin/students" ? "active" : ""}>
+          <span className="menu-icon"><FaUserGraduate /></span>
+          {isOpen && "Students"}
+        </Link>
+      </div>
+      
+      {/* Course Management Dropdown */}
+      <div className={`menu-item ${isCourseOpen ? "active" : ""}`}>
+        <button onClick={toggleCourseDropdown}>
+          <span className="menu-icon"><FaBook /></span>
+          {isOpen && "Course Management"}
+          {isOpen && <span className="ms-auto">{isCourseOpen ? <FaChevronDown size={12} /> : <FaChevronRight size={12} />}</span>}
+        </button>
+        
+        {isCourseOpen && isOpen && (
+          <div className="submenu">
+            <div className="menu-item">
+              <Link to="/admin/courses" className={location.pathname === "/admin/courses" ? "active" : ""}>
+                <span className="menu-icon"><FaList /></span>
+                All Courses
+              </Link>
+            </div>
+            <div className="menu-item">
+              <Link to="/admin/course-management/list" className={location.pathname === "/admin/course-management/list" ? "active" : ""}>
+                <span className="menu-icon"><FaList /></span>
+                Course List
+              </Link>
+            </div>
+            <div className="menu-item">
+              <Link to="/admin/course-management/create" className={location.pathname === "/admin/course-management/create" ? "active" : ""}>
+                <span className="menu-icon"><FaPlus /></span>
+                Create Course
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* Assessment Center Dropdown */}
+      <div className={`menu-item ${isAssessmentOpen ? "active" : ""}`}>
+        <button onClick={toggleAssessmentDropdown}>
+          <span className="menu-icon"><FaGraduationCap /></span>
+          {isOpen && "Assessment Center"}
+          {isOpen && <span className="ms-auto">{isAssessmentOpen ? <FaChevronDown size={12} /> : <FaChevronRight size={12} />}</span>}
+        </button>
+        
+        {isAssessmentOpen && isOpen && (
+          <div className="submenu">
+            <div className="menu-item">
+              <Link to="/admin/assessments" className={location.pathname === "/admin/assessments" ? "active" : ""}>
+                <span className="menu-icon"><FaList /></span>
+                All Assessments
+              </Link>
+            </div>
+            <div className="menu-item">
+              <Link to="/admin/assessments/create" className={location.pathname === "/admin/assessments/create" ? "active" : ""}>
+                <span className="menu-icon"><FaPlus /></span>
+                Create Assessment
+              </Link>
+            </div>
+            <div className="menu-item">
+              <Link to="/admin/assessments/results" className={location.pathname === "/admin/assessments/results" ? "active" : ""}>
+                <span className="menu-icon"><FaChartPie /></span>
+                Assessment Results
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      <div className="menu-item">
+        <Link to="/admin/analytics" className={location.pathname === "/admin/analytics" ? "active" : ""}>
+          <span className="menu-icon"><FaChartLine /></span>
+          {isOpen && "Analytics"}
+        </Link>
+      </div>
+      
+      <div className="menu-item">
+        <Link to="/admin/content" className={location.pathname === "/admin/content" ? "active" : ""}>
+          <span className="menu-icon"><FaFolder /></span>
+          {isOpen && "Content Management"}
+        </Link>
+      </div>
+      
+      <div className="menu-item">
+        <Link to="/admin/support" className={location.pathname === "/admin/support" ? "active" : ""}>
+          <span className="menu-icon"><FaHeadset /></span>
+          {isOpen && "Student Support"}
+        </Link>
+      </div>
+      
+      {/* Payment Management Dropdown */}
+      <div className={`menu-item ${isPaymentOpen ? "active" : ""}`}>
+        <button onClick={togglePaymentDropdown}>
+          <span className="menu-icon"><FaCreditCard /></span>
+          {isOpen && "Payment Management"}
+          {isOpen && <span className="ms-auto">{isPaymentOpen ? <FaChevronDown size={12} /> : <FaChevronRight size={12} />}</span>}
+        </button>
+        
+        {isPaymentOpen && isOpen && (
+          <div className="submenu">
+            <div className="menu-item">
+              <Link to="/admin/payments" className={location.pathname === "/admin/payments" ? "active" : ""}>
+                <span className="menu-icon"><FaMoneyBillWave /></span>
+                Dashboard
+              </Link>
+            </div>
+            <div className="menu-item">
+              <Link to="/admin/payments/history" className={location.pathname === "/admin/payments/history" ? "active" : ""}>
+                <span className="menu-icon"><FaHistory /></span>
+                Payment History
+              </Link>
+            </div>
+            <div className="menu-item">
+              <Link to="/admin/payments/refunds" className={location.pathname === "/admin/payments/refunds" ? "active" : ""}>
+                <span className="menu-icon"><FaExchangeAlt /></span>
+                Refund Requests
+              </Link>
+            </div>
+            <div className="menu-item">
+              <Link to="/admin/payments/settings" className={location.pathname === "/admin/payments/settings" ? "active" : ""}>
+                <span className="menu-icon"><FaCogs /></span>
+                Payment Settings
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      <div className="menu-item">
+        <Link to="/admin/guest-teachers" className={location.pathname === "/admin/guest-teachers" ? "active" : ""}>
+          <span className="menu-icon"><FaChalkboardTeacher /></span>
+          {isOpen && "Guest Teachers"}
+        </Link>
+      </div>
 
-          {/* Employees Dropdown */}
-          <li className="nav-item">
-            <button className="btn text-white d-flex align-items-center w-100" onClick={toggleEmployeeDropdown}>
-              <FaUsers size={20} className="me-2" />
-              {isOpen && "Employees"}
-              <span className="ms-auto">{isEmployeeOpen ? "▲" : "▼"}</span>
-            </button>
-            <ul className={`nav flex-column ps-3 ${isEmployeeOpen ? "d-block" : "d-none"}`}>
-              <li className="nav-item">
-                <Link to="/admin/employee/create-employee" className={`nav-link text-white ${location.pathname === "/admin/employee/create-employee" ? "bg-secondary" : ""}`}>
-                  <FaUserPlus size={18} className="me-2" />
-                  {isOpen && "Create Employee"}
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link to="/admin/employee/manage-employee" className={`nav-link text-white ${location.pathname === "/admin/employee/manage-employee" ? "bg-secondary" : ""}`}>
-                  <FaClipboardList size={18} className="me-2" />
-                  {isOpen && "Manage Employees"}
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link to="/admin/employee/view-employee" className={`nav-link text-white ${location.pathname === "/admin/employee/view-employee" ? "bg-secondary" : ""}`}>
-                  <FaUsers size={18} className="me-2" />
-                  {isOpen && "View Employees"}
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link to="/admin/employee/create-jobrole" className={`nav-link text-white ${location.pathname === "/admin/employee/create-jobrole" ? "bg-secondary" : ""}`}>
-                  <FaBriefcase size={18} className="me-2" />
-                  {isOpen && "Create Job Role"}
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link to="/admin/employee/manage-jobrole" className={`nav-link text-white ${location.pathname === "/admin/employee/manage-jobrole" ? "bg-secondary" : ""}`}>
-                  <FaBriefcase size={18} className="me-2" />
-                  {isOpen && "Manage Job Roles"}
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link to="/admin/employee/view-jobrole" className={`nav-link text-white ${location.pathname === "/admin/employee/view-jobrole" ? "bg-secondary" : ""}`}>
-                  <FaBriefcase size={18} className="me-2" />
-                  {isOpen && "View Job Roles"}
-                </Link>
-              </li>
-            </ul>
-          </li>
+      {/* Employees Dropdown */}
+      <div className={`menu-item ${isEmployeeOpen ? "active" : ""}`}>
+        <button onClick={toggleEmployeeDropdown}>
+          <span className="menu-icon"><FaUsers /></span>
+          {isOpen && "Employees"}
+          {isOpen && <span className="ms-auto">{isEmployeeOpen ? <FaChevronDown size={12} /> : <FaChevronRight size={12} />}</span>}
+        </button>
+        
+        {isEmployeeOpen && isOpen && (
+          <div className="submenu">
+            <div className="menu-item">
+              <Link to="/admin/employee/create-employee" className={location.pathname === "/admin/employee/create-employee" ? "active" : ""}>
+                <span className="menu-icon"><FaUserPlus /></span>
+                Create Employee
+              </Link>
+            </div>
+            <div className="menu-item">
+              <Link to="/admin/employee/manage-employee" className={location.pathname === "/admin/employee/manage-employee" ? "active" : ""}>
+                <span className="menu-icon"><FaClipboardList /></span>
+                Manage Employees
+              </Link>
+            </div>
+            <div className="menu-item">
+              <Link to="/admin/employee/view-employee" className={location.pathname === "/admin/employee/view-employee" ? "active" : ""}>
+                <span className="menu-icon"><FaUsers /></span>
+                View Employees
+              </Link>
+            </div>
+            <div className="menu-item">
+              <Link to="/admin/employee/create-jobrole" className={location.pathname === "/admin/employee/create-jobrole" ? "active" : ""}>
+                <span className="menu-icon"><FaBriefcase /></span>
+                Create Job Role
+              </Link>
+            </div>
+            <div className="menu-item">
+              <Link to="/admin/employee/manage-jobrole" className={location.pathname === "/admin/employee/manage-jobrole" ? "active" : ""}>
+                <span className="menu-icon"><FaBriefcase /></span>
+                Manage Job Roles
+              </Link>
+            </div>
+            <div className="menu-item">
+              <Link to="/admin/employee/view-jobrole" className={location.pathname === "/admin/employee/view-jobrole" ? "active" : ""}>
+                <span className="menu-icon"><FaBriefcase /></span>
+                View Job Roles
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
 
-          <li className="nav-item">
-            <Link to="/admin/categories" className={`nav-link text-white d-flex align-items-center ${location.pathname === "/admin/categories" ? "bg-secondary" : ""}`}>
-              <FaList size={20} className="me-2" />
-              {isOpen && "Categories"}
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/admin/reports" className={`nav-link text-white d-flex align-items-center ${location.pathname === "/admin/reports" ? "bg-secondary" : ""}`}>
-              <FaChartBar size={20} className="me-2" />
-              {isOpen && "Reports"}
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/admin/settings" className={`nav-link text-white d-flex align-items-center ${location.pathname === "/admin/settings" ? "bg-secondary" : ""}`}>
-              <FaCog size={20} className="me-2" />
-              {isOpen && "Settings"}
-            </Link>
-          </li>
-        </ul>
-      </nav>
+      <div className="menu-item">
+        <Link to="/admin/categories" className={location.pathname === "/admin/categories" ? "active" : ""}>
+          <span className="menu-icon"><FaList /></span>
+          {isOpen && "Categories"}
+        </Link>
+      </div>
+      
+      <div className="menu-item">
+        <Link to="/admin/reports" className={location.pathname === "/admin/reports" ? "active" : ""}>
+          <span className="menu-icon"><FaChartBar /></span>
+          {isOpen && "Reports"}
+        </Link>
+      </div>
+      
+      <div className="menu-item">
+        <Link to="/admin/settings" className={location.pathname === "/admin/settings" ? "active" : ""}>
+          <span className="menu-icon"><FaCog /></span>
+          {isOpen && "Settings"}
+        </Link>
+      </div>
     </div>
   );
 };

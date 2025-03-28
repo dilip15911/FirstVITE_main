@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { check, body } = require('express-validator');
 const authController = require('../controllers/authController');
-const { verifyToken } = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 
 // Validation middleware
 const loginValidation = [
@@ -58,9 +58,9 @@ router.post('/admin/login', adminLoginValidation, authController.adminLogin);
 router.get('/getAllUser', authController.getAllUser);
 
 // Protected routes (require authentication)
-router.get('/profile', verifyToken, authController.getProfile);
-router.put('/profile', [verifyToken, validateProfile], authController.updateProfile);
-router.get('/history', verifyToken, authController.getUserHistory);
-router.post('/restore', verifyToken, authController.restoreProfile);
+router.get('/profile', protect, authController.getProfile);
+router.put('/profile', [protect, validateProfile], authController.updateProfile);
+router.get('/history', protect, authController.getUserHistory);
+router.post('/restore', protect, authController.restoreProfile);
 
 module.exports = router;

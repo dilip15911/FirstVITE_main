@@ -7,6 +7,7 @@ import RootLayout from './layouts/RootLayout';
 import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import './styles/adminTheme.css';
 import Home from './pages/Home';
 
 // Admin Route
@@ -27,7 +28,20 @@ const ViewEmployees = React.lazy(()=> import('./pages/admin/Employee/ViewEmploye
 const CreateJobRole = React.lazy(() => import('./pages/admin/Employee/CreateJobRole'));
 const ManageJobRoles = React.lazy(() => import('./pages/admin/Employee/ManageJobRoles'));
 const ViewJobRoles = React.lazy(() => import('./pages/admin/Employee/ViewJobRoles'));
-
+const GuestTeachers = React.lazy(() => import('./pages/admin/GuestTeachers'));
+const CourseList = React.lazy(() => import('./pages/admin/CourseManagement/CourseList'));
+const CourseForm = React.lazy(() => import('./pages/admin/CourseManagement/CourseForm'));
+const AssessmentList = React.lazy(() => import('./pages/admin/AssessmentCenter/AssessmentList'));
+const CreateAssessment = React.lazy(() => import('./pages/admin/AssessmentCenter/CreateAssessment'));
+const AssessmentDetails = React.lazy(() => import('./pages/admin/AssessmentCenter/AssessmentDetails'));
+const AssessmentResults = React.lazy(() => import('./pages/admin/AssessmentCenter/AssessmentResults'));
+const AnalyticsDashboard = React.lazy(() => import('./pages/admin/Analytics/AnalyticsDashboard'));
+const ContentDashboard = React.lazy(() => import('./pages/admin/ContentManagement/ContentDashboard'));
+const SupportDashboard = React.lazy(() => import('./pages/admin/StudentSupport/SupportDashboard'));
+const PaymentDashboard = React.lazy(() => import('./pages/admin/PaymentManagement/PaymentDashboard'));
+const PaymentHistory = React.lazy(() => import('./pages/admin/PaymentManagement/components/PaymentHistory'));
+const RefundManagement = React.lazy(() => import('./pages/admin/PaymentManagement/components/RefundManagement'));
+const PaymentSettings = React.lazy(() => import('./pages/admin/PaymentManagement/components/PaymentSettings'));
 
 // Lazy load components
 const Login = React.lazy(() => import('./pages/auth/Login'));
@@ -88,6 +102,42 @@ const router = createBrowserRouter(
         <Route path="categories" element={<Categories />} />
         <Route path="reports" element={<Reports />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="guest-teachers" element={<GuestTeachers />} />
+        
+        {/* Course Management */}
+        <Route path="course-management">
+          <Route index element={<Navigate to="list" replace />} />
+          <Route path="list" element={<CourseList />} />
+          <Route path="create" element={<CourseForm />} />
+          <Route path="edit/:id" element={<CourseForm />} />
+        </Route>
+        
+        {/* Assessment Center */}
+        <Route path="assessments">
+          <Route index element={<AssessmentList />} />
+          <Route path="create" element={<CreateAssessment />} />
+          <Route path=":id" element={<AssessmentDetails />} />
+          <Route path=":id/edit" element={<CreateAssessment />} />
+          <Route path="results" element={<AssessmentResults />} />
+        </Route>
+        
+        {/* Analytics */}
+        <Route path="analytics" element={<AnalyticsDashboard />} />
+        
+        {/* Content Management */}
+        <Route path="content" element={<ContentDashboard />} />
+        
+        {/* Student Support */}
+        <Route path="support" element={<SupportDashboard />} />
+        
+        {/* Payment Management */}
+        <Route path="payments">
+          <Route index element={<PaymentDashboard />} />
+          <Route path="history" element={<PaymentHistory />} />
+          <Route path="refunds" element={<RefundManagement />} />
+          <Route path="settings" element={<PaymentSettings />} />
+        </Route>
+        
         <Route path="employee">
           <Route index element={<Navigate to="create-employee" replace />} />
           <Route path="create-employee" element={<CreateEmployee />} />

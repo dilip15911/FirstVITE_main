@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const verifyToken = (req, res, next) => {
+const protect = (req, res, next) => {
   try {
     // Get token from header
     const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -13,7 +13,7 @@ const verifyToken = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Add user to request
-    req.user = { userId: decoded.userId };
+    req.user = { userId: decoded.userId, role: decoded.role };
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
@@ -21,4 +21,11 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-module.exports = { verifyToken };
+const admin = (req, res, next) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Access denied. Admin only.' });
+  }
+  next();
+};
+
+module.exports = { protect, admin };

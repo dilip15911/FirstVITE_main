@@ -42,6 +42,11 @@ pool.getConnection()
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const guestTeachersRoutes = require('./routes/guestTeachersRoutes');
+const contentRoutes = require('./routes/contentRoutes');
+const supportRoutes = require('./routes/supportRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const userPaymentRoutes = require('./routes/userPaymentRoutes');
 
 // Initialize express app
 const app = express();
@@ -85,6 +90,11 @@ if (!require('fs').existsSync(uploadDir)) {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/guest-teachers', guestTeachersRoutes);
+app.use('/api/admin/content', contentRoutes);
+app.use('/api/admin/support', supportRoutes);
+app.use('/api/admin/payments', paymentRoutes);
+app.use('/api/user/payments', userPaymentRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {
