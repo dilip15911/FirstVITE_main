@@ -6,7 +6,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 axios.defaults.baseURL = API_URL;
 
 // Configure axios interceptors
-const setupAxiosInterceptors = (token) => {
+export const setupAxiosInterceptors = (token) => {
   // Request interceptor
   axios.interceptors.request.use(
     (config) => {
@@ -34,7 +34,7 @@ const setupAxiosInterceptors = (token) => {
 };
 
 // Auth routes
-const login = async (email, password) => {
+export const login = async (email, password) => {
   try {
     const response = await axios.post('/auth/login', { email, password });
     if (response.data.token) {
@@ -46,7 +46,7 @@ const login = async (email, password) => {
   }
 };
 
-const signup = async (name, email, password) => {
+export const signup = async (name, email, password) => {
   try {
     const response = await axios.post('/auth/signup', { name, email, password });
     return response.data;
@@ -55,7 +55,7 @@ const signup = async (name, email, password) => {
   }
 };
 
-const verifyEmail = async (userId, otp) => {
+export const verifyEmail = async (userId, otp) => {
   try {
     const response = await axios.post('/auth/verify', { userId, otp });
     return response.data;
@@ -64,7 +64,7 @@ const verifyEmail = async (userId, otp) => {
   }
 };
 
-const resendVerification = async (userId) => {
+export const resendVerification = async (userId) => {
   try {
     const response = await axios.post('/auth/resend-otp', { userId });
     return response.data;
@@ -73,7 +73,7 @@ const resendVerification = async (userId) => {
   }
 };
 
-const getProfile = async () => {
+export const getProfile = async () => {
   try {
     const response = await axios.get('/auth/profile');
     return response.data;
@@ -82,7 +82,7 @@ const getProfile = async () => {
   }
 };
 
-const updateProfile = async (data) => {
+export const updateProfile = async (data) => {
   try {
     const response = await axios.put('/auth/profile', data);
     return response.data;
@@ -91,7 +91,7 @@ const updateProfile = async (data) => {
   }
 };
 
-const getUserHistory = async () => {
+export const getUserHistory = async () => {
   try {
     const response = await axios.get('/auth/history');
     return response.data;
@@ -100,7 +100,7 @@ const getUserHistory = async () => {
   }
 };
 
-const restoreProfile = async (historyId) => {
+export const restoreProfile = async (historyId) => {
   try {
     const response = await axios.post(`/auth/history/${historyId}/restore`);
     return response.data;
@@ -109,7 +109,7 @@ const restoreProfile = async (historyId) => {
   }
 };
 
-export {
+export default {
   login,
   signup,
   verifyEmail,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Form, Button, Badge, Table, Pagination, Dropdown } from 'react-bootstrap';
 import { FaSearch, FaQuestionCircle, FaCheck, FaReply, FaThumbsUp, FaThumbsDown, FaEye, FaStar } from 'react-icons/fa';
-import axios from 'axios';
+
 
 const QAForum = () => {
   const [threads, setThreads] = useState([]);

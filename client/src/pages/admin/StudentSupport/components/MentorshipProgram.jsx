@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Form, Button, Badge, Table, Pagination, Dropdown } from 'react-bootstrap';
-import { FaUsers, FaUserGraduate, FaCalendarAlt, FaCheck, FaClock, FaTimes, FaComments } from 'react-icons/fa';
+import { Card, Row, Col, Form, Button, Badge, Table, Pagination } from 'react-bootstrap';
+import { FaUsers, FaCheck, FaClock, FaComments } from 'react-icons/fa';
 
 const MentorshipProgram = () => {
   const [mentorships, setMentorships] = useState([]);

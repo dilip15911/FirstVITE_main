@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Form, Button, Table, Badge, Modal, Spinner, Image } from 'react-bootstrap';
-import { FaImage, FaVideo, FaFileAudio, FaPlus, FaEdit, FaTrash, FaDownload, FaSearch, FaFilter, FaEye, FaPlay } from 'react-icons/fa';
-import axios from 'axios';
+import { FaImage, FaVideo, FaFileAudio, FaPlus, FaEdit, FaTrash, FaDownload, FaSearch, FaFilter, FaEye } from 'react-icons/fa';
 import Dropzone from 'react-dropzone';
 
 const MediaManager = () => {

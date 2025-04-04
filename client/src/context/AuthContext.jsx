@@ -82,6 +82,36 @@ export const AuthProvider = ({ children }) => {
     authAPI.setupAxiosInterceptors(null);
   };
 
+  const verifyEmail = async (userId, otp) => {
+    try {
+      const response = await authAPI.verifyEmail(userId, otp);
+      if (response.success) {
+        toast.success(response.message);
+        return { success: true, message: response.message };
+      }
+      return { success: false, message: response.message };
+    } catch (error) {
+      console.error('Verification error:', error);
+      toast.error(error.message);
+      return { success: false, message: error.message };
+    }
+  };
+
+  const resendVerification = async (userId) => {
+    try {
+      const response = await authAPI.resendVerification(userId);
+      if (response.success) {
+        toast.success(response.message);
+        return { success: true, message: response.message };
+      }
+      return { success: false, message: response.message };
+    } catch (error) {
+      console.error('Resend verification error:', error);
+      toast.error(error.message);
+      return { success: false, message: error.message };
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -90,6 +120,8 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         signup,
+        verifyEmail,
+        resendVerification,
         loadUser
       }}
     >

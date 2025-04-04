@@ -1,9 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
 import { 
-  FaUserGraduate, FaBook, FaList, FaChartBar, FaCog, FaBars, FaTachometerAlt, 
+  FaUserGraduate, FaBook, FaList, FaChartBar, FaCog, FaTachometerAlt, 
   FaHome, FaUsers, FaUserPlus, FaClipboardList, FaBriefcase, FaChalkboardTeacher, 
-  FaGraduationCap, FaFileAlt, FaChartLine, FaFolder, FaHeadset, FaCreditCard,
-  FaChevronDown, FaChevronRight, FaPlus, FaClipboard, FaChartPie, FaMoneyBillWave,
+  FaGraduationCap, FaChartLine, FaFolder, FaHeadset, FaCreditCard,
+  FaChevronDown, FaChevronRight, FaPlus, FaChartPie, FaMoneyBillWave,
   FaExchangeAlt, FaCogs, FaHistory
 } from "react-icons/fa";
 import { useState, useEffect } from "react";

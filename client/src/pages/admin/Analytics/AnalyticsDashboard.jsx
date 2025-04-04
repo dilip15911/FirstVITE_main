@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Nav, Tab } from 'react-bootstrap';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
-import '../../../utils/chartConfig';
-import axios from 'axios';
 import { FaGraduationCap, FaBook, FaUsers, FaChartLine, FaMoneyBillWave, FaUserGraduate, FaChartBar } from 'react-icons/fa';
 import EnrollmentAnalytics from './components/EnrollmentAnalytics';
 import RevenueAnalytics from './components/RevenueAnalytics';

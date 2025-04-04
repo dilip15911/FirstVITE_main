@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Form, Button, Badge, Table, Nav, Tab, Modal } from 'react-bootstrap';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Card, Row, Col, Form, Button, Badge, Table, Nav, Modal } from 'react-bootstrap';
 import { FaBook, FaVideo, FaFileAlt, FaLink, FaPlus, FaEdit, FaTrash, FaSearch, FaDownload, FaEye, FaStar } from 'react-icons/fa';
 
 const ResourceLibrary = () => {
@@ -23,7 +23,7 @@ const ResourceLibrary = () => {
   });
 
   // Mock data for development
-  const mockResources = [
+  const mockResources = useMemo(() => [
     {
       id: 1,
       title: "JavaScript Fundamentals Guide",
@@ -120,22 +120,12 @@ const ResourceLibrary = () => {
       featured: false,
       createdAt: "2025-03-01T00:00:00"
     }
-  ];
+  ], []);
 
   // Extract unique categories from resources
   const categories = ['all', ...new Set(mockResources.map(resource => resource.category))];
 
-  useEffect(() => {
-    // In a real app, fetch resources from API
-    // For now, use mock data
-    fetchResources();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [resources, searchTerm, typeFilter, activeCategory]);
-
-  const fetchResources = async () => {
+  const fetchResources = useCallback(async () => {
     try {
       setLoading(true);
       // In a real app:
@@ -149,9 +139,9 @@ const ResourceLibrary = () => {
       setError('Failed to fetch resources');
       setLoading(false);
     }
-  };
+  }, [mockResources]);
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...resources];
     
     // Apply search filter
@@ -173,7 +163,17 @@ const ResourceLibrary = () => {
     }
     
     setFilteredResources(filtered);
-  };
+  }, [resources, searchTerm, typeFilter, activeCategory]);
+
+  useEffect(() => {
+    // In a real app, fetch resources from API
+    // For now, use mock data
+    fetchResources();
+  }, [typeFilter, activeCategory, fetchResources]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [resources, searchTerm, typeFilter, activeCategory, applyFilters]);
 
   const handleAddResource = () => {
     // Reset form data

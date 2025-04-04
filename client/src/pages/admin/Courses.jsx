@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Outlet } from "react-router-dom";  
 import { Button, Table, Modal, Form } from "react-bootstrap";
 
 const Courses = () => {
@@ -80,6 +81,10 @@ const Courses = () => {
                     <Button variant="primary" onClick={handleAddCourse}>Save Course</Button>
                 </Modal.Footer>
             </Modal>
+
+            <div className="courses-page-content">
+                <Outlet />
+            </div>
         </div>
     );
 };

@@ -52,25 +52,25 @@ const Navbar = () => {
             </Nav.Link>
 
             <NavDropdown title="All Courses" id="courses-dropdown">
-              <NavDropdown.Item as={Link} to="/generative-ai" onClick={() => setExpanded(false)}>
+              <NavDropdown.Item as={Link} to="/courses/generative-ai" onClick={() => setExpanded(false)}>
                 Generative AI
               </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/web-development" onClick={() => setExpanded(false)}>
+              <NavDropdown.Item as={Link} to="/courses/web-development" onClick={() => setExpanded(false)}>
                 Web Development
               </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/data-science" onClick={() => setExpanded(false)}>
+              <NavDropdown.Item as={Link} to="/courses/data-science" onClick={() => setExpanded(false)}>
                 Data Science
               </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/cloud-devops" onClick={() => setExpanded(false)}>
+              <NavDropdown.Item as={Link} to="/courses/cloud-devops" onClick={() => setExpanded(false)}>
                 Cloud Computing and DevOps
               </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/cybersecurity" onClick={() => setExpanded(false)}>
+              <NavDropdown.Item as={Link} to="/courses/cybersecurity" onClick={() => setExpanded(false)}>
                 Cybersecurity
               </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/agile-scrum" onClick={() => setExpanded(false)}>
+              <NavDropdown.Item as={Link} to="/courses/agile-scrum" onClick={() => setExpanded(false)}>
                 Agile and Scrum
               </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/software-development" onClick={() => setExpanded(false)}>
+              <NavDropdown.Item as={Link} to="/courses/software-development" onClick={() => setExpanded(false)}>
                 Software Development
               </NavDropdown.Item>
             </NavDropdown>

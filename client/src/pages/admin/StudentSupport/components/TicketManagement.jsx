@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Form, Button, Badge, Table, Pagination, Dropdown } from 'react-bootstrap';
 import { FaFilter, FaSearch, FaTicketAlt, FaExclamationTriangle, FaCheck, FaClock, FaReply } from 'react-icons/fa';
-import axios from 'axios';
 
 const TicketManagement = () => {
   const [tickets, setTickets] = useState([]);
