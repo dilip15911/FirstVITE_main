@@ -6,15 +6,12 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 axios.defaults.baseURL = API_URL;
 
 // Configure axios interceptors
-<<<<<<< Updated upstream
 export const setupAxiosInterceptors = (token) => {
-=======
-const setupAxiosInterceptors = (token) => {
+// const setupAxiosInterceptors = (token) => {
   // Clear existing interceptors
   axios.interceptors.request.clear();
   axios.interceptors.response.clear();
 
->>>>>>> Stashed changes
   // Request interceptor
   axios.interceptors.request.use(
     (config) => {
