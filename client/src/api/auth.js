@@ -7,7 +7,6 @@ axios.defaults.baseURL = API_URL;
 
 // Configure axios interceptors
 export const setupAxiosInterceptors = (token) => {
-// const setupAxiosInterceptors = (token) => {
   // Clear existing interceptors
   axios.interceptors.request.clear();
   axios.interceptors.response.clear();
@@ -39,9 +38,9 @@ export const setupAxiosInterceptors = (token) => {
 };
 
 // Token management
-const getToken = () => localStorage.getItem('token');
-const setToken = (token) => localStorage.setItem('token', token);
-const clearToken = () => {
+export const getToken = () => localStorage.getItem('token');
+export const setToken = (token) => localStorage.setItem('token', token);
+export const clearToken = () => {
   localStorage.removeItem('token');
   // Clear axios interceptors
   axios.interceptors.request.clear();

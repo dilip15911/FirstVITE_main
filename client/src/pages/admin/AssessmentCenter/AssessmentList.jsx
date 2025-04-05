@@ -1,10 +1,5 @@
-<<<<<<< Updated upstream
-import React, { useState, useEffect } from 'react';
-import { Row, Col} from 'react-bootstrap';
-=======
 import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Form, Row, Col, Table, Button, Badge } from 'react-bootstrap';
->>>>>>> Stashed changes
 import { FaEdit, FaTrash, FaEye, FaPlus, FaFilter, FaSearch, FaFileExport, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';

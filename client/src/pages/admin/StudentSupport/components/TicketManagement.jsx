@@ -1,10 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Row, Col, Form, Button, Badge, Table, Pagination, Dropdown } from 'react-bootstrap';
 import { FaFilter, FaSearch, FaTicketAlt, FaExclamationTriangle, FaCheck, FaClock, FaReply } from 'react-icons/fa';
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
 
 const TicketManagement = () => {
   const [tickets, setTickets] = useState([]);

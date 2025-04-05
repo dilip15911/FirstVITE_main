@@ -1,10 +1,6 @@
 import axios from 'axios';
 
-<<<<<<< Updated upstream
-const BASE_URL = 'http://localhost:5000/api';
-=======
 const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
->>>>>>> Stashed changes
 
 // Create axios instance with default config
 const api = axios.create({
