@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { check, body } = require('express-validator');
 const authController = require('../controllers/authController');
-const { protect } = require('../middleware/auth');
+const { protect, admin, restrictTo } = require('../middleware/auth');
 
 // Validation middleware
 const loginValidation = [
@@ -47,20 +47,31 @@ const adminLoginValidation = [
   body('password').trim().notEmpty().withMessage('Password is required')
 ];
 
-// Auth routes
+// Public routes
 router.post('/signup', signupValidation, authController.signup);
 router.post('/login', loginValidation, authController.login);
-router.post('/verify', verifyEmailValidation, authController.verifyEmail);
+router.post('/verify-email', verifyEmailValidation, authController.verifyEmail);
 router.post('/resend-otp', resendOtpValidation, authController.resendVerification);
 router.post('/admin/login', adminLoginValidation, authController.adminLogin);
 
-// Get all users
-router.get('/getAllUser', authController.getAllUser);
-
 // Protected routes (require authentication)
-router.get('/profile', protect, authController.getProfile);
-router.put('/profile', [protect, validateProfile], authController.updateProfile);
-router.get('/history', protect, authController.getUserHistory);
-router.post('/restore', protect, authController.restoreProfile);
+router.use(protect);
+
+// User routes
+router.get('/profile', authController.getProfile);
+router.put('/profile', validateProfile, authController.updateProfile);
+router.get('/history', authController.getUserHistory);
+router.post('/restore', authController.restoreProfile);
+
+// Admin routes (require admin role)
+router.use('/admin', admin);
+router.get('/admin/users', authController.getAllUser);
+router.get('/admin/users/:userId', authController.getUser);
+router.put('/admin/users/:userId', validateProfile, authController.updateUser);
+router.delete('/admin/users/:userId', authController.deleteUser);
+
+// Role-based routes
+router.get('/instructors', restrictTo('admin', 'instructor'), authController.getAllInstructors);
+router.get('/students', restrictTo('admin', 'instructor'), authController.getAllStudents);
 
 module.exports = router;

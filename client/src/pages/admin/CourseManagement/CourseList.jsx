@@ -90,30 +90,17 @@ const CourseList = () => {
             <Table striped bordered hover responsive>
                 <thead>
                     <tr>
+                        <th>Serial No</th>
                         <th>Title</th>
                         <th>Category</th>
-                        <th>Level</th>
-                        <th>Duration</th>
-                        <th>Price</th>
-                        <th>Status</th>
-                        <th>Students</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {filteredCourses.map(course => (
                         <tr key={course.id}>
+                            <td>{course.id}</td>
                             <td>{course.title}</td>
                             <td>{course.category}</td>
-                            <td>{course.level}</td>
-                            <td>{course.duration}</td>
-                            <td>${course.price}</td>
-                            <td>
-                                <Badge bg={course.status === 'active' ? 'success' : 'secondary'}>
-                                    {course.status}
-                                </Badge>
-                            </td>
-                            <td>{course.studentCount || 0}</td>
                             <td>
                                 <Button variant="info" size="sm" className="me-2" href={`/admin/courses/${course.id}`}>
                                     <FaEye />

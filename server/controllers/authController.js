@@ -477,3 +477,102 @@ exports.getAllUser = async (req, res) => {
     });
   }
 };
+
+// Get user by ID
+exports.getUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const [user] = await db.query('SELECT id, name, email, role, is_verified FROM users WHERE id = ?', [userId]);
+
+    if (!user[0]) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      user: user[0]
+    });
+  } catch (error) {
+    handleDBError(error);
+  }
+};
+
+// Update user
+exports.updateUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { name, mobile, course } = req.body;
+
+    const updates = [];
+    const values = [];
+
+    if (name) updates.push('name = ?'); values.push(name);
+    if (mobile) updates.push('mobile = ?'); values.push(mobile);
+    if (course) updates.push('course = ?'); values.push(course);
+
+    if (updates.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No fields to update'
+      });
+    }
+
+    const updateQuery = `UPDATE users SET ${updates.join(', ')} WHERE id = ?`;
+    values.push(userId);
+
+    await db.query(updateQuery, values);
+
+    const [updatedUser] = await db.query('SELECT id, name, email, role, is_verified FROM users WHERE id = ?', [userId]);
+
+    res.json({
+      success: true,
+      message: 'User updated successfully',
+      user: updatedUser[0]
+    });
+  } catch (error) {
+    handleDBError(error);
+  }
+};
+
+// Delete user
+exports.deleteUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    await db.query('DELETE FROM users WHERE id = ?', [userId]);
+    res.json({
+      success: true,
+      message: 'User deleted successfully'
+    });
+  } catch (error) {
+    handleDBError(error);
+  }
+};
+
+// Get all instructors
+exports.getAllInstructors = async (req, res) => {
+  try {
+    const [instructors] = await db.query('SELECT id, name, email, role, is_verified FROM users WHERE role IN (?, ?)', ['admin', 'instructor']);
+    res.json({
+      success: true,
+      instructors
+    });
+  } catch (error) {
+    handleDBError(error);
+  }
+};
+
+// Get all students
+exports.getAllStudents = async (req, res) => {
+  try {
+    const [students] = await db.query('SELECT id, name, email, role, is_verified FROM users WHERE role = ?', ['student']);
+    res.json({
+      success: true,
+      students
+    });
+  } catch (error) {
+    handleDBError(error);
+  }
+};

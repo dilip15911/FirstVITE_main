@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Nav, Tab } from 'react-bootstrap';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
+<<<<<<< Updated upstream
+=======
+import '../../../utils/chartConfig';
+
+>>>>>>> Stashed changes
 import { FaGraduationCap, FaBook, FaUsers, FaChartLine, FaMoneyBillWave, FaUserGraduate, FaChartBar } from 'react-icons/fa';
 import EnrollmentAnalytics from './components/EnrollmentAnalytics';
 import RevenueAnalytics from './components/RevenueAnalytics';

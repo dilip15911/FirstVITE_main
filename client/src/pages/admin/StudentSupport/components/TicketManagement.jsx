@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Form, Button, Badge, Table, Pagination, Dropdown } from 'react-bootstrap';
 import { FaFilter, FaSearch, FaTicketAlt, FaExclamationTriangle, FaCheck, FaClock, FaReply } from 'react-icons/fa';
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 
 const TicketManagement = () => {
   const [tickets, setTickets] = useState([]);
@@ -124,21 +128,11 @@ const TicketManagement = () => {
     }
   ];
 
-  useEffect(() => {
-    // In a real app, fetch tickets from API
-    // For now, use mock data
-    fetchTickets();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [tickets, searchTerm, statusFilter, priorityFilter]);
-
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     try {
       setLoading(true);
       // In a real app:
-      // const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/admin/support-tickets`);
+      // const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/admin/tickets`);
       // setTickets(response.data);
       
       // Using mock data for development
@@ -148,9 +142,9 @@ const TicketManagement = () => {
       setError('Failed to fetch tickets');
       setLoading(false);
     }
-  };
+  }, []);
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...tickets];
     
     // Apply search filter
@@ -174,7 +168,15 @@ const TicketManagement = () => {
     }
     
     setFilteredTickets(filtered);
-  };
+  }, [tickets, searchTerm, statusFilter, priorityFilter]);
+
+  useEffect(() => {
+    fetchTickets();
+  }, [fetchTickets]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
 
   const handleStatusUpdate = async (id, status) => {
     try {

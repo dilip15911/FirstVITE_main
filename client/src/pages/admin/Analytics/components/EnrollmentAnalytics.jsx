@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Form, Button } from 'react-bootstrap';
 import { Line, Bar } from 'react-chartjs-2';
-import axios from 'axios';
+
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -46,7 +46,7 @@ const EnrollmentAnalytics = () => {
 
   useEffect(() => {
     fetchEnrollmentData();
-  }, [timeFrame, dateRange]);
+  }, [timeFrame, dateRange, fetchEnrollmentData]);
 
   const fetchEnrollmentData = async () => {
     try {

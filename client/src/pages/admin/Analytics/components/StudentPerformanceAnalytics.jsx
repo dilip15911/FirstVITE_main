@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Form, Button, Table, Badge } from 'react-bootstrap';
-import { Bar, Line, Radar, Doughnut, Scatter } from 'react-chartjs-2';
-import axios from 'axios';
+import { Bar, Radar, Scatter } from 'react-chartjs-2';
 import 'react-datepicker/dist/react-datepicker.css';
 
 const StudentPerformanceAnalytics = () => {
@@ -75,7 +74,7 @@ const StudentPerformanceAnalytics = () => {
   useEffect(() => {
     fetchCourses();
     fetchPerformanceData();
-  }, [courseFilter]);
+  }, [courseFilter, fetchCourses, fetchPerformanceData]);
 
   const fetchCourses = async () => {
     try {

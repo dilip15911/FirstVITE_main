@@ -112,8 +112,7 @@ const CourseForm = () => {
 
     return (
         <Container>
-            <h2 className="mb-4">{isEditMode ? 'Edit Course' : 'Create New Course'}</h2>
-            
+            <h2>{isEditMode ? 'Edit Course' : 'Create New Course'}</h2>
             {error && <Alert variant="danger">{error}</Alert>}
             {success && <Alert variant="success">{success}</Alert>}
 
@@ -124,7 +123,7 @@ const CourseForm = () => {
                         <Row>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Course Title</Form.Label>
+                                    <Form.Label>Course Name</Form.Label>
                                     <Form.Control
                                         type="text"
                                         name="title"
@@ -154,36 +153,6 @@ const CourseForm = () => {
                             </Col>
                         </Row>
 
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Level</Form.Label>
-                                    <Form.Select
-                                        name="level"
-                                        value={course.level}
-                                        onChange={handleChange}
-                                        required
-                                    >
-                                        <option value="beginner">Beginner</option>
-                                        <option value="intermediate">Intermediate</option>
-                                        <option value="advanced">Advanced</option>
-                                    </Form.Select>
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Duration (in hours)</Form.Label>
-                                    <Form.Control
-                                        type="number"
-                                        name="duration"
-                                        value={course.duration}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-
                         <Form.Group className="mb-3">
                             <Form.Label>Description</Form.Label>
                             <Form.Control
@@ -195,6 +164,88 @@ const CourseForm = () => {
                                 required
                             />
                         </Form.Group>
+                    </Card.Body>
+                </Card>
+
+                <Card>
+                    <Card.Body>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Course Logo</Form.Label>
+                                    <Form.Control
+                                        type="file"
+                                        name="thumbnail"
+                                        onChange={handleFileChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                    </Card.Body>
+                </Card>
+                <Card>
+                    <Card.Body>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Course Overview</Form.Label>
+                                    <Form.Control
+                                        as="textarea"
+                                        rows={2}
+                                        name="courseOverview"
+                                        value={course.courseOverview}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Key Features</Form.Label>
+                                    <Form.Control
+                                        as="textarea"
+                                        rows={2}
+                                        name="keyFeatures"
+                                        value={course.keyFeatures}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                    </Card.Body>
+                </Card>
+                <Card>
+                    <Card.Body>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Course Skills</Form.Label>
+                                    <Form.Control
+                                        as="textarea"
+                                        rows={2}
+                                        name="courseSkills"
+                                        value={course.skills}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Course Benefits</Form.Label>
+                                    <Form.Control
+                                        as="textarea"
+                                        rows={2}
+                                        name="courseBenefits"
+                                        value={course.benefits}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
                     </Card.Body>
                 </Card>
 
@@ -246,6 +297,153 @@ const CourseForm = () => {
                     </Card.Body>
                 </Card>
 
+
+                <Card>
+                    <Card.Body>
+                        <Card.Header>FAQs</Card.Header>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Question</Form.Label>
+                                    <Form.Control
+                                        type="textarea"
+                                        rows={3}
+                                        name="faqs"
+                                        value={course.faqs}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Answer</Form.Label>
+                                    <Form.Control
+                                        type="textarea"
+                                        rows={3}
+                                        name="faqs"
+                                        value={course.faqs}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Question</Form.Label>
+                                    <Form.Control
+                                        type="textarea"
+                                        rows={3}
+                                        name="faqs"
+                                        value={course.faqs}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Answer</Form.Label>
+                                    <Form.Control
+                                        type="textarea"
+                                        rows={3}
+                                        name="faqs"
+                                        value={course.faqs}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Question</Form.Label>
+                                    <Form.Control
+                                        type="textarea"
+                                        rows={3}
+                                        name="faqs"
+                                        value={course.faqs}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Answer</Form.Label>
+                                    <Form.Control
+                                        type="textarea"
+                                        rows={3}
+                                        name="faqs"
+                                        value={course.faqs}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Question</Form.Label>
+                                    <Form.Control
+                                        type="textarea"
+                                        rows={3}
+                                        name="faqs"
+                                        value={course.faqs}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Answer</Form.Label>
+                                    <Form.Control
+                                        type="textarea"
+                                        rows={3}
+                                        name="faqs"
+                                        value={course.faqs}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Question</Form.Label>
+                                    <Form.Control
+                                        type="textarea"
+                                        rows={3}
+                                        name="faqs"
+                                        value={course.faqs}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Answer</Form.Label>
+                                    <Form.Control
+                                        type="textarea"
+                                        rows={3}
+                                        name="faqs"
+                                        value={course.faqs}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                    </Card.Body>
+                </Card>
+
                 <Card className="mb-4">
                     <Card.Header>Media & Materials</Card.Header>
                     <Card.Body>
@@ -269,40 +467,6 @@ const CourseForm = () => {
                                 Upload PDFs, presentations, or other course materials
                             </Form.Text>
                         </Form.Group>
-                    </Card.Body>
-                </Card>
-
-                <Card className="mb-4">
-                    <Card.Header>Publishing</Card.Header>
-                    <Card.Body>
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Price ($)</Form.Label>
-                                    <Form.Control
-                                        type="number"
-                                        name="price"
-                                        value={course.price}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Status</Form.Label>
-                                    <Form.Select
-                                        name="status"
-                                        value={course.status}
-                                        onChange={handleChange}
-                                    >
-                                        <option value="draft">Draft</option>
-                                        <option value="review">Under Review</option>
-                                        <option value="published">Published</option>
-                                    </Form.Select>
-                                </Form.Group>
-                            </Col>
-                        </Row>
                     </Card.Body>
                 </Card>
 

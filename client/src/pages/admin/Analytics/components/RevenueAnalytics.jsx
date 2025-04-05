@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Form, Button, Table } from 'react-bootstrap';
-import { Line, Bar, Pie, Doughnut } from 'react-chartjs-2';
-import axios from 'axios';
+import { Line, Bar, Pie } from 'react-chartjs-2';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
@@ -62,7 +61,7 @@ const RevenueAnalytics = () => {
 
   useEffect(() => {
     fetchRevenueData();
-  }, [timeFrame, dateRange]);
+  }, [timeFrame, dateRange, fetchRevenueData]);
 
   const fetchRevenueData = async () => {
     try {

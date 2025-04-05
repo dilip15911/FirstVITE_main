@@ -9,61 +9,61 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import './styles/adminTheme.css';
 import Home from './pages/Home';
+import Courses from './pages/Courses/Courses.jsx';
+import CourseDetails from './pages/Courses/CourseDetails.jsx';
 
 // Admin Route
-const Sidebar = React.lazy(() => import('./pages/admin/AdminSidebar/sidebar.jsx'));
-const AdminLogin = React.lazy(() => import('./pages/admin/Login/AdminLogin'));
+const AdminLogin = React.lazy(() => import('./pages/admin/Login/AdminLogin.jsx'));
 const AdminHome = React.lazy(() => import('./pages/admin/Home.jsx'));
 const AdminLayout = React.lazy(() => import('./pages/admin/AdminLayout.jsx'));
 const AdminDashboard = React.lazy(() => import('./pages/admin/Dashboard.jsx'));
-const Students = React.lazy(() => import('./pages/admin/Students'));
-const Courses = React.lazy(() => import('./pages/admin/Courses'));
-const Instructors = React.lazy(() => import('./pages/admin/Instructors'));
-const Categories = React.lazy(() => import('./pages/admin/Categories'));
-const Reports = React.lazy(() => import('./pages/admin/Reports'));
-const Settings = React.lazy(() => import('./pages/admin/Settings'));
-const CreateEmployee = React.lazy(() => import('./pages/admin/Employee/CreateEmployee'));
+const Students = React.lazy(() => import('./pages/admin/Students.jsx'));
+const CoursesAdmin = React.lazy(() => import('./pages/admin/Courses.jsx'));
+const Instructors = React.lazy(() => import('./pages/admin/Instructors.jsx'));
+const Categories = React.lazy(() => import('./pages/admin/Categories.jsx'));
+const Reports = React.lazy(() => import('./pages/admin/Reports.jsx'));
+const Settings = React.lazy(() => import('./pages/admin/Settings.jsx'));
+const CreateEmployee = React.lazy(() => import('./pages/admin/Employee/CreateEmployee.jsx'));
 const ManageEmployees = React.lazy(()=> import('./pages/admin/Employee/ManageEmployees.jsx'))
 const ViewEmployees = React.lazy(()=> import('./pages/admin/Employee/ViewEmployees.jsx'))
-const CreateJobRole = React.lazy(() => import('./pages/admin/Employee/CreateJobRole'));
-const ManageJobRoles = React.lazy(() => import('./pages/admin/Employee/ManageJobRoles'));
-const ViewJobRoles = React.lazy(() => import('./pages/admin/Employee/ViewJobRoles'));
-const GuestTeachers = React.lazy(() => import('./pages/admin/GuestTeachers'));
-const CourseList = React.lazy(() => import('./pages/admin/CourseManagement/CourseList'));
-const CourseForm = React.lazy(() => import('./pages/admin/CourseManagement/CourseForm'));
-const AssessmentList = React.lazy(() => import('./pages/admin/AssessmentCenter/AssessmentList'));
-const CreateAssessment = React.lazy(() => import('./pages/admin/AssessmentCenter/CreateAssessment'));
-const AssessmentDetails = React.lazy(() => import('./pages/admin/AssessmentCenter/AssessmentDetails'));
-const AssessmentResults = React.lazy(() => import('./pages/admin/AssessmentCenter/AssessmentResults'));
-const AnalyticsDashboard = React.lazy(() => import('./pages/admin/Analytics/AnalyticsDashboard'));
-const ContentDashboard = React.lazy(() => import('./pages/admin/ContentManagement/ContentDashboard'));
-const SupportDashboard = React.lazy(() => import('./pages/admin/StudentSupport/SupportDashboard'));
-const PaymentDashboard = React.lazy(() => import('./pages/admin/PaymentManagement/PaymentDashboard'));
-const PaymentHistory = React.lazy(() => import('./pages/admin/PaymentManagement/components/PaymentHistory'));
-const RefundManagement = React.lazy(() => import('./pages/admin/PaymentManagement/components/RefundManagement'));
-const PaymentSettings = React.lazy(() => import('./pages/admin/PaymentManagement/components/PaymentSettings'));
+const CreateJobRole = React.lazy(() => import('./pages/admin/Employee/CreateJobRole.jsx'));
+const ManageJobRoles = React.lazy(() => import('./pages/admin/Employee/ManageJobRoles.jsx'));
+const ViewJobRoles = React.lazy(() => import('./pages/admin/Employee/ViewJobRoles.jsx'));
+const GuestTeachers = React.lazy(() => import('./pages/admin/GuestTeachers.jsx'));
+const CourseList = React.lazy(() => import('./pages/admin/CourseManagement/CourseList.jsx'));
+const CourseForm = React.lazy(() => import('./pages/admin/CourseManagement/CourseForm.jsx'));
+const AssessmentList = React.lazy(() => import('./pages/admin/AssessmentCenter/AssessmentList.jsx'));
+const CreateAssessment = React.lazy(() => import('./pages/admin/AssessmentCenter/CreateAssessment.jsx'));
+const AssessmentDetails = React.lazy(() => import('./pages/admin/AssessmentCenter/AssessmentDetails.jsx'));
+const AssessmentResults = React.lazy(() => import('./pages/admin/AssessmentCenter/AssessmentResults.jsx'));
+const AnalyticsDashboard = React.lazy(() => import('./pages/admin/Analytics/AnalyticsDashboard.jsx'));
+const ContentDashboard = React.lazy(() => import('./pages/admin/ContentManagement/ContentDashboard.jsx'));
+const SupportDashboard = React.lazy(() => import('./pages/admin/StudentSupport/SupportDashboard.jsx'));
+const PaymentDashboard = React.lazy(() => import('./pages/admin/PaymentManagement/PaymentDashboard.jsx'));
+const PaymentHistory = React.lazy(() => import('./pages/admin/PaymentManagement/components/PaymentHistory.jsx'));
+const RefundManagement = React.lazy(() => import('./pages/admin/PaymentManagement/components/RefundManagement.jsx'));
+const PaymentSettings = React.lazy(() => import('./pages/admin/PaymentManagement/components/PaymentSettings.jsx'));
 
 // Lazy load components
-const Login = React.lazy(() => import('./pages/auth/Login'));
-const Signup = React.lazy(() => import('./pages/auth/Signup'));
-const VerifyOTP = React.lazy(() => import('./pages/auth/VerifyOTP'));
-const Profile = React.lazy(() => import('./pages/user/Profile'));
-const Dashboard = React.lazy(() => import('./pages/Dashboard/Dashboard'));
+const Login = React.lazy(() => import('./pages/auth/Login.jsx'));
+const Signup = React.lazy(() => import('./pages/auth/Signup.jsx'));
+const VerifyOTP = React.lazy(() => import('./pages/auth/VerifyOTP.jsx'));
+const Profile = React.lazy(() => import('./pages/user/Profile.jsx'));
+const Dashboard = React.lazy(() => import('./pages/Dashboard/Dashboard.jsx'));
 const SendEmail = React.lazy(() => import('./pages/SendEmail.jsx'));
-const Corporate = React.lazy(() => import('./pages/Corporate/Corporate'));
-const Blog = React.lazy(() => import('./pages/blog/blog'));
-const Tutorials = React.lazy(() => import('./pages/Tutorials/Tutorials'));
-const Documentation = React.lazy(() => import('./pages/Documentation/Documentation'));
-const BecomeATeacher = React.lazy(() => import('./pages/BecomeATeacher/BecomeATeacher'));
-const Contact = React.lazy(() => import('./pages/Contact/Contact'));
-const HireFromUs = React.lazy(() => import('./pages/HireFromUs/HireFromUs'));
+const Corporate = React.lazy(() => import('./pages/Corporate/Corporate.jsx'));
+const Blog = React.lazy(() => import('./pages/blog/blog.jsx'));
+const Tutorials = React.lazy(() => import('./pages/Tutorials/Tutorials.jsx'));
+const Documentation = React.lazy(() => import('./pages/Documentation/Documentation.jsx'));
+const BecomeATeacher = React.lazy(() => import('./pages/BecomeATeacher/BecomeATeacher.jsx'));
+const Contact = React.lazy(() => import('./pages/Contact/Contact.jsx'));
+const HireFromUs = React.lazy(() => import('./pages/HireFromUs/HireFromUs.jsx'));
 const GetStarted = React.lazy(() => import('./pages/HireFromUs/GetStarted.jsx'));
 const OurStudent = React.lazy(() => import('./pages/HireFromUs/OurStudents.jsx'));
-const Review = React.lazy(() => import('./pages/Review/Review'));
-const CoursesPage = React.lazy(() => import('./pages/Courses/Courses'));
-const GenerativeAI = React.lazy(() => import('./pages/GenerativeAI/GenerativeAipage'));
-const GenerativeAIcard = React.lazy(() => import('./pages/GenerativeAI/GenerativeAIcard'));
-const GenerativeAipagedetails = React.lazy(() => import('./pages/GenerativeAI/GenerativeAipagedetails'));
+const Review = React.lazy(() => import('./pages/Review/Review.jsx'));
+const GenerativeAI = React.lazy(() => import('./pages/GenerativeAI/GenerativeAipage.jsx'));
+const GenerativeAIcard = React.lazy(() => import('./pages/GenerativeAI/GenerativeAIcard.jsx'));
+const GenerativeAipagedetails = React.lazy(() => import('./pages/GenerativeAI/GenerativeAipagedetails.jsx'));
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -85,7 +85,8 @@ const router = createBrowserRouter(
       <Route path='/get-started' element={<GetStarted />} />
       <Route path='/our-student' element={<OurStudent />} />
       <Route path="/review" element={<Review />} />
-      <Route path="/courses" element={<CoursesPage />} />
+      <Route path="/courses" element={<Courses />} />
+      <Route path="/courses/:courseId" element={<CourseDetails />} />
       <Route path="/generative-ai" element={<GenerativeAI />} />
       <Route path="/generative-ai-card" element={<GenerativeAIcard />} />
       <Route path="/generative-ai-details" element={<GenerativeAipagedetails />} />
@@ -97,7 +98,7 @@ const router = createBrowserRouter(
         <Route path="home" element={<AdminHome />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="students" element={<Students />} />
-        <Route path="courses" element={<Courses />} />
+        <Route path="courses" element={<CoursesAdmin />} />
         <Route path="instructors" element={<Instructors />} />
         <Route path="categories" element={<Categories />} />
         <Route path="reports" element={<Reports />} />

@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+=======
+import React, { useState, useEffect } from 'react';
+>>>>>>> Stashed changes
 import { Card, Row, Col, Form, Button, Badge, Table, Nav, Modal } from 'react-bootstrap';
 import { FaBook, FaVideo, FaFileAlt, FaLink, FaPlus, FaEdit, FaTrash, FaSearch, FaDownload, FaEye, FaStar } from 'react-icons/fa';
 
@@ -139,7 +143,11 @@ const ResourceLibrary = () => {
       setError('Failed to fetch resources');
       setLoading(false);
     }
+<<<<<<< Updated upstream
   }, [mockResources]);
+=======
+  }, []);
+>>>>>>> Stashed changes
 
   const applyFilters = useCallback(() => {
     let filtered = [...resources];
@@ -166,6 +174,7 @@ const ResourceLibrary = () => {
   }, [resources, searchTerm, typeFilter, activeCategory]);
 
   useEffect(() => {
+<<<<<<< Updated upstream
     // In a real app, fetch resources from API
     // For now, use mock data
     fetchResources();
@@ -174,6 +183,14 @@ const ResourceLibrary = () => {
   useEffect(() => {
     applyFilters();
   }, [resources, searchTerm, typeFilter, activeCategory, applyFilters]);
+=======
+    fetchResources();
+  }, [fetchResources]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
+>>>>>>> Stashed changes
 
   const handleAddResource = () => {
     // Reset form data

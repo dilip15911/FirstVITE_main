@@ -140,17 +140,7 @@ const QAForum = () => {
 
   const courses = [...new Set(mockThreads.map(thread => thread.course))];
 
-  useEffect(() => {
-    // In a real app, fetch threads from API
-    // For now, use mock data
-    fetchThreads();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [threads, searchTerm, statusFilter, courseFilter]);
-
-  const fetchThreads = async () => {
+  const fetchThreads = useCallback(async () => {
     try {
       setLoading(true);
       // In a real app:
@@ -164,9 +154,9 @@ const QAForum = () => {
       setError('Failed to fetch Q&A threads');
       setLoading(false);
     }
-  };
+  }, []);
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...threads];
     
     // Apply search filter
@@ -189,7 +179,17 @@ const QAForum = () => {
     }
     
     setFilteredThreads(filtered);
-  };
+  }, [threads, searchTerm, statusFilter, courseFilter]);
+
+  useEffect(() => {
+    fetchThreads();
+  }, [fetchThreads]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
+
+
 
   const handleStatusUpdate = async (id, status) => {
     try {

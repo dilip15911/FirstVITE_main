@@ -11,9 +11,8 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = authAPI.getToken();
     if (token) {
-      authAPI.setupAxiosInterceptors(token);
       loadUser();
     } else {
       setLoading(false);
@@ -28,7 +27,7 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Error loading user:', error);
-      localStorage.removeItem('token');
+      authAPI.clearToken();
       setUser(null);
     } finally {
       setLoading(false);
@@ -40,6 +39,12 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.signup(name, email, password);
       if (response.success) {
         toast.success(response.message);
+        // Note: Typically signup doesn't return a token - user needs to verify email first
+        // Only set token if it's returned from the API
+        if (response.token) {
+          authAPI.setToken(response.token);
+          setUser(response.user);
+        }
         return {
           success: true,
           userId: response.userId,
@@ -62,9 +67,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authAPI.login(email, password);
       if (response.success) {
-        const token = response.token;
-        localStorage.setItem('token', token);
-        authAPI.setupAxiosInterceptors(token);
+        authAPI.setToken(response.token);
         setUser(response.user);
         return { success: true, message: response.message };
       }
@@ -77,9 +80,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    authAPI.clearToken();
     setUser(null);
-    authAPI.setupAxiosInterceptors(null);
   };
 
   const verifyEmail = async (userId, otp) => {

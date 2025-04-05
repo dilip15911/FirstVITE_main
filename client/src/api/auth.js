@@ -6,7 +6,15 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 axios.defaults.baseURL = API_URL;
 
 // Configure axios interceptors
+<<<<<<< Updated upstream
 export const setupAxiosInterceptors = (token) => {
+=======
+const setupAxiosInterceptors = (token) => {
+  // Clear existing interceptors
+  axios.interceptors.request.clear();
+  axios.interceptors.response.clear();
+
+>>>>>>> Stashed changes
   // Request interceptor
   axios.interceptors.request.use(
     (config) => {
@@ -25,7 +33,7 @@ export const setupAxiosInterceptors = (token) => {
     (response) => response,
     (error) => {
       if (error.response?.status === 401) {
-        localStorage.removeItem('token');
+        clearToken();
         window.location.href = '/login';
       }
       return Promise.reject(error);
@@ -33,15 +41,27 @@ export const setupAxiosInterceptors = (token) => {
   );
 };
 
+// Token management
+const getToken = () => localStorage.getItem('token');
+const setToken = (token) => localStorage.setItem('token', token);
+const clearToken = () => {
+  localStorage.removeItem('token');
+  // Clear axios interceptors
+  axios.interceptors.request.clear();
+  axios.interceptors.response.clear();
+};
+
 // Auth routes
 export const login = async (email, password) => {
   try {
     const response = await axios.post('/auth/login', { email, password });
     if (response.data.token) {
+      setToken(response.data.token);
       setupAxiosInterceptors(response.data.token);
     }
     return response.data;
   } catch (error) {
+    clearToken();
     throw error.response?.data || { message: 'An error occurred during login' };
   }
 };
@@ -51,25 +71,28 @@ export const signup = async (name, email, password) => {
     const response = await axios.post('/auth/signup', { name, email, password });
     return response.data;
   } catch (error) {
+    clearToken();
     throw error.response?.data || { message: 'An error occurred during signup' };
   }
 };
 
 export const verifyEmail = async (userId, otp) => {
   try {
-    const response = await axios.post('/auth/verify', { userId, otp });
+    const response = await axios.post(`/auth/verify-email/${userId}`, { otp });
     return response.data;
   } catch (error) {
-    throw error.response?.data || { message: 'An error occurred during verification' };
+    clearToken();
+    throw error.response?.data || { message: 'Email verification failed' };
   }
 };
 
 export const resendVerification = async (userId) => {
   try {
-    const response = await axios.post('/auth/resend-otp', { userId });
+    const response = await axios.post(`/auth/resend-verification/${userId}`);
     return response.data;
   } catch (error) {
-    throw error.response?.data || { message: 'Failed to resend verification code' };
+    clearToken();
+    throw error.response?.data || { message: 'Failed to resend verification' };
   }
 };
 
@@ -78,7 +101,8 @@ export const getProfile = async () => {
     const response = await axios.get('/auth/profile');
     return response.data;
   } catch (error) {
-    throw error.response?.data || { message: 'Failed to fetch profile' };
+    clearToken();
+    throw error.response?.data || { message: 'Failed to get profile' };
   }
 };
 
@@ -87,6 +111,7 @@ export const updateProfile = async (data) => {
     const response = await axios.put('/auth/profile', data);
     return response.data;
   } catch (error) {
+    clearToken();
     throw error.response?.data || { message: 'Failed to update profile' };
   }
 };
@@ -96,15 +121,17 @@ export const getUserHistory = async () => {
     const response = await axios.get('/auth/history');
     return response.data;
   } catch (error) {
-    throw error.response?.data || { message: 'Failed to fetch history' };
+    clearToken();
+    throw error.response?.data || { message: 'Failed to get user history' };
   }
 };
 
 export const restoreProfile = async (historyId) => {
   try {
-    const response = await axios.post(`/auth/history/${historyId}/restore`);
+    const response = await axios.post(`/auth/restore/${historyId}`);
     return response.data;
   } catch (error) {
+    clearToken();
     throw error.response?.data || { message: 'Failed to restore profile' };
   }
 };
@@ -118,5 +145,7 @@ export default {
   updateProfile,
   getUserHistory,
   restoreProfile,
-  setupAxiosInterceptors
+  getToken,
+  setToken,
+  clearToken
 };

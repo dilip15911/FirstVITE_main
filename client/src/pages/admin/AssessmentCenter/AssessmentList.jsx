@@ -1,7 +1,13 @@
+<<<<<<< Updated upstream
 import React, { useState, useEffect } from 'react';
 import { Row, Col} from 'react-bootstrap';
+=======
+import React, { useState, useEffect, useCallback } from 'react';
+import { Container, Form, Row, Col, Table, Button, Badge } from 'react-bootstrap';
+>>>>>>> Stashed changes
 import { FaEdit, FaTrash, FaEye, FaPlus, FaFilter, FaSearch, FaFileExport, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import '../../../styles/adminTheme.css';
 
 const AssessmentList = () => {
@@ -15,124 +21,162 @@ const AssessmentList = () => {
     const [sortDirection, setSortDirection] = useState('desc');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
+    const [filteredAssessments, setFilteredAssessments] = useState([]);
 
-    useEffect(() => {
-        fetchAssessments();
-    }, []);
+    const mockAssessments = [
+        {
+            id: '1',
+            title: 'JavaScript Fundamentals Quiz',
+            type: 'quiz',
+            status: 'active',
+            courseName: 'JavaScript Basics',
+            totalQuestions: 20,
+            passingScore: 70,
+            duration: 30,
+            createdAt: '2025-03-15',
+            submissions: 45
+        },
+        {
+            id: '2',
+            title: 'React Component Development',
+            type: 'coding',
+            status: 'active',
+            courseName: 'React Fundamentals',
+            totalQuestions: 5,
+            passingScore: 80,
+            duration: 120,
+            createdAt: '2025-03-18',
+            submissions: 32
+        },
+        {
+            id: '3',
+            title: 'Database Design Project',
+            type: 'project',
+            status: 'active',
+            courseName: 'Database Systems',
+            totalQuestions: 1,
+            passingScore: 60,
+            duration: 1440,
+            createdAt: '2025-03-20',
+            submissions: 28
+        },
+        {
+            id: '4',
+            title: 'Python Data Structures',
+            type: 'quiz',
+            status: 'inactive',
+            courseName: 'Python Programming',
+            totalQuestions: 15,
+            passingScore: 65,
+            duration: 45,
+            createdAt: '2025-03-21',
+            submissions: 0
+        },
+        {
+            id: '5',
+            title: 'Full Stack Final Exam',
+            type: 'exam',
+            status: 'scheduled',
+            courseName: 'Full Stack Development',
+            totalQuestions: 30,
+            passingScore: 75,
+            duration: 180,
+            createdAt: '2025-03-22',
+            submissions: 0
+        },
+        {
+            id: '6',
+            title: 'API Integration Challenge',
+            type: 'coding',
+            status: 'active',
+            courseName: 'Backend Development',
+            totalQuestions: 3,
+            passingScore: 70,
+            duration: 90,
+            createdAt: '2025-03-23',
+            submissions: 18
+        },
+        {
+            id: '7',
+            title: 'UI/UX Design Principles',
+            type: 'quiz',
+            status: 'active',
+            courseName: 'Frontend Design',
+            totalQuestions: 25,
+            passingScore: 60,
+            duration: 40,
+            createdAt: '2025-03-24',
+            submissions: 22
+        },
+        {
+            id: '8',
+            title: 'Mobile App Development Project',
+            type: 'project',
+            status: 'active',
+            courseName: 'Mobile Development',
+            totalQuestions: 1,
+            passingScore: 70,
+            duration: 2880,
+            createdAt: '2025-03-25',
+            submissions: 15
+        }
+    ];
 
-    const fetchAssessments = async () => {
+    const fetchAssessments = useCallback(async () => {
         try {
             setLoading(true);
-            // In production, use the actual API call
+            // In a real app:
             // const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/admin/assessments`);
+            // setAssessments(response.data);
             
-            // Mock data for development
-            const mockAssessments = [
-                {
-                    id: '1',
-                    title: 'JavaScript Fundamentals Quiz',
-                    type: 'quiz',
-                    status: 'active',
-                    courseName: 'JavaScript Basics',
-                    totalQuestions: 20,
-                    passingScore: 70,
-                    duration: 30,
-                    createdAt: '2025-03-15',
-                    submissions: 45
-                },
-                {
-                    id: '2',
-                    title: 'React Component Development',
-                    type: 'coding',
-                    status: 'active',
-                    courseName: 'React Fundamentals',
-                    totalQuestions: 5,
-                    passingScore: 80,
-                    duration: 120,
-                    createdAt: '2025-03-18',
-                    submissions: 32
-                },
-                {
-                    id: '3',
-                    title: 'Database Design Project',
-                    type: 'project',
-                    status: 'active',
-                    courseName: 'Database Systems',
-                    totalQuestions: 1,
-                    passingScore: 60,
-                    duration: 1440,
-                    createdAt: '2025-03-20',
-                    submissions: 28
-                },
-                {
-                    id: '4',
-                    title: 'Python Data Structures',
-                    type: 'quiz',
-                    status: 'inactive',
-                    courseName: 'Python Programming',
-                    totalQuestions: 15,
-                    passingScore: 65,
-                    duration: 45,
-                    createdAt: '2025-03-21',
-                    submissions: 0
-                },
-                {
-                    id: '5',
-                    title: 'Full Stack Final Exam',
-                    type: 'exam',
-                    status: 'scheduled',
-                    courseName: 'Full Stack Development',
-                    totalQuestions: 30,
-                    passingScore: 75,
-                    duration: 180,
-                    createdAt: '2025-03-22',
-                    submissions: 0
-                },
-                {
-                    id: '6',
-                    title: 'API Integration Challenge',
-                    type: 'coding',
-                    status: 'active',
-                    courseName: 'Backend Development',
-                    totalQuestions: 3,
-                    passingScore: 70,
-                    duration: 90,
-                    createdAt: '2025-03-23',
-                    submissions: 18
-                },
-                {
-                    id: '7',
-                    title: 'UI/UX Design Principles',
-                    type: 'quiz',
-                    status: 'active',
-                    courseName: 'Frontend Design',
-                    totalQuestions: 25,
-                    passingScore: 60,
-                    duration: 40,
-                    createdAt: '2025-03-24',
-                    submissions: 22
-                },
-                {
-                    id: '8',
-                    title: 'Mobile App Development Project',
-                    type: 'project',
-                    status: 'active',
-                    courseName: 'Mobile Development',
-                    totalQuestions: 1,
-                    passingScore: 70,
-                    duration: 2880,
-                    createdAt: '2025-03-25',
-                    submissions: 15
-                }
-            ];
-            
+            // Using mock data for development
             setAssessments(mockAssessments);
             setLoading(false);
         } catch (err) {
             setError('Failed to fetch assessments');
             setLoading(false);
         }
-    };
+    }, []);
+
+    const filterAndSortAssessments = useCallback(() => {
+        let filtered = [...assessments];
+
+        // Apply type filter
+        if (filterType !== 'all') {
+            filtered = filtered.filter(assessment => assessment.type === filterType);
+        }
+
+        // Apply search filter
+        if (searchTerm) {
+            filtered = filtered.filter(assessment =>
+                assessment.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                assessment.courseName.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+
+        // Apply sorting
+        filtered.sort((a, b) => {
+            if (sortField === 'createdAt') {
+                return sortDirection === 'asc' ? 
+                    new Date(a.createdAt) - new Date(b.createdAt) :
+                    new Date(b.createdAt) - new Date(a.createdAt);
+            }
+            
+            // Handle numeric fields
+            if (['totalQuestions', 'duration', 'submissions', 'passingScore'].includes(sortField)) {
+                return sortDirection === 'asc' ? 
+                    a[sortField] - b[sortField] :
+                    b[sortField] - a[sortField];
+            }
+            
+            // Handle string fields
+            return sortDirection === 'asc' ?
+                String(a[sortField]).localeCompare(String(b[sortField])) :
+                String(b[sortField]).localeCompare(String(a[sortField]));
+        });
+
+        return filtered;
+    }, [assessments, filterType, searchTerm, sortField, sortDirection]);
 
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this assessment?')) {
@@ -141,7 +185,8 @@ const AssessmentList = () => {
                 // await axios.delete(`${process.env.REACT_APP_API_URL}/api/admin/assessments/${id}`);
                 
                 // For development, filter out the deleted assessment
-                setAssessments(assessments.filter(assessment => assessment.id !== id));
+                const updatedAssessments = assessments.filter(assessment => assessment.id !== id);
+                setAssessments(updatedAssessments);
             } catch (err) {
                 setError('Failed to delete assessment');
             }
@@ -149,7 +194,7 @@ const AssessmentList = () => {
     };
 
     const handleSort = (field) => {
-        if (sortField === field) {
+        if (field === sortField) {
             setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
         } else {
             setSortField(field);
@@ -158,36 +203,9 @@ const AssessmentList = () => {
     };
 
     const getSortIcon = (field) => {
-        if (sortField !== field) return <FaSort className="ms-1 text-muted" size={12} />;
-        return sortDirection === 'asc' ? 
-            <FaSortUp className="ms-1 text-primary" size={12} /> : 
-            <FaSortDown className="ms-1 text-primary" size={12} />;
+        if (field !== sortField) return <FaSort />;
+        return sortDirection === 'asc' ? <FaSortUp /> : <FaSortDown />;
     };
-
-    // Filter assessments based on search term and filter type
-    const filteredAssessments = assessments.filter(assessment => {
-        const matchesSearch = assessment.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                             assessment.courseName.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesType = filterType === 'all' || assessment.type === filterType;
-        return matchesSearch && matchesType;
-    });
-
-    // Sort assessments
-    const sortedAssessments = [...filteredAssessments].sort((a, b) => {
-        let comparison = 0;
-        if (a[sortField] > b[sortField]) {
-            comparison = 1;
-        } else if (a[sortField] < b[sortField]) {
-            comparison = -1;
-        }
-        return sortDirection === 'desc' ? comparison * -1 : comparison;
-    });
-
-    // Pagination
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = sortedAssessments.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(sortedAssessments.length / itemsPerPage);
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -209,6 +227,20 @@ const AssessmentList = () => {
             default: return 'admin-badge-light';
         }
     };
+
+    // Update filtered assessments when dependencies change
+    useEffect(() => {
+        const filtered = filterAndSortAssessments();
+        setFilteredAssessments(filtered);
+        // Reset to first page when filters change
+        setCurrentPage(1);
+    }, [filterAndSortAssessments]);
+
+    // Calculate pagination values
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredAssessments.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredAssessments.length / itemsPerPage);
 
     if (loading) {
         return (
@@ -291,7 +323,7 @@ const AssessmentList = () => {
                     <div className="d-flex justify-content-between align-items-center">
                         <div>
                             <span className="text-muted">
-                                Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, sortedAssessments.length)} of {sortedAssessments.length} assessments
+                                Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredAssessments.length)} of {filteredAssessments.length} assessments
                             </span>
                         </div>
                         <button className="admin-btn admin-btn-outline">
@@ -303,7 +335,7 @@ const AssessmentList = () => {
 
             <div className="admin-card">
                 <div className="table-responsive">
-                    <table className="admin-table">
+                    <Table striped bordered hover>
                         <thead>
                             <tr>
                                 <th style={{ cursor: 'pointer' }} onClick={() => handleSort('title')}>
@@ -398,7 +430,7 @@ const AssessmentList = () => {
                                 </tr>
                             )}
                         </tbody>
-                    </table>
+                    </Table>
                 </div>
                 
                 {totalPages > 1 && (
