@@ -24,7 +24,7 @@ This is a full-stack application using React for the frontend, Express.js for th
    npm run dev
    ```
 
-The frontend will run on http://localhost:3000 and the backend on http://localhost:3001.
+The frontend will run on http://localhost:3000 and the backend on http://localhost:5000.
 
 ## Project Structure
 

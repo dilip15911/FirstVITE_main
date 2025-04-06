@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, Row, Col, Form, Button } from 'react-bootstrap';
 import { Line, Bar } from 'react-chartjs-2';
 
@@ -23,7 +23,7 @@ const EnrollmentAnalytics = () => {
   const [viewType, setViewType] = useState('line');
 
   // Mock data for development
-  const mockEnrollmentData = {
+  const mockEnrollmentData = useMemo(() => ({
     daily: Array.from({ length: 30 }, (_, i) => ({
       date: new Date(new Date().setDate(new Date().getDate() - 29 + i)).toISOString().split('T')[0],
       count: Math.floor(Math.random() * 20) + 5
@@ -42,13 +42,9 @@ const EnrollmentAnalytics = () => {
       year: 2021 + i,
       count: Math.floor(Math.random() * 1000) + 200
     }))
-  };
+  }), []);
 
-  useEffect(() => {
-    fetchEnrollmentData();
-  }, [timeFrame, dateRange, fetchEnrollmentData]);
-
-  const fetchEnrollmentData = async () => {
+  const fetchEnrollmentData = useCallback(async () => {
     try {
       setLoading(true);
       // In a real app:
@@ -66,7 +62,11 @@ const EnrollmentAnalytics = () => {
       setError('Failed to fetch enrollment data');
       setLoading(false);
     }
-  };
+  }, [mockEnrollmentData]);
+
+  useEffect(() => {
+    fetchEnrollmentData();
+  }, [fetchEnrollmentData]);
 
   const getChartData = () => {
     let labels = [];

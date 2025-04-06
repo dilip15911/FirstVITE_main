@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
-import axios from 'axios';
+import { api } from '../../../utils/api';
 import './AdminLogin.css';
 
 const AdminLogin = () => {
@@ -47,13 +47,34 @@ const AdminLogin = () => {
         setLoading(true);
         
         try {
-            const response = await axios.post(`${process.env.REACT_APP_API_URL}/admin/login`, {
+            console.log('Attempting admin login with:', { username });
+            
+            // Use the correct endpoint based on the API structure
+            const response = await api.post('/auth/admin/login', {
                 username,
                 password
             });
 
-            localStorage.setItem("token", response.data.token);
-            window.location.href = "/admin";
+            console.log('Login response:', response.data);
+            
+            if (response.data && response.data.token) {
+                // Store the token with Bearer prefix if it doesn't have it
+                const token = response.data.token;
+                const tokenToStore = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+                
+                console.log('Storing token in localStorage');
+                localStorage.setItem("token", tokenToStore);
+                
+                // Also store user info if available
+                if (response.data.user) {
+                    localStorage.setItem("user", JSON.stringify(response.data.user));
+                }
+                
+                // Redirect to admin dashboard
+                window.location.href = "/admin/dashboard";
+            } else {
+                throw new Error('No token received from server');
+            }
         } catch (err) {
             console.error('Login error:', err.response?.data);
             setError(err.response?.data?.error || "Login failed");

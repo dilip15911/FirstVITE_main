@@ -1,3 +1,6 @@
+/* Import toast styles */
+@import './styles/toast.css';
+
 /* Add any global styles here */
 * {
   margin: 0;

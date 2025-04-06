@@ -34,7 +34,7 @@ const CourseDetails = () => {
         } finally {
             setLoading(false);
         }
-    }, [courseId, api]);
+    }, [courseId]);
 
     useEffect(() => {
         fetchCourseDetails();

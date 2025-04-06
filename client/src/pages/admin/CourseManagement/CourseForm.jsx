@@ -1,47 +1,89 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Form, Button, Card, Row, Col, Alert } from 'react-bootstrap';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Container, Form, Button, Alert } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
-import { Editor } from '@tinymce/tinymce-react';
+import api from '../../../utils/api';
+import { toast } from 'react-toastify';
 
 const CourseForm = () => {
     const navigate = useNavigate();
     const { id } = useParams();
-    const isEditMode = !!id;
+    const courseId = id || null; // Store courseId in a variable for use
+    const isEditMode = !!courseId;
 
     const [course, setCourse] = useState({
         title: '',
         description: '',
-        category: '',
-        level: 'beginner',
-        duration: '',
-        price: '',
-        prerequisites: '',
-        learningObjectives: '',
-        curriculum: '',
-        status: 'draft',
-        thumbnail: null,
-        materials: []
+        category_id: '1', // Default to first category
+        category_name: '',
+        status: 'draft'
     });
 
+    const [categories, setCategories] = useState([]);
+    const [loadingCategories, setLoadingCategories] = useState(true);
     const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(null);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (isEditMode) {
-            fetchCourse();
-        }
-    }, [id]);
-
-    const fetchCourse = async () => {
-        try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/admin/courses/${id}`);
-            setCourse(response.data);
-        } catch (err) {
-            setError('Failed to fetch course details');
-        }
-    };
+        // Fetch categories when component mounts
+        const fetchCategories = async () => {
+            try {
+                const response = await api.getCourses();
+                if (response.success && response.data) {
+                    const categoriesData = response.data.categories || [];
+                    if (categoriesData.length > 0) {
+                        setCategories(categoriesData);
+                        // Set default category to first one
+                        setCourse(prev => ({
+                            ...prev,
+                            category_id: categoriesData[0].id.toString(),
+                            category_name: categoriesData[0].name
+                        }));
+                    }
+                } else {
+                    // Set default categories if fetch fails
+                    const defaultCategories = [
+                        { id: 1, name: 'Web Development', slug: 'web-development' },
+                        { id: 2, name: 'Mobile Development', slug: 'mobile-development' },
+                        { id: 3, name: 'Data Science', slug: 'data-science' },
+                        { id: 4, name: 'Design', slug: 'design' },
+                        { id: 5, name: 'Business', slug: 'business' },
+                        { id: 6, name: 'Marketing', slug: 'marketing' },
+                        { id: 7, name: 'Personal Development', slug: 'personal-development' }
+                    ];
+                    setCategories(defaultCategories);
+                    // Set first default category
+                    setCourse(prev => ({
+                        ...prev,
+                        category_id: defaultCategories[0].id.toString(),
+                        category_name: defaultCategories[0].name
+                    }));
+                }
+            } catch (error) {
+                console.error('Failed to fetch categories:', error);
+                toast.error('Failed to load categories from server. Using default categories.');
+                // Set default categories if fetch fails
+                const defaultCategories = [
+                    { id: 1, name: 'Web Development', slug: 'web-development' },
+                    { id: 2, name: 'Mobile Development', slug: 'mobile-development' },
+                    { id: 3, name: 'Data Science', slug: 'data-science' },
+                    { id: 4, name: 'Design', slug: 'design' },
+                    { id: 5, name: 'Business', slug: 'business' },
+                    { id: 6, name: 'Marketing', slug: 'marketing' },
+                    { id: 7, name: 'Personal Development', slug: 'personal-development' }
+                ];
+                setCategories(defaultCategories);
+                // Set first default category
+                setCourse(prev => ({
+                    ...prev,
+                    category_id: defaultCategories[0].id.toString(),
+                    category_name: defaultCategories[0].name
+                }));
+            } finally {
+                setLoadingCategories(false);
+            }
+        };
+        fetchCategories();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -51,11 +93,91 @@ const CourseForm = () => {
         }));
     };
 
-    const handleEditorChange = (content, editor) => {
-        setCourse(prev => ({
-            ...prev,
-            curriculum: content
-        }));
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+        
+        try {
+            // Validate required fields
+            if (!course.title.trim()) {
+                setError('Please enter a course title');
+                return;
+            }
+            if (!course.category_id || !categories.some(cat => cat.id.toString() === course.category_id)) {
+                setError('Please select a valid category from the dropdown');
+                return;
+            }
+            if (!course.description.trim()) {
+                setError('Please enter a course description');
+                return;
+            }
+
+            // Create FormData
+            const formData = new FormData();
+            formData.append('title', course.title);
+            formData.append('description', course.description);
+            formData.append('category_id', parseInt(course.category_id)); // Convert to number
+            
+            if (course.thumbnail) {
+                formData.append('thumbnail', course.thumbnail);
+            }
+
+            console.log('Form data being sent:', {
+                title: formData.get('title'),
+                category_id: formData.get('category_id'),
+                description: formData.get('description'),
+                hasThumbnail: formData.get('thumbnail') ? 'Yes' : 'No'
+            });
+
+            // Check if we have a valid token
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setError('Not authenticated. Please log in again.');
+                toast.error('Not authenticated. Please log in again.');
+                return;
+            }
+
+            try {
+                const response = await api.createCourse(formData);
+                
+                if (response.success) {
+                    toast.success('Course created successfully!');
+                    navigate('/admin/dashboard');
+                } else {
+                    setError(response.message || 'Failed to create course. Please try again.');
+                    toast.error(response.message || 'Failed to create course');
+                }
+            } catch (apiError) {
+                console.error('Course creation error:', {
+                    message: apiError.message,
+                    response: apiError.response?.data,
+                    status: apiError.response?.status,
+                    config: apiError.config
+                });
+                
+                if (apiError.response?.status === 401) {
+                    setError('Authentication required. Please log in again.');
+                    toast.error('Session expired. Please log in again.');
+                    // Clear token and redirect to login
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    navigate('/login');
+                } else if (apiError.response?.status === 400) {
+                    setError(apiError.response.data?.message || 'Invalid data provided. Please check your input and try again.');
+                    toast.error(apiError.response.data?.message || 'Invalid data provided');
+                } else {
+                    setError('Server error while creating course. Please try again later.');
+                    toast.error('Server error encountered');
+                }
+            }
+        } catch (error) {
+            console.error('Unexpected error:', error);
+            setError('An unexpected error occurred. Please try again.');
+            toast.error('An unexpected error occurred');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleFileChange = (e) => {
@@ -65,419 +187,81 @@ const CourseForm = () => {
         }));
     };
 
-    const handleMaterialUpload = (e) => {
-        const files = Array.from(e.target.files);
-        setCourse(prev => ({
-            ...prev,
-            materials: [...prev.materials, ...files]
-        }));
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
-
-        try {
-            const formData = new FormData();
-            Object.keys(course).forEach(key => {
-                if (key === 'materials') {
-                    course.materials.forEach(file => {
-                        formData.append('materials', file);
-                    });
-                } else if (key === 'thumbnail' && course[key]) {
-                    formData.append('thumbnail', course[key]);
-                } else {
-                    formData.append(key, course[key]);
-                }
-            });
-
-            if (isEditMode) {
-                await axios.put(`${process.env.REACT_APP_API_URL}/api/admin/courses/${id}`, formData);
-                setSuccess('Course updated successfully');
-            } else {
-                await axios.post(`${process.env.REACT_APP_API_URL}/api/admin/courses`, formData);
-                setSuccess('Course created successfully');
-            }
-
-            setTimeout(() => {
-                navigate('/admin/courses');
-            }, 2000);
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to save course');
-        } finally {
-            setLoading(false);
-        }
-    };
-
     return (
         <Container>
             <h2>{isEditMode ? 'Edit Course' : 'Create New Course'}</h2>
             {error && <Alert variant="danger">{error}</Alert>}
-            {success && <Alert variant="success">{success}</Alert>}
-
+            
             <Form onSubmit={handleSubmit}>
-                <Card className="mb-4">
-                    <Card.Header>Basic Information</Card.Header>
-                    <Card.Body>
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Course Name</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        name="title"
-                                        value={course.title}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Category</Form.Label>
-                                    <Form.Select
-                                        name="category"
-                                        value={course.category}
-                                        onChange={handleChange}
-                                        required
-                                    >
-                                        <option value="">Select Category</option>
-                                        <option value="programming">Programming</option>
-                                        <option value="web-development">Web Development</option>
-                                        <option value="data-science">Data Science</option>
-                                        <option value="devops">DevOps</option>
-                                        <option value="mobile-dev">Mobile Development</option>
-                                    </Form.Select>
-                                </Form.Group>
-                            </Col>
-                        </Row>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Description</Form.Label>
-                            <Form.Control
-                                as="textarea"
-                                rows={3}
-                                name="description"
-                                value={course.description}
-                                onChange={handleChange}
-                                required
+                <Form.Group controlId="title">
+                    <Form.Label>Title *</Form.Label>
+                    <Form.Control
+                        type="text"
+                        name="title"
+                        value={course.title}
+                        onChange={handleChange}
+                        required
+                        placeholder="Enter course title"
+                    />
+                </Form.Group>
+                <Form.Group controlId="category">
+                    <Form.Label>Category *</Form.Label>
+                    <Form.Select 
+                        name="category_id" 
+                        value={course.category_id} 
+                        onChange={handleChange} 
+                        required
+                        disabled={loadingCategories}
+                    >
+                        <option value="">Select Category</option>
+                        {categories.map(category => (
+                            <option 
+                                key={category.id} 
+                                value={category.id.toString()}
+                            >
+                                {category.name} (ID: {category.id})
+                            </option>
+                        ))}
+                    </Form.Select>
+                    {loadingCategories && (
+                        <Form.Text className="text-muted">
+                            Loading categories...
+                        </Form.Text>
+                    )}
+                </Form.Group>
+                <Form.Group controlId="description">
+                    <Form.Label>Description *</Form.Label>
+                    <Form.Control
+                        as="textarea"
+                        name="description"
+                        value={course.description}
+                        onChange={handleChange}
+                        required
+                        rows={3}
+                        placeholder="Enter course description"
+                    />
+                </Form.Group>
+                <Form.Group controlId="thumbnail">
+                    <Form.Label>Course Thumbnail</Form.Label>
+                    <Form.Control
+                        type="file"
+                        name="thumbnail"
+                        onChange={handleFileChange}
+                        accept="image/*"
+                    />
+                    {course.thumbnail && (
+                        <div className="mt-2">
+                            <img 
+                                src={URL.createObjectURL(course.thumbnail)} 
+                                alt="Preview" 
+                                style={{ maxWidth: '200px', maxHeight: '200px' }}
                             />
-                        </Form.Group>
-                    </Card.Body>
-                </Card>
-
-                <Card>
-                    <Card.Body>
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Course Logo</Form.Label>
-                                    <Form.Control
-                                        type="file"
-                                        name="thumbnail"
-                                        onChange={handleFileChange}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                    </Card.Body>
-                </Card>
-                <Card>
-                    <Card.Body>
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Course Overview</Form.Label>
-                                    <Form.Control
-                                        as="textarea"
-                                        rows={2}
-                                        name="courseOverview"
-                                        value={course.courseOverview}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Key Features</Form.Label>
-                                    <Form.Control
-                                        as="textarea"
-                                        rows={2}
-                                        name="keyFeatures"
-                                        value={course.keyFeatures}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                    </Card.Body>
-                </Card>
-                <Card>
-                    <Card.Body>
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Course Skills</Form.Label>
-                                    <Form.Control
-                                        as="textarea"
-                                        rows={2}
-                                        name="courseSkills"
-                                        value={course.skills}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Course Benefits</Form.Label>
-                                    <Form.Control
-                                        as="textarea"
-                                        rows={2}
-                                        name="courseBenefits"
-                                        value={course.benefits}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                    </Card.Body>
-                </Card>
-
-                <Card className="mb-4">
-                    <Card.Header>Course Content</Card.Header>
-                    <Card.Body>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Prerequisites</Form.Label>
-                            <Form.Control
-                                as="textarea"
-                                rows={2}
-                                name="prerequisites"
-                                value={course.prerequisites}
-                                onChange={handleChange}
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Learning Objectives</Form.Label>
-                            <Form.Control
-                                as="textarea"
-                                rows={3}
-                                name="learningObjectives"
-                                value={course.learningObjectives}
-                                onChange={handleChange}
-                                required
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Curriculum</Form.Label>
-                            <Editor
-                                initialValue={course.curriculum}
-                                init={{
-                                    height: 400,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist autolink lists link image charmap print preview anchor',
-                                        'searchreplace visualblocks code fullscreen',
-                                        'insertdatetime media table paste code help wordcount'
-                                    ],
-                                    toolbar: 'undo redo | formatselect | bold italic backcolor | \
-                                        alignleft aligncenter alignright alignjustify | \
-                                        bullist numlist outdent indent | removeformat | help'
-                                }}
-                                onEditorChange={handleEditorChange}
-                            />
-                        </Form.Group>
-                    </Card.Body>
-                </Card>
-
-
-                <Card>
-                    <Card.Body>
-                        <Card.Header>FAQs</Card.Header>
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Question</Form.Label>
-                                    <Form.Control
-                                        type="textarea"
-                                        rows={3}
-                                        name="faqs"
-                                        value={course.faqs}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Answer</Form.Label>
-                                    <Form.Control
-                                        type="textarea"
-                                        rows={3}
-                                        name="faqs"
-                                        value={course.faqs}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Question</Form.Label>
-                                    <Form.Control
-                                        type="textarea"
-                                        rows={3}
-                                        name="faqs"
-                                        value={course.faqs}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Answer</Form.Label>
-                                    <Form.Control
-                                        type="textarea"
-                                        rows={3}
-                                        name="faqs"
-                                        value={course.faqs}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Question</Form.Label>
-                                    <Form.Control
-                                        type="textarea"
-                                        rows={3}
-                                        name="faqs"
-                                        value={course.faqs}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Answer</Form.Label>
-                                    <Form.Control
-                                        type="textarea"
-                                        rows={3}
-                                        name="faqs"
-                                        value={course.faqs}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Question</Form.Label>
-                                    <Form.Control
-                                        type="textarea"
-                                        rows={3}
-                                        name="faqs"
-                                        value={course.faqs}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Answer</Form.Label>
-                                    <Form.Control
-                                        type="textarea"
-                                        rows={3}
-                                        name="faqs"
-                                        value={course.faqs}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Question</Form.Label>
-                                    <Form.Control
-                                        type="textarea"
-                                        rows={3}
-                                        name="faqs"
-                                        value={course.faqs}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Answer</Form.Label>
-                                    <Form.Control
-                                        type="textarea"
-                                        rows={3}
-                                        name="faqs"
-                                        value={course.faqs}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                    </Card.Body>
-                </Card>
-
-                <Card className="mb-4">
-                    <Card.Header>Media & Materials</Card.Header>
-                    <Card.Body>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Course Thumbnail</Form.Label>
-                            <Form.Control
-                                type="file"
-                                accept="image/*"
-                                onChange={handleFileChange}
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Course Materials</Form.Label>
-                            <Form.Control
-                                type="file"
-                                multiple
-                                onChange={handleMaterialUpload}
-                            />
-                            <Form.Text className="text-muted">
-                                Upload PDFs, presentations, or other course materials
-                            </Form.Text>
-                        </Form.Group>
-                    </Card.Body>
-                </Card>
-
-                <div className="d-flex justify-content-end gap-2 mb-4">
-                    <Button variant="secondary" onClick={() => navigate('/admin/courses')}>
-                        Cancel
-                    </Button>
-                    <Button variant="primary" type="submit" disabled={loading}>
-                        {loading ? 'Saving...' : (isEditMode ? 'Update Course' : 'Create Course')}
-                    </Button>
-                </div>
+                        </div>
+                    )}
+                </Form.Group>
+                <Button variant="primary" type="submit" disabled={loading}>
+                    {loading ? 'Creating...' : 'Create Course'}
+                </Button>
             </Form>
         </Container>
     );

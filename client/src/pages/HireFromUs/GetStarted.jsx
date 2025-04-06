@@ -20,7 +20,7 @@ const GetStarted = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:3001/hiring-register", formData);
+      await axios.post("http://localhost:3000/hiring-register", formData);
       navigate("/our-student");
     } catch (error) {
       console.error("Error registering user:", error);

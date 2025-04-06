@@ -11,12 +11,37 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = authAPI.getToken();
-    if (token) {
-      loadUser();
-    } else {
-      setLoading(false);
-    }
+    const initializeAuth = async () => {
+      try {
+        const token = authAPI.getToken();
+        if (token) {
+          // Check if we're in admin section
+          const isAdminSection = window.location.pathname.includes('/admin');
+          
+          // For admin section, use admin data
+          if (isAdminSection) {
+            const adminData = sessionStorage.getItem('adminData');
+            if (adminData) {
+              setUser(JSON.parse(adminData));
+            }
+          } else {
+            // For regular users, use user data
+            const userData = sessionStorage.getItem('userData');
+            if (userData) {
+              setUser(JSON.parse(userData));
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        // Clear invalid token
+        authAPI.clearToken();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   const loadUser = async () => {
@@ -24,9 +49,12 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.getProfile();
       if (response.success) {
         setUser(response.user);
+        // Update session storage with fresh user data
+        sessionStorage.setItem('userData', JSON.stringify(response.user));
       }
     } catch (error) {
       console.error('Error loading user:', error);
+      // Clear invalid token and user data
       authAPI.clearToken();
       setUser(null);
     } finally {
@@ -34,83 +62,56 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signup = async (name, email, password) => {
-    try {
-      const response = await authAPI.signup(name, email, password);
-      if (response.success) {
-        toast.success(response.message);
-        // Note: Typically signup doesn't return a token - user needs to verify email first
-        // Only set token if it's returned from the API
-        if (response.token) {
-          authAPI.setToken(response.token);
-          setUser(response.user);
-        }
-        return {
-          success: true,
-          userId: response.userId,
-          email: response.email,
-          message: response.message
-        };
-      }
-      return {
-        success: false,
-        message: response.message || 'Registration failed. Please try again.'
-      };
-    } catch (error) {
-      console.error('Signup error:', error);
-      toast.error(error.message);
-      return { success: false, message: error.message };
-    }
-  };
-
   const login = async (email, password) => {
     try {
       const response = await authAPI.login(email, password);
       if (response.success) {
-        authAPI.setToken(response.token);
+        toast.success(response.message);
         setUser(response.user);
-        return { success: true, message: response.message };
+        // Update session storage with fresh user data
+        sessionStorage.setItem('userData', JSON.stringify(response.user));
       }
-      return { success: false, message: response.message };
+      return response;
     } catch (error) {
       console.error('Login error:', error);
       toast.error(error.message);
+      // Clear any invalid token
+      authAPI.clearToken();
+      return { success: false, message: error.message };
+    }
+  };
+
+  const adminLogin = async (username, password) => {
+    try {
+      const response = await authAPI.adminLogin(username, password);
+      if (response.success) {
+        toast.success('Admin login successful');
+        setUser(response.user);
+        // Update session storage with fresh admin data
+        sessionStorage.setItem('adminData', JSON.stringify(response.admin));
+      }
+      return response;
+    } catch (error) {
+      console.error('Admin login error:', error);
+      toast.error(error.message);
+      // Clear any invalid token
+      authAPI.clearToken();
       return { success: false, message: error.message };
     }
   };
 
   const logout = () => {
     authAPI.clearToken();
+    // Clear user data from session storage
+    sessionStorage.removeItem('userData');
+    sessionStorage.removeItem('adminData');
     setUser(null);
-  };
-
-  const verifyEmail = async (userId, otp) => {
-    try {
-      const response = await authAPI.verifyEmail(userId, otp);
-      if (response.success) {
-        toast.success(response.message);
-        return { success: true, message: response.message };
-      }
-      return { success: false, message: response.message };
-    } catch (error) {
-      console.error('Verification error:', error);
-      toast.error(error.message);
-      return { success: false, message: error.message };
-    }
-  };
-
-  const resendVerification = async (userId) => {
-    try {
-      const response = await authAPI.resendVerification(userId);
-      if (response.success) {
-        toast.success(response.message);
-        return { success: true, message: response.message };
-      }
-      return { success: false, message: response.message };
-    } catch (error) {
-      console.error('Resend verification error:', error);
-      toast.error(error.message);
-      return { success: false, message: error.message };
+    
+    // Redirect based on current path
+    if (window.location.pathname.includes('/admin')) {
+      window.location.href = '/admin/login';
+    } else {
+      window.location.href = '/login';
     }
   };
 
@@ -120,11 +121,8 @@ export const AuthProvider = ({ children }) => {
         user,
         loading,
         login,
-        logout,
-        signup,
-        verifyEmail,
-        resendVerification,
-        loadUser
+        adminLogin,
+        logout
       }}
     >
       {children}

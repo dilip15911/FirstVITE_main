@@ -17,6 +17,7 @@ const AdminLogin = React.lazy(() => import('./pages/admin/Login/AdminLogin.jsx')
 const AdminHome = React.lazy(() => import('./pages/admin/Home.jsx'));
 const AdminLayout = React.lazy(() => import('./pages/admin/AdminLayout.jsx'));
 const AdminDashboard = React.lazy(() => import('./pages/admin/Dashboard.jsx'));
+const TestAuth = React.lazy(() => import('./pages/admin/TestAuth.jsx'));
 const Students = React.lazy(() => import('./pages/admin/Students.jsx'));
 const CoursesAdmin = React.lazy(() => import('./pages/admin/Courses.jsx'));
 const Instructors = React.lazy(() => import('./pages/admin/Instructors.jsx'));
@@ -93,6 +94,7 @@ const router = createBrowserRouter(
 
       {/* Admin Route */}
       <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/admin/test-auth" element={<TestAuth />} />
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<AdminHome />} />
@@ -156,25 +158,22 @@ const router = createBrowserRouter(
 function App() {
   return (
     <AuthProvider>
-      <Suspense
-        fallback={
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-          </div>
-        }
-      >
+      <Suspense fallback={<div>Loading...</div>}>
         <RouterProvider router={router} />
         <ToastContainer
           position="top-right"
           autoClose={5000}
           hideProgressBar={false}
-          newestOnTop
+          newestOnTop={false}
           closeOnClick
           rtl={false}
           pauseOnFocusLoss
           draggable
           pauseOnHover
           theme="light"
+          toastClassName="custom-toast"
+          bodyClassName="custom-toast-body"
+          closeButton={false}
         />
       </Suspense>
     </AuthProvider>

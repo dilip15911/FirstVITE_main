@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Container, Form, Row, Col, Table, Button, Badge } from 'react-bootstrap';
-import { FaEdit, FaTrash, FaEye, FaPlus, FaFilter, FaSearch, FaFileExport, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Row, Col, Table } from 'react-bootstrap';
+import { FaEdit, FaTrash, FaEye, FaPlus, FaSearch, FaFileExport, FaSort, FaSortUp, FaSortDown, FaFilter } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import '../../../styles/adminTheme.css';
 
 const AssessmentList = () => {
@@ -18,18 +17,18 @@ const AssessmentList = () => {
     const [itemsPerPage] = useState(10);
     const [filteredAssessments, setFilteredAssessments] = useState([]);
 
-    const mockAssessments = [
+    const mockAssessments = useMemo(() => [
         {
             id: '1',
             title: 'JavaScript Fundamentals Quiz',
             type: 'quiz',
             status: 'active',
-            courseName: 'JavaScript Basics',
+            courseName: 'Introduction to JavaScript',
             totalQuestions: 20,
             passingScore: 70,
             duration: 30,
-            createdAt: '2025-03-15',
-            submissions: 45
+            createdAt: '2025-03-10',
+            submissions: 48
         },
         {
             id: '2',
@@ -115,7 +114,7 @@ const AssessmentList = () => {
             createdAt: '2025-03-25',
             submissions: 15
         }
-    ];
+    ], []);
 
     const fetchAssessments = useCallback(async () => {
         try {
@@ -131,7 +130,7 @@ const AssessmentList = () => {
             setError('Failed to fetch assessments');
             setLoading(false);
         }
-    }, []);
+    }, [mockAssessments]);
 
     const filterAndSortAssessments = useCallback(() => {
         let filtered = [...assessments];

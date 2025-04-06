@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, Row, Col, Form, Button, Table } from 'react-bootstrap';
 import { Line, Bar, Pie } from 'react-chartjs-2';
 import DatePicker from 'react-datepicker';
@@ -28,7 +28,7 @@ const RevenueAnalytics = () => {
   const [viewType, setViewType] = useState('line');
 
   // Mock data for development
-  const mockRevenueData = {
+  const mockRevenueData = useMemo(() => ({
     overview: {
       totalRevenue: 125750.45,
       comparedToLastPeriod: 15.3,
@@ -57,13 +57,9 @@ const RevenueAnalytics = () => {
       { method: 'Bank Transfer', revenue: 12575.05, percentage: 10 },
       { method: 'Other', revenue: 6275.00, percentage: 5 }
     ]
-  };
+  }), []);
 
-  useEffect(() => {
-    fetchRevenueData();
-  }, [timeFrame, dateRange, fetchRevenueData]);
-
-  const fetchRevenueData = async () => {
+  const fetchRevenueData = useCallback(async () => {
     try {
       setLoading(true);
       // In a real app:
@@ -81,7 +77,11 @@ const RevenueAnalytics = () => {
       setError('Failed to fetch revenue data');
       setLoading(false);
     }
-  };
+  }, [mockRevenueData]);
+
+  useEffect(() => {
+    fetchRevenueData();
+  }, [fetchRevenueData]);
 
   const getPeriodChartData = () => {
     return {

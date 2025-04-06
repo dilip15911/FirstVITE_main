@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, Row, Col, Form, Button, Table, Badge } from 'react-bootstrap';
 import { Bar, Radar, Scatter } from 'react-chartjs-2';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -16,8 +16,7 @@ const StudentPerformanceAnalytics = () => {
   const [error, setError] = useState(null);
   const [courses, setCourses] = useState([]);
 
-  // Mock data for development
-  const mockPerformanceData = {
+  const mockPerformanceData = useMemo(() => ({
     courseCompletionRates: [
       { course: 'Web Development', completionRate: 78 },
       { course: 'Data Science', completionRate: 65 },
@@ -60,23 +59,18 @@ const StudentPerformanceAnalytics = () => {
       { timeSpent: 55, score: 93 },
       { timeSpent: 60, score: 95 }
     ]
-  };
+  }), []);
 
-  const mockCourses = [
+  const mockCourses = useMemo(() => [
     { id: 1, name: 'All Courses' },
     { id: 2, name: 'Web Development' },
     { id: 3, name: 'Data Science' },
     { id: 4, name: 'Mobile Development' },
     { id: 5, name: 'UI/UX Design' },
     { id: 6, name: 'Cloud Computing' }
-  ];
+  ], []);
 
-  useEffect(() => {
-    fetchCourses();
-    fetchPerformanceData();
-  }, [courseFilter, fetchCourses, fetchPerformanceData]);
-
-  const fetchCourses = async () => {
+  const fetchCourses = useCallback(async () => {
     try {
       // In a real app:
       // const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/admin/courses`);
@@ -87,25 +81,27 @@ const StudentPerformanceAnalytics = () => {
     } catch (err) {
       console.error('Failed to fetch courses:', err);
     }
-  };
+  }, [mockCourses]);
 
-  const fetchPerformanceData = async () => {
+  const fetchPerformanceData = useCallback(async () => {
     try {
       setLoading(true);
       // In a real app:
-      // const response = await axios.get(
-      //   `${process.env.REACT_APP_API_URL}/api/admin/analytics/student-performance?course=${courseFilter}`
-      // );
-      // setPerformanceData(response.data);
-
-      // Using mock data for development
+      // const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/admin/performance`);
+      // setData(response.data);
       setPerformanceData(mockPerformanceData);
-      setLoading(false);
-    } catch (err) {
-      setError('Failed to fetch student performance data');
+    } catch (error) {
+      console.error('Error fetching performance data:', error);
+      setError('Failed to fetch performance data');
+    } finally {
       setLoading(false);
     }
-  };
+  }, [mockPerformanceData]);
+
+  useEffect(() => {
+    fetchCourses();
+    fetchPerformanceData();
+  }, [fetchCourses, fetchPerformanceData]);
 
   const getCompletionRatesChartData = () => {
     return {

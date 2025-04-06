@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Badge, Button, Table } from 'react-bootstrap';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Row, Col } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { FaEdit, FaArrowLeft, FaDownload, FaEye, FaCalendarAlt, FaClock, FaUserGraduate, FaBook, FaCheckCircle, FaTimesCircle, FaPlus } from 'react-icons/fa';
+import { FaEdit, FaArrowLeft, FaDownload, FaEye, FaCalendarAlt, FaClock, FaUserGraduate, FaBook, FaCheckCircle, FaPlus } from 'react-icons/fa';
 import '../../../styles/adminTheme.css';
 
 const AssessmentDetails = () => {
@@ -12,60 +11,62 @@ const AssessmentDetails = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('overview');
+    
+    // Mock data for development using useMemo to prevent unnecessary re-renders
+    const mockAssessmentData = useMemo(() => ({
+        id: id,
+        title: 'Advanced JavaScript Concepts',
+        description: 'This assessment tests understanding of advanced JavaScript concepts including closures, prototypes, and async programming.',
+        type: 'quiz',
+        status: 'active',
+        courseName: 'JavaScript Masterclass',
+        courseId: '123',
+        duration: 60,
+        totalQuestions: 25,
+        passingScore: 70,
+        dueDate: '2025-04-15',
+        createdAt: '2025-03-20',
+        updatedAt: '2025-03-25',
+        questions: [
+            { id: 1, text: 'What is a closure in JavaScript?', type: 'multiple_choice', points: 5, 
+              options: ['A way to close the browser', 'A function with access to its outer scope', 'A method to end a loop', 'None of the above'],
+              correctAnswer: 1 },
+            { id: 2, text: 'Explain how prototypal inheritance works in JavaScript', type: 'essay', points: 10 },
+            { id: 3, text: 'What is the output of the following code?\n\nconsole.log(typeof null);', type: 'multiple_choice', points: 5,
+              options: ['null', 'undefined', 'object', 'string'],
+              correctAnswer: 2 },
+            { id: 4, text: 'Implement a function that returns a Promise which resolves after a given delay', type: 'coding', points: 15 },
+            { id: 5, text: 'What is the difference between let, const, and var?', type: 'multiple_choice', points: 5,
+              options: ['Scope differences only', 'Hoisting differences only', 'Both scope and hoisting differences', 'No difference'],
+              correctAnswer: 2 }
+        ],
+        submissions: [
+            { id: 101, studentName: 'John Doe', studentId: 'S1001', submittedAt: '2025-03-26', score: 85, status: 'passed' },
+            { id: 102, studentName: 'Jane Smith', studentId: 'S1002', submittedAt: '2025-03-26', score: 92, status: 'passed' },
+            { id: 103, studentName: 'Bob Johnson', studentId: 'S1003', submittedAt: '2025-03-27', score: 65, status: 'failed' },
+            { id: 104, studentName: 'Alice Brown', studentId: 'S1004', submittedAt: '2025-03-27', score: 78, status: 'passed' }
+        ]
+    }), [id]);
 
-    useEffect(() => {
-        fetchAssessment();
-    }, [id]);
-
-    const fetchAssessment = async () => {
+    const fetchAssessment = useCallback(async () => {
         try {
-            // Simulate API call for now
-            // In production, uncomment the actual API call
+            setLoading(true);
+            // In a real app:
             // const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/admin/assessments/${id}`);
+            // setAssessment(response.data);
             
-            // Mock data for development
-            const mockAssessment = {
-                id: id,
-                title: 'Advanced JavaScript Concepts',
-                description: 'This assessment tests understanding of advanced JavaScript concepts including closures, prototypes, and async programming.',
-                type: 'quiz',
-                status: 'active',
-                courseName: 'JavaScript Masterclass',
-                courseId: '123',
-                duration: 60,
-                totalQuestions: 25,
-                passingScore: 70,
-                dueDate: '2025-04-15',
-                createdAt: '2025-03-20',
-                updatedAt: '2025-03-25',
-                questions: [
-                    { id: 1, text: 'What is a closure in JavaScript?', type: 'multiple_choice', points: 5, 
-                      options: ['A way to close the browser', 'A function with access to its outer scope', 'A method to end a loop', 'None of the above'],
-                      correctAnswer: 1 },
-                    { id: 2, text: 'Explain how prototypal inheritance works in JavaScript', type: 'essay', points: 10 },
-                    { id: 3, text: 'What is the output of the following code?\n\nconsole.log(typeof null);', type: 'multiple_choice', points: 5,
-                      options: ['null', 'undefined', 'object', 'string'],
-                      correctAnswer: 2 },
-                    { id: 4, text: 'Implement a function that returns a Promise which resolves after a given delay', type: 'coding', points: 15 },
-                    { id: 5, text: 'What is the difference between let, const, and var?', type: 'multiple_choice', points: 5,
-                      options: ['Scope differences only', 'Hoisting differences only', 'Both scope and hoisting differences', 'No difference'],
-                      correctAnswer: 2 }
-                ],
-                submissions: [
-                    { id: 101, studentName: 'John Doe', studentId: 'S1001', submittedAt: '2025-03-26', score: 85, status: 'passed' },
-                    { id: 102, studentName: 'Jane Smith', studentId: 'S1002', submittedAt: '2025-03-26', score: 92, status: 'passed' },
-                    { id: 103, studentName: 'Bob Johnson', studentId: 'S1003', submittedAt: '2025-03-27', score: 65, status: 'failed' },
-                    { id: 104, studentName: 'Alice Brown', studentId: 'S1004', submittedAt: '2025-03-27', score: 78, status: 'passed' }
-                ]
-            };
-            
-            setAssessment(mockAssessment);
+            // Using mock data for development
+            setAssessment(mockAssessmentData);
             setLoading(false);
         } catch (err) {
             setError('Failed to fetch assessment details');
             setLoading(false);
         }
-    };
+    }, [mockAssessmentData]);
+
+    useEffect(() => {
+        fetchAssessment();
+    }, [fetchAssessment]);
 
     const handleExport = async () => {
         try {
