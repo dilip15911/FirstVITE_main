@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const rateLimit = require('express-rate-limit');
+const fileUpload = require('express-fileupload');
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
@@ -47,6 +48,7 @@ const contentRoutes = require('./routes/contentRoutes');
 const supportRoutes = require('./routes/supportRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const userPaymentRoutes = require('./routes/userPaymentRoutes');
+const courseRoutes = require('./routes/courseRoutes');
 
 // Initialize express app
 const app = express();
@@ -68,7 +70,7 @@ app.use('/api', limiter);
 
 // Basic middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: ['http://localhost:3000', 'http://localhost:3001'],
   credentials: true
 }));
 if (process.env.NODE_ENV === 'development') {
@@ -76,6 +78,16 @@ if (process.env.NODE_ENV === 'development') {
 }
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// File upload middleware
+app.use(fileUpload({
+  useTempFiles: true,
+  tempFileDir: '/tmp/',
+  createParentPath: true,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max file size
+  abortOnLimit: true,
+  responseOnLimit: 'File size is too large. Max allowed size is 50MB.'
+}));
 
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -95,6 +107,7 @@ app.use('/api/admin/content', contentRoutes);
 app.use('/api/admin/support', supportRoutes);
 app.use('/api/admin/payments', paymentRoutes);
 app.use('/api/user/payments', userPaymentRoutes);
+app.use('/api/courses', courseRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {

@@ -154,7 +154,7 @@ exports.login = async (req, res) => {
     if (users.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'User not found. Please check your email'
       });
     }
 
@@ -165,7 +165,7 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'Incorrect password'
       });
     }
 
@@ -186,7 +186,7 @@ exports.login = async (req, res) => {
         needsVerification: true,
         userId: user.id,
         email: user.email,
-        message: 'Please verify your email first'
+        message: 'Please verify your email first. A new verification code has been sent to your email'
       });
     }
 
@@ -196,6 +196,9 @@ exports.login = async (req, res) => {
     // Get user data without password
     const { password: _, ...userData } = user;
 
+    // Update last login timestamp
+    await db.query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', [user.id]);
+
     res.json({
       success: true,
       token,
@@ -203,10 +206,19 @@ exports.login = async (req, res) => {
       message: 'Login successful'
     });
   } catch (error) {
+    console.error('Login error:', error);
+    
+    // Handle specific database errors
+    if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+      return res.status(500).json({
+        success: false,
+        message: 'Database connection error. Please try again later'
+      });
+    }
+
     res.status(error.status || 500).json({
       success: false,
-      message: error.message || 'Server error',
-      errors: error.errors
+      message: error.message || 'Server error occurred. Please try again'
     });
   }
 };

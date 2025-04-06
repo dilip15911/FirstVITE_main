@@ -3,6 +3,8 @@ const router = express.Router();
 const { check, body } = require('express-validator');
 const authController = require('../controllers/authController');
 const { protect, admin, restrictTo } = require('../middleware/auth');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 // Validation middleware
 const loginValidation = [
