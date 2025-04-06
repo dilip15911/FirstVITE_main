@@ -8,17 +8,18 @@ const connection = require("../config/db");
 // Admin Login Controller
 exports.adminLogin = async (req, res) => {
   try {
+    console.log('Admin login attempt:', req.body);
     const { username, password } = req.body;
 
     if (!username || !password) {
-      return res.status(400).json({ error: "All fields are required" });
+      return res.status(400).json({ success: false, error: "All fields are required" });
     }
 
     // First check if admin exists
     const [rows] = await db.query("SELECT * FROM admin_users WHERE username = ?", [username]);
 
     if (rows.length === 0) {
-      return res.status(401).json({ error: "Invalid username or password" });
+      return res.status(401).json({ success: false, error: "Invalid username or password" });
     }
 
     const admin = rows[0];
@@ -26,7 +27,7 @@ exports.adminLogin = async (req, res) => {
     // Verify password
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
-      return res.status(401).json({ error: "Invalid username or password" });
+      return res.status(401).json({ success: false, error: "Invalid username or password" });
     }
 
     // Generate JWT token
@@ -38,17 +39,25 @@ exports.adminLogin = async (req, res) => {
       expiresIn: "24h" 
     });
 
+    // Add Bearer prefix to token
+    const tokenWithBearer = `Bearer ${token}`;
+
+    console.log('Admin login successful for:', username);
+
+    // Return success response with all necessary data
     res.json({ 
-      token, 
+      success: true,
+      token: tokenWithBearer, 
       message: "Admin login successful",
       admin: {
         id: admin.id,
-        username: admin.username
+        username: admin.username,
+        role: "admin"
       }
     });
   } catch (error) {
     console.error('Admin login error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
 

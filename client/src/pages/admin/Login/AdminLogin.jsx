@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
-import { api } from '../../../utils/api';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './AdminLogin.css';
 
 const AdminLogin = () => {
@@ -8,6 +9,15 @@ const AdminLogin = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+    
+    // Check if already logged in
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            navigate('/admin/dashboard');
+        }
+    }, [navigate]);
 
     useEffect(() => {
         // Create particles
@@ -49,37 +59,34 @@ const AdminLogin = () => {
         try {
             console.log('Attempting admin login with:', { username });
             
-            // Use the correct endpoint based on the API structure
-            const response = await api.post('/auth/admin/login', {
+            // Direct API call to ensure we get the complete response
+            const response = await axios.post('http://localhost:5000/api/auth/admin/login', {
                 username,
                 password
             });
-
+            
             console.log('Login response:', response.data);
             
             if (response.data && response.data.token) {
-                // Store the token with Bearer prefix if it doesn't have it
+                // Store token
                 const token = response.data.token;
-                const tokenToStore = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+                localStorage.setItem('token', token);
                 
-                console.log('Storing token in localStorage');
-                localStorage.setItem("token", tokenToStore);
-                
-                // Also store user info if available
-                if (response.data.user) {
-                    localStorage.setItem("user", JSON.stringify(response.data.user));
+                // Store admin data
+                if (response.data.admin) {
+                    localStorage.setItem('adminData', JSON.stringify(response.data.admin));
                 }
                 
-                // Redirect to admin dashboard
-                window.location.href = "/admin/dashboard";
+                console.log('Login successful, redirecting to dashboard');
+                
+                // Force redirect to admin dashboard
+                window.location.href = '/admin/dashboard';
             } else {
-                throw new Error('No token received from server');
+                throw new Error('Invalid response from server');
             }
         } catch (err) {
-            console.error('Login error:', err.response?.data);
-            setError(err.response?.data?.error || "Login failed");
-            // Log the error details for debugging
-            console.error('Error details:', err.response?.data?.details);
+            console.error('Login error:', err);
+            setError(err.response?.data?.error || "Login failed. Please check your credentials.");
         } finally {
             setLoading(false);
         }

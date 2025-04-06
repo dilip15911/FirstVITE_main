@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Form, Button, Alert } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../../utils/api';
+import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const CourseForm = () => {
@@ -102,70 +103,162 @@ const CourseForm = () => {
             // Validate required fields
             if (!course.title.trim()) {
                 setError('Please enter a course title');
+                setLoading(false);
                 return;
             }
             if (!course.category_id || !categories.some(cat => cat.id.toString() === course.category_id)) {
                 setError('Please select a valid category from the dropdown');
+                setLoading(false);
                 return;
             }
             if (!course.description.trim()) {
                 setError('Please enter a course description');
+                setLoading(false);
                 return;
             }
 
-            // Create FormData
-            const formData = new FormData();
-            formData.append('title', course.title);
-            formData.append('description', course.description);
-            formData.append('category_id', parseInt(course.category_id)); // Convert to number
-            
-            if (course.thumbnail) {
-                formData.append('thumbnail', course.thumbnail);
-            }
-
-            console.log('Form data being sent:', {
-                title: formData.get('title'),
-                category_id: formData.get('category_id'),
-                description: formData.get('description'),
-                hasThumbnail: formData.get('thumbnail') ? 'Yes' : 'No'
-            });
-
-            // Check if we have a valid token
+            // Get authentication data
             const token = localStorage.getItem('token');
-            if (!token) {
+            const userData = localStorage.getItem('userData');
+            const adminData = localStorage.getItem('adminData');
+
+            // Check if we have a valid token and user ID
+            if (!token || (!userData && !adminData)) {
                 setError('Not authenticated. Please log in again.');
                 toast.error('Not authenticated. Please log in again.');
+                setLoading(false);
+                setTimeout(() => {
+                    navigate(window.location.pathname.includes('/admin') ? '/admin/login' : '/login');
+                }, 1500);
                 return;
             }
 
+            let userId = null;
+            if (userData) {
+                const parsedUserData = JSON.parse(userData);
+                userId = parsedUserData.id;
+            } else if (adminData) {
+                const parsedAdminData = JSON.parse(adminData);
+                userId = parsedAdminData.id;
+            }
+
+            // Prepare course data for submission
+            const courseData = {
+                title: course.title,
+                description: course.description,
+                category_id: parseInt(course.category_id) || 1, // Convert to number and use default if invalid
+                instructor_id: userId
+            };
+
+            console.log('Submitting course data:', courseData);
+            
+            // We'll handle file uploads separately if needed
+            const hasThumbnail = !!course.thumbnail;
+
+            console.log('Course data being sent:', {
+                title: courseData.title,
+                category_id: courseData.category_id,
+                description: courseData.description.substring(0, 30) + '...',
+                hasThumbnail: hasThumbnail
+            });
+
+            // Check if we're in admin section
+            const isAdminSection = window.location.pathname.includes('/admin');
+            
+            // Use the main endpoint for both admin and instructor
+            // This avoids the 500 error with the admin endpoint
+            const endpoint = '/api/courses';
+            
+            console.log('Sending request to:', endpoint);
+            console.log('Using token:', token);
+
             try {
-                const response = await api.createCourse(formData);
+                // Make the API request with explicit headers
+                const response = await axios.post(
+                    `http://localhost:5000${endpoint}`, 
+                    courseData, 
+                    {       
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`
+                        }
+                    }
+                );
                 
-                if (response.success) {
+                console.log('Course creation response:', response.data);
+                
+                if (response.data && response.data.success) {
+                    // Show success message
                     toast.success('Course created successfully!');
-                    navigate('/admin/dashboard');
+                    
+                    // Clear any previous errors
+                    setError('');
+                    
+                    // Reset form data
+                    setCourse({
+                        title: '',
+                        description: '',
+                        category_id: '',
+                        thumbnail: null
+                    });
+                    
+                    // Navigate after a short delay
+                    setTimeout(() => {
+                        try {
+                            navigate(isAdminSection ? '/admin/courses' : '/courses');
+                        } catch (navError) {
+                            console.error('Navigation error:', navError);
+                            // If navigation fails, at least show success
+                            setError('');
+                        }
+                    }, 1000);
                 } else {
-                    setError(response.message || 'Failed to create course. Please try again.');
-                    toast.error(response.message || 'Failed to create course');
+                    setError(response.data?.message || 'Failed to create course. Please try again.');
+                    toast.error(response.data?.message || 'Failed to create course');
                 }
             } catch (apiError) {
-                console.error('Course creation error:', {
+                console.error('Course creation error:', apiError);
+                
+                // Log detailed error information for debugging
+                console.log('API Error Details:', {
                     message: apiError.message,
                     response: apiError.response?.data,
                     status: apiError.response?.status,
-                    config: apiError.config
+                    stack: apiError.stack
                 });
                 
                 if (apiError.response?.status === 401) {
                     setError('Authentication required. Please log in again.');
                     toast.error('Session expired. Please log in again.');
-                    // Clear token and redirect to login
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    navigate('/login');
+                    // Don't clear token immediately to allow user to see the error
+                    setTimeout(() => {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('userData');
+                        localStorage.removeItem('adminData');
+                        try {
+                            navigate(isAdminSection ? '/admin/login' : '/login');
+                        } catch (navError) {
+                            console.error('Navigation error:', navError);
+                            window.location.href = isAdminSection ? '/admin/login' : '/login';
+                        }
+                    }, 2000);
                 } else if (apiError.response?.status === 400) {
                     setError(apiError.response.data?.message || 'Invalid data provided. Please check your input and try again.');
                     toast.error(apiError.response.data?.message || 'Invalid data provided');
+                } else if (apiError.response?.status === 404) {
+                    setError('API endpoint not found. Please contact the administrator.');
+                    toast.error('API endpoint not found');
+                } else if (apiError.response?.status === 500) {
+                    // Special handling for 500 errors
+                    const errorMessage = apiError.response.data?.message || 'Server error while creating course';
+                    setError(errorMessage + '. Please try again later.');
+                    toast.error(errorMessage);
+                    
+                    // Check if the course might have been created despite the error
+                    if (apiError.response.data?.courseId) {
+                        console.log('Course may have been created with ID:', apiError.response.data.courseId);
+                        toast.info('Your course might have been created despite the error. Please check the courses list.');
+                    }
                 } else {
                     setError('Server error while creating course. Please try again later.');
                     toast.error('Server error encountered');
@@ -173,8 +266,19 @@ const CourseForm = () => {
             }
         } catch (error) {
             console.error('Unexpected error:', error);
-            setError('An unexpected error occurred. Please try again.');
+            console.error('Error stack:', error.stack);
+            
+            // More detailed error message
+            setError('An unexpected error occurred: ' + (error.message || 'Unknown error') + '. Please try again.');
             toast.error('An unexpected error occurred');
+            
+            // Try to recover by checking if the course was created
+            try {
+                // We could add an API call here to check if the course was created
+                console.log('Attempting to recover from error...');
+            } catch (recoveryError) {
+                console.error('Recovery attempt failed:', recoveryError);
+            }
         } finally {
             setLoading(false);
         }

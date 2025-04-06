@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "./AdminSidebar/sidebar";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import ScrollToTop from "../../components/ScrollToTop";
 import { FaSearch, FaBell, FaEnvelope, FaCog, FaSignOutAlt, FaUser } from "react-icons/fa";
+import { useAuth } from '../../context/AuthContext';
 import "../../styles/adminTheme.css";
 
 const AdminLayout = () => {
@@ -10,6 +11,8 @@ const AdminLayout = () => {
     const [notifications, setNotifications] = useState([]);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const navigate = useNavigate();
+    const { logout } = useAuth();
 
     useEffect(() => {
         // Handle responsive behavior
@@ -46,6 +49,17 @@ const AdminLayout = () => {
 
     const toggleUserMenu = () => {
         setUserMenuOpen(!userMenuOpen);
+    };
+
+    const handleLogout = async (e) => {
+        e.preventDefault();
+        try {
+            await logout();
+            navigate('/login', { replace: true });
+        } catch (error) {
+            console.error('Logout error:', error);
+            alert('Error logging out. Please try again.');
+        }
     };
 
     return (
@@ -119,9 +133,12 @@ const AdminLayout = () => {
                                             <FaCog className="me-2" size={14} /> Settings
                                         </a>
                                         <div className="dropdown-divider"></div>
-                                        <a href="#logout" className="dropdown-item py-2 px-3 d-flex align-items-center text-danger">
+                                        <button 
+                                            onClick={handleLogout}
+                                            className="dropdown-item py-2 px-3 d-flex align-items-center text-danger"
+                                        >
                                             <FaSignOutAlt className="me-2" size={14} /> Logout
-                                        </a>
+                                        </button>
                                     </div>
                                 </div>
                             )}

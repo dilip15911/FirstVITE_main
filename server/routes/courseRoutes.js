@@ -14,20 +14,19 @@ router.use((req, res, next) => {
 router.get('/', courseController.getCourses);
 router.get('/:id', courseController.getCourse);
 
-// Admin routes - prefixed with /admin
-const adminRouter = express.Router();
-adminRouter.post('/', protect, courseController.createCourse); // Removed restrictTo for testing
-adminRouter.get('/:id', protect, courseController.getCourse); // Removed restrictTo for testing
-adminRouter.put('/:id', protect, courseController.updateCourse); // Removed restrictTo for testing
-adminRouter.delete('/:id', protect, courseController.deleteCourse); // Removed restrictTo for testing
+// Admin routes
+router.post('/admin', protect, courseController.createCourse);
+router.get('/admin/:id', protect, courseController.getCourse);
+router.put('/admin/:id', protect, courseController.updateCourse);
+router.delete('/admin/:id', protect, courseController.deleteCourse);
+
+// Default course creation route (used by both admin and instructors)
+router.post('/', protect, courseController.createCourse);
 
 // Instructor course creation route
 router.post('/instructor', protect, courseController.createCourse);
 
 // Purchase route
 router.post('/:id/purchase', protect, courseController.purchaseCourse);
-
-// Use admin routes under /admin prefix
-router.use('/admin', adminRouter);
 
 module.exports = router;

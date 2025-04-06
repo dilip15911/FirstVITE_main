@@ -8,11 +8,12 @@ const db = require('../config/db');
 // Course controller class
 class CourseController {
     async createCourse(req, res) {
+        let connection;
         try {
             console.log('\n=== Course Creation Request ===');
             console.log('Request headers:', req.headers);
             console.log('Request body:', req.body);
-            console.log('Request files:', req.files);
+            console.log('Content-Type:', req.headers['content-type']);
             console.log('Request user:', req.user);
 
             // Validate required fields
@@ -28,9 +29,12 @@ class CourseController {
             }
 
             // Get database connection
-            const connection = await db.getConnection();
+            connection = await db.getConnection();
             
             try {
+                // Start transaction
+                await connection.beginTransaction();
+                
                 // Validate category exists
                 const [category] = await connection.query(
                     'SELECT id FROM categories WHERE id = ?',
@@ -44,88 +48,188 @@ class CourseController {
                         message: 'Invalid category ID. Please select a valid category from the dropdown.'
                     });
                 }
-
+                
+                // Get category ID as number
+                const categoryId = parseInt(category[0].id);
+                
                 // Get user ID from request
-                const userId = req.user?.id;
-                if (!userId) {
-                    console.log('No user ID in request');
-                    return res.status(401).json({
+                const userId = req.user.id;
+                const isAdmin = req.user.role === 'admin';
+                
+                // For admin users, we'll use NULL for instructor_id since they're not regular instructors
+                const instructorId = isAdmin ? null : userId;
+                
+                // Insert course
+                const [result] = await connection.query(
+                    'INSERT INTO courses (title, description, category_id, instructor_id, created_at) VALUES (?, ?, ?, ?, NOW())',
+                    [req.body.title, req.body.description, categoryId, instructorId]
+                );
+                
+                // Get course ID
+                const courseId = result.insertId;
+                
+                // Commit transaction
+                await connection.commit();
+                
+                console.log('Course created successfully with ID:', courseId);
+                
+                return res.status(201).json({
+                    success: true,
+                    message: 'Course created successfully',
+                    data: {
+                        id: courseId,
+                        title: req.body.title,
+                        description: req.body.description,
+                        category_id: categoryId,
+                        instructor_id: instructorId
+                    }
+                });
+            } catch (error) {
+                // Rollback transaction on error
+                await connection.rollback();
+                
+                console.error('=== Detailed Course Creation Error ===');
+                console.error('Error Type:', error.constructor.name);
+                console.error('Error Message:', error.message);
+                console.error('Stack Trace:', error.stack);
+                
+                // Log database-specific errors
+                if (error.sql) {
+                    console.error('SQL Query:', error.sql);
+                    console.error('SQL State:', error.sqlState);
+                    console.error('SQL Error Code:', error.errno);
+                    console.error('SQL Error Message:', error.sqlMessage);
+                }
+                
+                // Log request data
+                console.error('Request Data:', {
+                    title: req.body.title,
+                    description: req.body.description,
+                    category_id: req.body.category_id,
+                    userId: req.user.id,
+                    isAdmin: req.user.role === 'admin'
+                });
+                
+                // Return appropriate error response based on error type
+                if (error.errno === 1452) { // Foreign key constraint error
+                    if (req.user.role === 'admin') {
+                        return res.status(400).json({
+                            success: false,
+                            message: 'Invalid category or instructor ID. Please check your input and try again.'
+                        });
+                    } else {
+                        return res.status(400).json({
+                            success: false,
+                            message: 'Your account is not properly set up as an instructor. Please contact support.'
+                        });
+                    }
+                } else if (error.errno === 1062) { // Duplicate entry error
+                    return res.status(400).json({
                         success: false,
-                        message: 'Authentication required'
+                        message: 'A course with this title already exists.'
+                    });
+                } else {
+                    return res.status(500).json({
+                        success: false,
+                        message: 'Server error while creating course',
+                        error: {
+                            message: error.message,
+                            code: error.code,
+                            sql: error.sql,
+                            sqlMessage: error.sqlMessage
+                        }
                     });
                 }
+            }
 
-                // Validate user exists
+            // Get user ID from request
+            const userId = req.user?.id;
+            
+            console.log('User data from token:', {
+                id: userId,
+                role: req.user.role
+            });
+            
+            if (!userId) {
+                console.log('No user ID in request');
+                return res.status(401).json({
+                    success: false,
+                    message: 'Authentication required'
+                });
+            }
+            
+            // Check if the user exists in the users table
+            let userExists = false;
+            let instructorId = null; // Default to NULL for instructor_id
+            
+            try {
+                // Check if user exists in users table
                 const [user] = await connection.query(
                     'SELECT id FROM users WHERE id = ?',
                     [userId]
                 );
                 
-                if (!user.length) {
-                    console.log('Invalid user ID:', userId);
-                    return res.status(401).json({
-                        success: false,
-                        message: 'Invalid user. Please log in again.'
-                    });
+                if (user.length > 0) {
+                    console.log('User found in users table with ID:', userId);
+                    userExists = true;
+                    instructorId = userId; // Use the actual user ID
+                } else {
+                    console.log('User not found in users table. Will use NULL for instructor_id');
+                    // We'll use NULL for instructor_id to avoid foreign key constraint issues
                 }
-
-                // Insert course
-                const [result] = await connection.query(
-                    'INSERT INTO courses (title, description, category_id, status, instructor_id, created_at) VALUES (?, ?, ?, ?, ?, NOW())',
-                    [req.body.title, req.body.description, category[0].id, 'draft', userId]
-                );
-
-                console.log('Course created successfully:', {
-                    id: result.insertId,
-                    title: req.body.title,
-                    category_id: category[0].id,
-                    instructor_id: userId
-                });
-
-                return res.status(201).json({
-                    success: true,
-                    message: 'Course created successfully',
-                    data: {
-                        id: result.insertId,
-                        title: req.body.title,
-                        category_id: category[0].id,
-                        instructor_id: userId
-                    }
-                });
-
             } catch (dbError) {
-                console.error('Database error:', {
-                    message: dbError.message,
-                    code: dbError.code,
-                    sql: dbError.sql,
-                    sqlMessage: dbError.sqlMessage
-                });
-                
-                // Handle specific database errors
-                if (dbError.code === 'ER_NO_REFERENCED_ROW_2') {
-                    return res.status(400).json({
+                console.error('Error checking user existence:', dbError);
+                // Continue with NULL instructor_id
+            }
+            
+            // For non-admin users, we still want to validate they exist
+            if (!req.user.role === 'admin') {
+                // For non-admin users, validate they exist in the users table
+
+                try {
+                    const [user] = await connection.query(
+                        'SELECT id FROM users WHERE id = ?',
+                        [userId]
+                    );
+                    
+                    if (!user.length) {
+                        console.log('Invalid user ID:', userId);
+                        return res.status(401).json({
+                            success: false,
+                            message: 'Invalid user. Please log in again.'
+                        });
+                    }
+                } catch (dbError) {
+                    console.error('Database error during user validation:', dbError);
+                    return res.status(500).json({
                         success: false,
-                        message: 'Invalid category or instructor ID. Please check your input and try again.'
+                        message: 'Database error during user validation'
                     });
                 }
-
-                return res.status(500).json({
-                    success: false,
-                    message: 'Database error: ' + dbError.message
-                });
-            } finally {
-                connection.release();
             }
-        } catch (error) {
-            console.error('Unexpected error:', {
-                message: error.message,
-                stack: error.stack
+
+        } catch (dbError) {
+            console.error('Database error:', {
+                message: dbError.message,
+                code: dbError.code,
+                sql: dbError.sql,
+                sqlMessage: dbError.sqlMessage
             });
             
+            // Handle specific database errors
+            if (dbError.code === 'ER_NO_REFERENCED_ROW_2') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid category or instructor ID. Please check your input and try again.'
+                });
+            }
+
             return res.status(500).json({
                 success: false,
-                message: 'Server error: ' + error.message
+                message: 'Database error: ' + dbError.message
             });
+        } finally {
+            connection.release();
         }
     }
 
@@ -239,7 +343,7 @@ class CourseController {
                 });
             } finally {
                 // Release the connection back to the pool
-                connection.release();
+                if (connection) connection.release();
             }
         } catch (error) {
             console.error('Error fetching courses:', error);
@@ -296,18 +400,18 @@ class CourseController {
     async deleteCourse(req, res) {
         try {
             const courseId = req.params.id;
-            
+
             // Get database connection from pool
             const connection = await db.getConnection();
             console.log('Database connection obtained');
-            
+
             try {
                 // Delete course materials first
                 await connection.query('DELETE FROM course_materials WHERE course_id = ?', [courseId]);
-                
+
                 // Then delete the course
                 const [result] = await connection.query('DELETE FROM courses WHERE id = ?', [courseId]);
-                
+
                 if (result.affectedRows === 0) {
                     return res.status(404).json({
                         success: false,

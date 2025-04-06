@@ -18,15 +18,15 @@ export const AuthProvider = ({ children }) => {
           // Check if we're in admin section
           const isAdminSection = window.location.pathname.includes('/admin');
           
-          // For admin section, use admin data
+          // For admin section, use admin data from localStorage
           if (isAdminSection) {
-            const adminData = sessionStorage.getItem('adminData');
+            const adminData = localStorage.getItem('adminData');
             if (adminData) {
               setUser(JSON.parse(adminData));
             }
           } else {
-            // For regular users, use user data
-            const userData = sessionStorage.getItem('userData');
+            // For regular users, use user data from localStorage
+            const userData = localStorage.getItem('userData');
             if (userData) {
               setUser(JSON.parse(userData));
             }
@@ -49,13 +49,15 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.getProfile();
       if (response.success) {
         setUser(response.user);
-        // Update session storage with fresh user data
-        sessionStorage.setItem('userData', JSON.stringify(response.user));
+        // Update localStorage with fresh user data
+        localStorage.setItem('userData', JSON.stringify(response.user));
       }
     } catch (error) {
       console.error('Error loading user:', error);
       // Clear invalid token and user data
       authAPI.clearToken();
+      localStorage.removeItem('userData');
+      localStorage.removeItem('adminData');
       setUser(null);
     } finally {
       setLoading(false);
@@ -68,8 +70,8 @@ export const AuthProvider = ({ children }) => {
       if (response.success) {
         toast.success(response.message);
         setUser(response.user);
-        // Update session storage with fresh user data
-        sessionStorage.setItem('userData', JSON.stringify(response.user));
+        // Update localStorage with fresh user data
+        localStorage.setItem('userData', JSON.stringify(response.user));
       }
       return response;
     } catch (error) {
@@ -77,6 +79,7 @@ export const AuthProvider = ({ children }) => {
       toast.error(error.message);
       // Clear any invalid token
       authAPI.clearToken();
+      localStorage.removeItem('userData');
       return { success: false, message: error.message };
     }
   };
@@ -86,9 +89,9 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.adminLogin(username, password);
       if (response.success) {
         toast.success('Admin login successful');
-        setUser(response.user);
-        // Update session storage with fresh admin data
-        sessionStorage.setItem('adminData', JSON.stringify(response.admin));
+        setUser(response.admin);
+        // Update localStorage with fresh admin data
+        localStorage.setItem('adminData', JSON.stringify(response.admin));
       }
       return response;
     } catch (error) {
@@ -96,15 +99,16 @@ export const AuthProvider = ({ children }) => {
       toast.error(error.message);
       // Clear any invalid token
       authAPI.clearToken();
+      localStorage.removeItem('adminData');
       return { success: false, message: error.message };
     }
   };
 
   const logout = () => {
     authAPI.clearToken();
-    // Clear user data from session storage
-    sessionStorage.removeItem('userData');
-    sessionStorage.removeItem('adminData');
+    // Clear user data from localStorage
+    localStorage.removeItem('userData');
+    localStorage.removeItem('adminData');
     setUser(null);
     
     // Redirect based on current path
