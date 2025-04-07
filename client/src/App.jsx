@@ -3,14 +3,12 @@ import { RouterProvider, createBrowserRouter, createRoutesFromElements, Route, N
 import { AuthProvider } from './context/AuthContext';
 import { ToastContainer } from 'react-toastify';
 import PrivateRoute from './components/PrivateRoute';
+import AdminRoute from './components/AdminRoute';
 import RootLayout from './layouts/RootLayout';
 import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import './styles/adminTheme.css';
-import Home from './pages/Home';
-import Courses from './pages/Courses/Courses.jsx';
-import CourseDetails from './pages/Courses/CourseDetails.jsx';
 
 // Admin Route
 const AdminLogin = React.lazy(() => import('./pages/admin/Login/AdminLogin.jsx'));
@@ -33,6 +31,9 @@ const ViewJobRoles = React.lazy(() => import('./pages/admin/Employee/ViewJobRole
 const GuestTeachers = React.lazy(() => import('./pages/admin/GuestTeachers.jsx'));
 const CourseList = React.lazy(() => import('./pages/admin/CourseManagement/CourseList.jsx'));
 const CourseForm = React.lazy(() => import('./pages/admin/CourseManagement/CourseForm.jsx'));
+const LessonForm = React.lazy(() => import('./pages/admin/CourseManagement/LessonForm.jsx'));
+const CategoryManager = React.lazy(() => import('./pages/admin/CourseManagement/CategoryManager.jsx'));
+const CourseSettings = React.lazy(() => import('./pages/admin/CourseManagement/CourseSettings.jsx'));
 const AssessmentList = React.lazy(() => import('./pages/admin/AssessmentCenter/AssessmentList.jsx'));
 const CreateAssessment = React.lazy(() => import('./pages/admin/AssessmentCenter/CreateAssessment.jsx'));
 const AssessmentDetails = React.lazy(() => import('./pages/admin/AssessmentCenter/AssessmentDetails.jsx'));
@@ -65,6 +66,9 @@ const Review = React.lazy(() => import('./pages/Review/Review.jsx'));
 const GenerativeAI = React.lazy(() => import('./pages/GenerativeAI/GenerativeAipage.jsx'));
 const GenerativeAIcard = React.lazy(() => import('./pages/GenerativeAI/GenerativeAIcard.jsx'));
 const GenerativeAipagedetails = React.lazy(() => import('./pages/GenerativeAI/GenerativeAipagedetails.jsx'));
+const Home = React.lazy(() => import('./pages/Home'));
+const Courses = React.lazy(() => import('./pages/Courses/Courses.jsx'));
+const CourseDetails = React.lazy(() => import('./pages/Courses/CourseDetails.jsx'));
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -95,7 +99,7 @@ const router = createBrowserRouter(
       {/* Admin Route */}
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin/test-auth" element={<TestAuth />} />
-      <Route path="/admin" element={<AdminLayout />}>
+      <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<AdminHome />} />
         <Route path="dashboard" element={<AdminDashboard />} />
@@ -108,11 +112,15 @@ const router = createBrowserRouter(
         <Route path="guest-teachers" element={<GuestTeachers />} />
         
         {/* Course Management */}
-        <Route path="course-management">
-          <Route index element={<Navigate to="list" replace />} />
-          <Route path="list" element={<CourseList />} />
-          <Route path="create" element={<CourseForm />} />
-          <Route path="edit/:id" element={<CourseForm />} />
+        <Route path="courses">
+          <Route index element={<CourseList />} />
+          <Route path="new" element={<CourseForm />} />
+          <Route path=":id/edit" element={<CourseForm />} />
+          <Route path=":id" element={<CourseDetails />} />
+          <Route path="categories" element={<CategoryManager />} />
+          <Route path="settings" element={<CourseSettings />} />
+          <Route path=":courseId/lessons/new" element={<LessonForm />} />
+          <Route path=":courseId/lessons/:lessonId/edit" element={<LessonForm />} />
         </Route>
         
         {/* Assessment Center */}

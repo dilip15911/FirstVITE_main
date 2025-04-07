@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useAuth } from '../../../context/AuthContext';
 import './AdminLogin.css';
 
 const AdminLogin = () => {
@@ -11,13 +11,15 @@ const AdminLogin = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     
-    // Check if already logged in
+    const { user, adminLogin } = useAuth();
+    
+    // Check if already logged in as admin
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
+        // If user exists and has admin role, redirect to dashboard
+        if (user && (user.role === 'admin' || user.isAdmin === true)) {
             navigate('/admin/dashboard');
         }
-    }, [navigate]);
+    }, [user, navigate]);
 
     useEffect(() => {
         // Create particles
@@ -59,34 +61,21 @@ const AdminLogin = () => {
         try {
             console.log('Attempting admin login with:', { username });
             
-            // Direct API call to ensure we get the complete response
-            const response = await axios.post('http://localhost:5000/api/auth/admin/login', {
-                username,
-                password
-            });
+            // Use the adminLogin function from AuthContext
+            const response = await adminLogin(username, password);
             
-            console.log('Login response:', response.data);
-            
-            if (response.data && response.data.token) {
-                // Store token
-                const token = response.data.token;
-                localStorage.setItem('token', token);
-                
-                // Store admin data
-                if (response.data.admin) {
-                    localStorage.setItem('adminData', JSON.stringify(response.data.admin));
-                }
-                
+            if (response.success) {
                 console.log('Login successful, redirecting to dashboard');
-                
-                // Force redirect to admin dashboard
-                window.location.href = '/admin/dashboard';
+                // Set isAdmin flag in localStorage
+                localStorage.setItem('isAdmin', 'true');
+                // Navigate to admin dashboard
+                navigate('/admin/dashboard');
             } else {
-                throw new Error('Invalid response from server');
+                throw new Error(response.message || 'Invalid response from server');
             }
         } catch (err) {
             console.error('Login error:', err);
-            setError(err.response?.data?.error || "Login failed. Please check your credentials.");
+            setError(err.message || "Login failed. Please check your credentials.");
         } finally {
             setLoading(false);
         }

@@ -18,7 +18,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
   useEffect(() => {
     // Auto-expand relevant dropdown based on current path
-    if (location.pathname.includes('/admin/course-management') || location.pathname === '/admin/courses') {
+    if (location.pathname.includes('/admin/courses')) {
       setIsCourseOpen(true);
     }
     
@@ -91,19 +91,19 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <div className="menu-item">
               <Link to="/admin/courses" className={location.pathname === "/admin/courses" ? "active" : ""}>
                 <span className="menu-icon"><FaList /></span>
-                All Courses
-              </Link>
-            </div>
-            <div className="menu-item">
-              <Link to="/admin/course-management/list" className={location.pathname === "/admin/course-management/list" ? "active" : ""}>
-                <span className="menu-icon"><FaList /></span>
                 Course List
               </Link>
             </div>
             <div className="menu-item">
-              <Link to="/admin/course-management/create" className={location.pathname === "/admin/course-management/create" ? "active" : ""}>
+              <Link to="/admin/courses/new" className={location.pathname === "/admin/courses/new" ? "active" : ""}>
                 <span className="menu-icon"><FaPlus /></span>
-                Create Course
+                Add New Course
+              </Link>
+            </div>
+            <div className="menu-item">
+              <Link to="/admin/categories" className={location.pathname === "/admin/categories" ? "active" : ""}>
+                <span className="menu-icon"><FaList /></span>
+                Categories
               </Link>
             </div>
           </div>

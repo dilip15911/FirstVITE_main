@@ -104,12 +104,21 @@ export const adminLogin = async (username, password) => {
   try {
     const response = await axios.post('/auth/admin/login', { username, password });
     if (response.data.success) {
-      // Store admin token in both local and session storage
+      // Store admin token in localStorage
       setToken(response.data.token);
       setupAxiosInterceptors(response.data.token);
       
-      // Store admin data in session
-      sessionStorage.setItem('adminData', JSON.stringify(response.data.admin));
+      // Store admin data in localStorage
+      localStorage.setItem('adminData', JSON.stringify(response.data.admin));
+      
+      // Set isAdmin flag
+      localStorage.setItem('isAdmin', 'true');
+      
+      // Ensure admin has the correct role
+      if (response.data.admin && !response.data.admin.role) {
+        response.data.admin.role = 'admin';
+        localStorage.setItem('adminData', JSON.stringify(response.data.admin));
+      }
       
       return response.data;
     }
