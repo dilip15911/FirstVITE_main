@@ -597,3 +597,49 @@ exports.getAllStudents = async (req, res) => {
     handleDBError(error);
   }
 };
+
+// Refresh Token Controller
+exports.refreshToken = async (req, res) => {
+    try {
+        const { token } = req.body;
+        
+        if (!token) {
+            return res.status(400).json({
+                success: false,
+                message: 'Token is required'
+            });
+        }
+
+        try {
+            // Verify the token
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            
+            // Generate new token
+            const newToken = jwt.sign({
+                id: decoded.id,
+                username: decoded.username,
+                role: decoded.role
+            }, process.env.JWT_SECRET, {
+                expiresIn: '24h'
+            });
+
+            res.json({
+                success: true,
+                token: newToken,
+                message: 'Token refreshed successfully'
+            });
+        } catch (jwtError) {
+            // If token is invalid or expired
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid or expired token'
+            });
+        }
+    } catch (error) {
+        console.error('Token refresh error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+};

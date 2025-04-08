@@ -26,6 +26,16 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS students (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  mobile VARCHAR(20) NOT NULL,
+  course VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS programs (
   id INT AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
@@ -57,7 +67,7 @@ CREATE TABLE IF NOT EXISTS enrollments (
   payment_status ENUM('pending', 'completed', 'failed', 'refunded') DEFAULT 'pending',
   payment_id VARCHAR(255),
   payment_amount DECIMAL(10, 2),
-  payment_date TIMESTAMP,
+  payment_date TIMESTAMP NULL DEFAULT NULL,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE
 );
@@ -76,7 +86,7 @@ CREATE TABLE IF NOT EXISTS corporate_requests (
   payment_status ENUM('pending', 'completed', 'failed', 'refunded') DEFAULT 'pending',
   payment_id VARCHAR(255),
   payment_amount DECIMAL(10, 2),
-  payment_date TIMESTAMP,
+  payment_date TIMESTAMP NULL DEFAULT NULL,
   admin_notes TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -96,6 +106,18 @@ CREATE TABLE IF NOT EXISTS payments (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
+
+CREATE TABLE IF NOT EXISTS admin_users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(50) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+INSERT INTO admin_users (username, password) VALUES 
+('admin', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'); -- password: password
+
 `;
 
 connection.connect((err) => {

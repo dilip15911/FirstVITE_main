@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import './AdminLogin.css';
 
@@ -10,14 +10,16 @@ const AdminLogin = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
     
-    const { user, adminLogin } = useAuth();
+    const { user, adminLogin, refreshUser } = useAuth();
     
     // Check if already logged in as admin
     useEffect(() => {
         // If user exists and has admin role, redirect to dashboard
         if (user && (user.role === 'admin' || user.isAdmin === true)) {
-            navigate('/admin/dashboard');
+            console.log('User is already logged in as admin, redirecting to dashboard');
+            navigate('/admin/dashboard', { replace: true });
         }
     }, [user, navigate]);
 
@@ -63,15 +65,26 @@ const AdminLogin = () => {
             
             // Use the adminLogin function from AuthContext
             const response = await adminLogin(username, password);
+            console.log('Admin login response:', response);
             
             if (response.success) {
                 console.log('Login successful, redirecting to dashboard');
-                // Set isAdmin flag in localStorage
-                localStorage.setItem('isAdmin', 'true');
-                // Navigate to admin dashboard
-                navigate('/admin/dashboard');
+                console.log('Token in localStorage:', localStorage.getItem('token'));
+                console.log('AdminData in localStorage:', localStorage.getItem('adminData'));
+                
+                // Always redirect to the admin dashboard after successful login
+                console.log('Redirecting to: /admin/dashboard');
+                
+                // Wait a moment for token to be properly set and context to update
+                setTimeout(() => {
+                    // Force refresh user data before navigation
+                    refreshUser().then(() => {
+                        // Navigate to the admin dashboard
+                        navigate('/admin/dashboard', { replace: true });
+                    });
+                }, 300);
             } else {
-                throw new Error(response.message || 'Invalid response from server');
+                throw new Error(response.message || 'Invalid credentials');
             }
         } catch (err) {
             console.error('Login error:', err);
@@ -104,7 +117,6 @@ const AdminLogin = () => {
                                             placeholder="Enter username"
                                             value={username}
                                             onChange={(e) => setUsername(e.target.value)}
-                                            className="admin-login-input"
                                             required
                                         />
                                     </Form.Group>
@@ -116,25 +128,17 @@ const AdminLogin = () => {
                                             placeholder="Enter password"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
-                                            className="admin-login-input"
                                             required
                                         />
                                     </Form.Group>
 
-                                    <Button 
-                                        variant="primary" 
-                                        className="w-100 admin-login-button"
+                                    <Button
+                                        variant="primary"
                                         type="submit"
+                                        className="admin-login-button w-100"
                                         disabled={loading}
                                     >
-                                        {loading ? (
-                                            <>
-                                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                                Logging in...
-                                            </>
-                                        ) : (
-                                            'Login'
-                                        )}
+                                        {loading ? 'Logging in...' : 'Login'}
                                     </Button>
                                 </Form>
                             </Card.Body>
