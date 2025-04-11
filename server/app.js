@@ -31,6 +31,13 @@ const pool = mysql.createPool({
 pool.getConnection()
   .then(connection => {
     console.log('Database connected successfully');
+    connection.query('SELECT 1 + 1 as test', (error, results) => {
+      if (error) {
+        console.error('Error executing test query:', error);
+      } else {
+        console.log('Test query successful:', results);
+      }
+    });
     connection.release();
   })
   .catch(err => {
@@ -49,6 +56,7 @@ const supportRoutes = require('./routes/supportRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const userPaymentRoutes = require('./routes/userPaymentRoutes');
 const courseRoutes = require('./routes/courseRoutes');
+const studentRoutes = require('./routes/studentsRoutes');
 
 // Initialize express app
 const app = express();
@@ -108,6 +116,7 @@ app.use('/api/admin/support', supportRoutes);
 app.use('/api/admin/payments', paymentRoutes);
 app.use('/api/user/payments', userPaymentRoutes);
 app.use('/api/courses', courseRoutes);
+app.use('/api/students', studentRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {

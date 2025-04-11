@@ -41,6 +41,7 @@ const Students = () => {
     const fetchStudents = async () => {
         try {
             setLoading(true);
+            console.log('Fetching students with search term:', searchTerm);
             
             // Get the current token
             let token = localStorage.getItem('token');
@@ -66,15 +67,19 @@ const Students = () => {
             // Set the token in axios headers for this specific request
             const config = {
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
             };
             
-            console.log('Fetching students with token');
+            console.log('Fetching students with token:', token);
+            console.log('Request URL:', `${API_URL}/students?search=${searchTerm}`);
+            
             const response = await axios.get(`${API_URL}/students?search=${searchTerm}`, config);
+            console.log('Response data:', response.data);
             setStudents(response.data || []);
         } catch (error) {
-            console.error('Error fetching students:', error);
+            console.error('Error fetching students:', error.response?.data || error.message);
             toast.error(error.response?.data?.message || 'Failed to load students');
             if (error.response?.status === 401) {
                 // Clear token and redirect to login
@@ -87,13 +92,18 @@ const Students = () => {
     };
 
     useEffect(() => {
+        console.log('isAdmin:', isAdmin);
         if (isAdmin) {
             fetchStudents();
         }
     }, [searchTerm, isAdmin]);
 
     const handleChange = (e) => {
-        setNewStudent({ ...newStudent, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setNewStudent(prev => ({
+            ...prev,
+            [name]: value
+        }));
     };
 
     const handleSearch = (e) => {
@@ -101,20 +111,32 @@ const Students = () => {
     };
 
     const validateForm = () => {
-        if (!newStudent.name || !newStudent.email || !newStudent.mobile || !newStudent.course) {
-            toast.error('All fields are required');
-            return false;
+        const errors = {};
+        
+        if (!newStudent.name) {
+            errors.name = 'Name is required';
+        }
+        
+        if (!newStudent.email) {
+            errors.email = 'Email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newStudent.email)) {
+            errors.email = 'Please enter a valid email address';
+        }
+        
+        if (!newStudent.mobile) {
+            errors.mobile = 'Mobile number is required';
+        } else if (!/^[0-9]{10}$/.test(newStudent.mobile)) {
+            errors.mobile = 'Please enter a valid 10-digit mobile number';
+        }
+        
+        if (!newStudent.course) {
+            errors.course = 'Course is required';
         }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(newStudent.email)) {
-            toast.error('Please enter a valid email address');
-            return false;
-        }
-
-        const mobileRegex = /^[0-9]{10}$/;
-        if (!mobileRegex.test(newStudent.mobile)) {
-            toast.error('Please enter a valid 10-digit mobile number');
+        if (Object.keys(errors).length > 0) {
+            Object.entries(errors).forEach(([field, message]) => {
+                toast.error(`${field.charAt(0).toUpperCase() + field.slice(1)}: ${message}`);
+            });
             return false;
         }
 
@@ -157,7 +179,14 @@ const Students = () => {
             };
             
             console.log('Sending request to add student with token');
-            const response = await axios.post(`${API_URL}/students`, newStudent, config);
+            console.log('Student data:', newStudent);
+            
+            const response = await axios.post(`${API_URL}/students`, {
+                name: newStudent.name,
+                email: newStudent.email,
+                mobile: newStudent.mobile,
+                course: newStudent.course
+            }, config);
             
             if (response.status === 201) {
                 toast.success('Student added successfully');
@@ -171,6 +200,7 @@ const Students = () => {
             }
         } catch (error) {
             console.error('Error adding student:', error);
+            console.error('Error response:', error.response?.data);
             toast.error(error.response?.data?.message || 'Failed to add student');
             if (error.response?.status === 401) {
                 // Clear token and redirect to login
@@ -230,7 +260,12 @@ const Students = () => {
             };
             
             console.log('Updating student with token');
-            const response = await axios.put(`${API_URL}/students/${currentStudentId}`, newStudent, config);
+            const response = await axios.put(`${API_URL}/students/${currentStudentId}`, {
+                name: newStudent.name,
+                email: newStudent.email,
+                mobile: newStudent.mobile,
+                course: newStudent.course
+            }, config);
             
             if (response.status === 200) {
                 toast.success('Student updated successfully');
