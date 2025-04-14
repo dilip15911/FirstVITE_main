@@ -1,12 +1,11 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
-const db = require('../config/db');
+const db = require('../db');
 const { sendVerificationEmail } = require('../utils/email');
-const connection = require("../config/db");
 
 // Admin Login Controller
-exports.adminLogin = async (req, res) => {
+module.exports.adminLogin = async (req, res) => {
   try {
     console.log('Admin login attempt:', req.body);
     const { username, password } = req.body;
@@ -86,7 +85,7 @@ const handleDBError = (error) => {
 };
 
 // Auth Controller Methods
-exports.signup = async (req, res) => {
+module.exports.signup = async (req, res) => {
   try {
     handleValidationErrors(req);
     const { name, email, password } = req.body;
@@ -149,7 +148,7 @@ exports.signup = async (req, res) => {
   }
 };
 
-exports.login = async (req, res) => {
+module.exports.login = async (req, res) => {
   try {
     handleValidationErrors(req);
     const { email, password } = req.body;
@@ -232,7 +231,7 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.verifyEmail = async (req, res) => {
+module.exports.verifyEmail = async (req, res) => {
   try {
     handleValidationErrors(req);
     const { userId, otp } = req.body;
@@ -270,7 +269,7 @@ exports.verifyEmail = async (req, res) => {
   }
 };
 
-exports.resendVerification = async (req, res) => {
+module.exports.resendVerification = async (req, res) => {
   try {
     handleValidationErrors(req);
     const { userId } = req.body;
@@ -316,33 +315,52 @@ exports.resendVerification = async (req, res) => {
   }
 };
 
-exports.getProfile = async (req, res) => {
-  try {
-    const [users] = await db.query(
-      'SELECT id, name, email, mobile, course, created_at, updated_at FROM users WHERE id = ?',
-      [req.user.userId]
-    );
+module.exports.getProfile = async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: 'No token provided'
+            });
+        }
 
-    if (users.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
+        // Verify token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.userId;
+
+        // Get user information
+        const [user] = await db.query('SELECT * FROM users WHERE id = ?', [userId]);
+        
+        if (!user[0]) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Return user profile (excluding sensitive info like password)
+        const userProfile = {
+            id: user[0].id,
+            name: user[0].name,
+            email: user[0].email,
+            role: user[0].role
+        };
+
+        return res.status(200).json({
+            success: true,
+            data: userProfile
+        });
+    } catch (error) {
+        console.error('Profile error:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Server error'
+        });
     }
-
-    res.json({
-      success: true,
-      user: users[0]
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
-  }
 };
 
-exports.updateProfile = async (req, res) => {
+module.exports.updateProfile = async (req, res) => {
   try {
     handleValidationErrors(req);
     const { name, mobile, course } = req.body;
@@ -393,7 +411,7 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-exports.getUserHistory = async (req, res) => {
+module.exports.getUserHistory = async (req, res) => {
   try {
     const [history] = await db.query(
       'SELECT * FROM user_history WHERE user_id = ? ORDER BY created_at DESC',
@@ -412,7 +430,7 @@ exports.getUserHistory = async (req, res) => {
   }
 };
 
-exports.restoreProfile = async (req, res) => {
+module.exports.restoreProfile = async (req, res) => {
   try {
     const { historyId } = req.body;
     const userId = req.user.userId;
@@ -477,7 +495,7 @@ exports.restoreProfile = async (req, res) => {
 };
 
 // Get all users
-exports.getAllUser = async (req, res) => {
+module.exports.getAllUser = async (req, res) => {
   try {
     const searchQuery = req.query.search || '';
     
@@ -500,7 +518,7 @@ exports.getAllUser = async (req, res) => {
 };
 
 // Get user by ID
-exports.getUser = async (req, res) => {
+module.exports.getUser = async (req, res) => {
   try {
     const { userId } = req.params;
     const [user] = await db.query('SELECT id, name, email, role, is_verified FROM users WHERE id = ?', [userId]);
@@ -522,7 +540,7 @@ exports.getUser = async (req, res) => {
 };
 
 // Update user
-exports.updateUser = async (req, res) => {
+module.exports.updateUser = async (req, res) => {
   try {
     const { userId } = req.params;
     const { name, mobile, course } = req.body;
@@ -559,7 +577,7 @@ exports.updateUser = async (req, res) => {
 };
 
 // Delete user
-exports.deleteUser = async (req, res) => {
+module.exports.deleteUser = async (req, res) => {
   try {
     const { userId } = req.params;
     await db.query('DELETE FROM users WHERE id = ?', [userId]);
@@ -573,7 +591,7 @@ exports.deleteUser = async (req, res) => {
 };
 
 // Get all instructors
-exports.getAllInstructors = async (req, res) => {
+module.exports.getAllInstructors = async (req, res) => {
   try {
     const [instructors] = await db.query('SELECT id, name, email, role, is_verified FROM users WHERE role IN (?, ?)', ['admin', 'instructor']);
     res.json({
@@ -586,7 +604,7 @@ exports.getAllInstructors = async (req, res) => {
 };
 
 // Get all students
-exports.getAllStudents = async (req, res) => {
+module.exports.getAllStudents = async (req, res) => {
   try {
     const [students] = await db.query('SELECT id, name, email, role, is_verified FROM users WHERE role = ?', ['student']);
     res.json({
@@ -599,7 +617,7 @@ exports.getAllStudents = async (req, res) => {
 };
 
 // Refresh Token Controller
-exports.refreshToken = async (req, res) => {
+module.exports.refreshToken = async (req, res) => {
     try {
         const { token } = req.body;
         
@@ -642,4 +660,25 @@ exports.refreshToken = async (req, res) => {
             message: 'Internal server error'
         });
     }
+};
+
+module.exports.getMe = async (req, res) => {
+  try {
+    const { user } = req;
+    res.json({ success: true, user });
+  } catch (error) {
+    console.error('Get me error:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+};
+
+module.exports.logout = async (req, res) => {
+  try {
+    // Clear the token from the client-side storage
+    res.clearCookie('token');
+    res.json({ success: true, message: 'Logged out successfully' });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ success: false, error: 'Failed to logout' });
+  }
 };

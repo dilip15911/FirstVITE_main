@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const { protect } = require('../middleware/auth');
+const { protect, admin } = require('../middleware/auth');
 const userController = require('../controllers/userController');
 
 // Configure multer for file uploads
@@ -39,5 +39,27 @@ router.post('/profile/picture', protect, upload.single('profile_picture'), userC
 router.delete('/profile/picture', protect, userController.deleteProfilePicture);
 router.get('/', protect, userController.getAllUsers);
 router.delete('/:id', protect, userController.deleteUser);
+
+// Get all instructors
+router.get('/instructors', protect, admin, async (req, res) => {
+    try {
+        const pool = require('../config/db');
+        const [instructors] = await pool.query(
+            'SELECT id, name, email FROM users WHERE role = "instructor"'
+        );
+
+        res.json({
+            success: true,
+            data: instructors
+        });
+    } catch (error) {
+        console.error('Error fetching instructors:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch instructors',
+            error: error.message
+        });
+    }
+});
 
 module.exports = router;

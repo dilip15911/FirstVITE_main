@@ -118,6 +118,23 @@ CREATE TABLE IF NOT EXISTS admin_users (
 INSERT INTO admin_users (username, password) VALUES 
 ('admin', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'); -- password: password
 
+CREATE TABLE IF NOT EXISTS course_settings (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  default_course_status ENUM('draft', 'published', 'archived') DEFAULT 'draft',
+  enable_course_reviews BOOLEAN DEFAULT TRUE,
+  enable_course_ratings BOOLEAN DEFAULT TRUE,
+  enable_student_enrollment BOOLEAN DEFAULT TRUE,
+  max_file_upload_size INT DEFAULT 50,
+  allowed_file_types VARCHAR(255) DEFAULT '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip,.mp4,.mp3',
+  default_course_price DECIMAL(10, 2) DEFAULT 0,
+  currency VARCHAR(3) DEFAULT 'USD',
+  enable_course_certificates BOOLEAN DEFAULT TRUE,
+  certificate_template VARCHAR(50) DEFAULT 'default',
+  notification_emails TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 `;
 
 connection.connect((err) => {

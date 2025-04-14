@@ -40,6 +40,10 @@ const CourseSettings = () => {
                 throw new Error('Not authenticated');
             }
 
+            console.log('Fetching course settings...');
+            console.log('API URL:', `${API_URL}/api/admin/settings/courses`);
+            console.log('Token:', token.startsWith('Bearer ') ? token : `Bearer ${token.slice(0, 10)}...`);
+
             const response = await axios.get(`${API_URL}/api/admin/settings/courses`, {
                 headers: {
                     'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`
@@ -81,6 +85,11 @@ const CourseSettings = () => {
                 throw new Error('Not authenticated');
             }
 
+            console.log('Updating course settings...');
+            console.log('API URL:', `${API_URL}/api/admin/settings/courses`);
+            console.log('Settings:', settings);
+            console.log('Token:', token.startsWith('Bearer ') ? token : `Bearer ${token.slice(0, 10)}...`);
+
             const response = await axios.put(
                 `${API_URL}/api/admin/settings/courses`,
                 settings,
@@ -94,6 +103,7 @@ const CourseSettings = () => {
 
             if (response.data && response.data.success) {
                 toast.success('Course settings updated successfully!');
+                fetchSettings(); // Refresh the settings after update
             } else {
                 throw new Error(response.data.message || 'Failed to update settings');
             }
@@ -101,9 +111,6 @@ const CourseSettings = () => {
             console.error('Error updating course settings:', err);
             setError(err.message || 'Failed to update course settings');
             toast.error(err.message || 'Failed to update course settings');
-            
-            // For demo purposes, simulate success if API fails
-            toast.success('Course settings updated successfully!');
         } finally {
             setSaving(false);
         }

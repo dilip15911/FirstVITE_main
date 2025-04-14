@@ -50,17 +50,13 @@ const adminLoginValidation = [
 ];
 
 // Public routes
-router.post('/signup', signupValidation, authController.signup);
 router.post('/login', loginValidation, authController.login);
+router.post('/signup', signupValidation, authController.signup);
 router.post('/verify-email', verifyEmailValidation, authController.verifyEmail);
 router.post('/resend-otp', resendOtpValidation, authController.resendVerification);
-router.post('/admin/login', adminLoginValidation, authController.adminLogin);
-router.post('/refresh', authController.refreshToken);
 
-// Protected routes (require authentication)
+// Protected routes
 router.use(protect);
-
-// User routes
 router.get('/profile', authController.getProfile);
 router.put('/profile', validateProfile, authController.updateProfile);
 router.get('/history', authController.getUserHistory);

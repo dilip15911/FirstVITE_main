@@ -272,6 +272,49 @@ export const updateProfile = async (data) => {
     }
 };
 
+// Add logout function
+export const logout = async () => {
+    try {
+        const token = getToken();
+        if (!token) {
+            return { success: false, message: 'No token found' };
+        }
+
+        const response = await axios.post(`${API_URL}/auth/logout`, null, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        if (response.data.success) {
+            // Clear all auth data
+            clearToken();
+            localStorage.removeItem('userData');
+            localStorage.removeItem('adminData');
+            localStorage.removeItem('isAdmin');
+            sessionStorage.removeItem('token');
+            
+            return { success: true };
+        }
+        
+        return { success: false, message: response.data.message || 'Logout failed' };
+    } catch (error) {
+        console.error('Logout error:', error);
+        clearToken();
+        localStorage.removeItem('userData');
+        localStorage.removeItem('adminData');
+        localStorage.removeItem('isAdmin');
+        sessionStorage.removeItem('token');
+        
+        return { 
+            success: false, 
+            message: error.response?.data?.message || 
+                     error.message || 
+                     'Logout failed. Please try again.' 
+        };
+    }
+};
+
 const authService = {
     login,
     adminLogin,
@@ -280,7 +323,8 @@ const authService = {
     setupAxiosInterceptors,
     getToken,
     setToken,
-    clearToken
+    clearToken,
+    logout
 };
 
 export { authService };

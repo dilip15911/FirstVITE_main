@@ -9,6 +9,7 @@ import PrivateRoute from '../components/PrivateRoute/PrivateRoute';
 import CreateEmployee from '../pages/admin/Employee/CreateEmployee';
 import ManageEmployees from '../pages/admin/Employee/ManageEmployees';
 import ViewEmployees from '../pages/admin/Employee/ViewEmployees';
+import StudentSupport from '../pages/admin/StudentSupport';
 
 const AppRoutes = () => {
   return (
@@ -22,6 +23,14 @@ const AppRoutes = () => {
         element={
           <PrivateRoute>
             <Profile />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/studentsupport"
+        element={
+          <PrivateRoute>
+            <StudentSupport />
           </PrivateRoute>
         }
       />

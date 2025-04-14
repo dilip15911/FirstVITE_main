@@ -33,6 +33,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     if (location.pathname.includes('/admin/payments')) {
       setIsPaymentOpen(true);
     }
+    
+    if (location.pathname.includes('/admin/course-management')) {
+      setIsCourseOpen(true);
+    }
   }, [location.pathname]);
 
   const toggleEmployeeDropdown = (e) => {
@@ -89,21 +93,15 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         {isCourseOpen && isOpen && (
           <div className="submenu">
             <div className="menu-item">
-              <Link to="/admin/courses" className={location.pathname === "/admin/courses" ? "active" : ""}>
+              <Link to="/admin/course-management" className={location.pathname === "/admin/course-management" ? "active" : ""}>
                 <span className="menu-icon"><FaList /></span>
                 Course List
               </Link>
             </div>
             <div className="menu-item">
-              <Link to="/admin/courses/new" className={location.pathname === "/admin/courses/new" ? "active" : ""}>
-                <span className="menu-icon"><FaPlus /></span>
-                Add New Course
-              </Link>
-            </div>
-            <div className="menu-item">
-              <Link to="/admin/categories" className={location.pathname === "/admin/categories" ? "active" : ""}>
-                <span className="menu-icon"><FaList /></span>
-                Categories
+              <Link to="/admin/course-management/settings" className={location.pathname === "/admin/course-management/settings" ? "active" : ""}>
+                <span className="menu-icon"><FaCog /></span>
+                Course Settings
               </Link>
             </div>
           </div>

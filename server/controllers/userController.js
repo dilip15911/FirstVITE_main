@@ -236,6 +236,35 @@ const deleteProfilePicture = async (req, res) => {
   }
 };
 
+// Get all instructors
+async function getInstructors(req, res) {
+    try {
+        const connection = await db.getConnection();
+        try {
+            const [instructors] = await connection.query(
+                `SELECT u.*, COUNT(c.id) as course_count 
+                FROM users u 
+                LEFT JOIN courses c ON u.id = c.instructor_id 
+                WHERE u.role = "instructor" 
+                GROUP BY u.id 
+                ORDER BY u.name ASC`
+            );
+            res.status(200).json({
+                success: true,
+                data: instructors
+            });
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Error fetching instructors:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch instructors'
+        });
+    }
+}
+
 module.exports = {
   getProfile,
   updateProfile,
@@ -244,5 +273,6 @@ module.exports = {
   uploadProfilePicture,
   deleteProfilePicture,
   getAllUsers,
-  deleteUser
+  deleteUser,
+  getInstructors
 };

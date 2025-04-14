@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const verifyToken = require('../authMiddleware');
+const { protect, admin, restrictTo } = require('../middleware/auth');
 const logger = console;
 
 // Database middleware
@@ -13,7 +13,7 @@ router.use((req, res, next) => {
 });
 
 // Create employee
-router.post('/', verifyToken, async (req, res) => {
+router.post('/', protect, async (req, res) => {
   try {
     const { name, email, role } = req.body;
 
@@ -54,7 +54,7 @@ router.post('/', verifyToken, async (req, res) => {
 });
 
 // Get all employees
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', protect, async (req, res) => {
   try {
     const [employees] = await req.db.query('SELECT * FROM employees');
     res.json(employees);
@@ -65,7 +65,7 @@ router.get('/', verifyToken, async (req, res) => {
 });
 
 // Get employee by ID
-router.get('/:id', verifyToken, async (req, res) => {
+router.get('/:id', protect, async (req, res) => {
   try {
     const [employee] = await req.db.query(
       'SELECT * FROM employees WHERE id = ?',
@@ -84,7 +84,7 @@ router.get('/:id', verifyToken, async (req, res) => {
 });
 
 // Update employee
-router.put('/:id', verifyToken, async (req, res) => {
+router.put('/:id', protect, async (req, res) => {
   try {
     const { name, email, role } = req.body;
     const employeeId = req.params.id;
@@ -121,7 +121,7 @@ router.put('/:id', verifyToken, async (req, res) => {
 });
 
 // Delete employee
-router.delete('/:id', verifyToken, async (req, res) => {
+router.delete('/:id', protect, async (req, res) => {
   try {
     const employeeId = req.params.id;
 

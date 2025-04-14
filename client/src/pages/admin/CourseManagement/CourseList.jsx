@@ -1,225 +1,310 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Table, Button, Badge, Form, Row, Col, Card, Spinner, Alert, InputGroup } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
-import { FaEdit, FaTrash, FaEye, FaPlus, FaSearch, FaFilter } from 'react-icons/fa';
-import { fetchCourses, deleteCourse, fetchCategories, fetchCoursesWithFilters } from '../../../services/courseService';
+import { Container, Row, Col, Table, Button, Form, Spinner, Alert, Dropdown, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { FaSearch, FaFilter, FaPlus, FaEdit, FaTrash, FaDownload, FaUpload, FaEye, FaInfoCircle } from 'react-icons/fa';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { fetchCourses, fetchCategories, deleteCourse } from '../../../services/courseService';
 
 const CourseList = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [courses, setCourses] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterCategory, setFilterCategory] = useState('all');
-    const [deleteLoading, setDeleteLoading] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState('all');
+    const [showFilters, setShowFilters] = useState(false);
+    const [sortConfig, setSortConfig] = useState({
+        key: 'created_at',
+        direction: 'desc'
+    });
 
     useEffect(() => {
-        loadData();
+        loadCourses();
+        loadCategories();
     }, []);
 
-    const loadData = async () => {
+    const loadCourses = async () => {
         try {
             setLoading(true);
-            setError(null);
-            
-            // Store admin flag in localStorage if not already set
-            localStorage.setItem('isAdmin', 'true');
-            
-            // Fetch courses and categories in parallel
-            const [coursesData, categoriesData] = await Promise.all([
-                fetchCourses(),
-                fetchCategories()
-            ]);
-            
-            setCourses(coursesData || []);
-            setCategories(categoriesData || []);
+            const response = await fetchCourses({
+                search: searchTerm,
+                category: selectedCategory === 'all' ? '' : selectedCategory
+            });
+            setCourses(response.data);
         } catch (err) {
-            console.error('Error loading data:', err);
-            setError(err.message || 'Failed to load data');
-            toast.error(err.message || 'Failed to load data');
+            setError(err.message || 'Failed to load courses');
+            toast.error(err.message || 'Failed to load courses');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleSearch = async (e) => {
-        e.preventDefault();
+    const loadCategories = async () => {
         try {
-            setLoading(true);
-            setError(null);
-            
-            // Use the new search method with filters
-            const courses = await fetchCoursesWithFilters(searchTerm, filterCategory);
-            setCourses(courses || []);
+            const response = await fetchCategories();
+            setCategories([{ id: 'all', name: 'All Categories' }, ...response.data]);
         } catch (err) {
-            console.error('Error searching courses:', err);
-            setError(err.message || 'Failed to search courses');
-            toast.error(err.message || 'Failed to search courses');
-        } finally {
-            setLoading(false);
+            setError(err.message || 'Failed to load categories');
+            toast.error(err.message || 'Failed to load categories');
         }
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this course?')) {
-            try {
-                setDeleteLoading(true);
-                await deleteCourse(id);
-                toast.success('Course deleted successfully');
-                // Refresh the course list
-                await loadData();
-            } catch (err) {
-                console.error('Error deleting course:', err);
-                setError(err.message || 'Failed to delete course');
-                toast.error(err.message || 'Failed to delete course');
-            } finally {
-                setDeleteLoading(false);
-            }
+    const handleSearch = (e) => {
+        setSearchTerm(e.target.value);
+        loadCourses();
+    };
+
+    const handleCategoryChange = (category) => {
+        setSelectedCategory(category);
+        loadCourses();
+    };
+
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+        
+        const sortedCourses = [...courses].sort((a, b) => {
+            if (a[key] < b[key]) return direction === 'asc' ? -1 : 1;
+            if (a[key] > b[key]) return direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+        setCourses(sortedCourses);
+    };
+
+    const handleDelete = async (courseId) => {
+        if (!window.confirm('Are you sure you want to delete this course?')) {
+            return;
+        }
+
+        try {
+            await deleteCourse(courseId);
+            toast.success('Course deleted successfully');
+            loadCourses();
+        } catch (err) {
+            toast.error(err.message || 'Failed to delete course');
         }
     };
 
-    if (loading) {
-        return (
-            <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '300px' }}>
-                <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                </Spinner>
-            </Container>
-        );
-    }
+    const getStatusBadge = (status) => {
+        switch (status) {
+            case 'active':
+                return <span className="badge bg-success">Active</span>;
+            case 'inactive':
+                return <span className="badge bg-secondary">Inactive</span>;
+            default:
+                return <span className="badge bg-warning">{status}</span>;
+        }
+    };
 
     return (
-        <Container fluid>
+        <Container fluid className="p-4">
+            <Row className="mb-4">
+                <Col>
+                    <h2>Courses Management</h2>
+                </Col>
+            </Row>
+
             {error && (
-                <Alert variant="danger" dismissible onClose={() => setError(null)}>
+                <Alert variant="danger" className="mb-4">
                     {error}
                 </Alert>
             )}
-            
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>Course Management</h2>
-                <Button 
-                    variant="primary" 
-                    as={Link} 
-                    to="/admin/courses/new"
-                    className="d-flex align-items-center"
-                >
-                    <FaPlus className="me-2" /> Create New Course
-                </Button>
-            </div>
 
-            <Card className="mb-4">
-                <Card.Body>
-                    <Form onSubmit={handleSearch} className="mb-3">
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group controlId="searchTerm">
-                                    <Form.Label>Search Courses</Form.Label>
-                                    <InputGroup>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Search by title or description"
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            className="me-2"
-                                        />
-                                        <Button type="submit" variant="outline-secondary">
-                                            <FaSearch />
-                                        </Button>
-                                    </InputGroup>
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group controlId="filterCategory">
-                                    <Form.Label>Filter by Category</Form.Label>
-                                    <Form.Select
-                                        value={filterCategory}
-                                        onChange={(e) => setFilterCategory(e.target.value)}
-                                    >
-                                        <option value="all">All Categories</option>
-                                        {categories.map(category => (
-                                            <option key={category.id} value={category.id}>
-                                                {category.name}
-                                            </option>
-                                        ))}
-                                    </Form.Select>
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                    </Form>
-                </Card.Body>
-            </Card>
+            <Row className="mb-4">
+                <Col md={6}>
+                    <Form.Group className="mb-3">
+                        <Form.Control
+                            type="text"
+                            placeholder="Search courses..."
+                            value={searchTerm}
+                            onChange={handleSearch}
+                            className="me-2"
+                        />
+                    </Form.Group>
+                </Col>
+                <Col md={6}>
+                    <Dropdown className="float-end">
+                        <Dropdown.Toggle variant="outline-secondary">
+                            {categories.find(c => c.id === selectedCategory)?.name || 'All Categories'}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            {categories.map(category => (
+                                <Dropdown.Item
+                                    key={category.id}
+                                    active={category.id === selectedCategory}
+                                    onClick={() => handleCategoryChange(category.id)}
+                                >
+                                    {category.name}
+                                </Dropdown.Item>
+                            ))}
+                        </Dropdown.Menu>
+                    </Dropdown>
+                </Col>
+            </Row>
 
-            <Table striped bordered hover responsive>
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Category</th>
-                        <th>Status</th>
-                        <th>Price</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {courses.map(course => (
-                        <tr key={course.id}>
-                            <td>{course.title}</td>
-                            <td>{course.category_name || 'N/A'}</td>
-                            <td>
-                                <Badge bg={getStatusColor(course.status)}>
-                                    {course.status}
-                                </Badge>
-                            </td>
-                            <td>${course.price}</td>
-                            <td>
-                                <Button
-                                    variant="outline-primary"
-                                    size="sm"
-                                    as={Link}
-                                    to={`/admin/courses/${course.id}`}
-                                    className="me-1"
-                                >
-                                    <FaEye className="me-1" /> View
-                                </Button>
-                                <Button
-                                    variant="outline-warning"
-                                    size="sm"
-                                    as={Link}
-                                    to={`/admin/courses/${course.id}/edit`}
-                                    className="me-1"
-                                >
-                                    <FaEdit className="me-1" /> Edit
-                                </Button>
-                                <Button
-                                    variant="outline-danger"
-                                    size="sm"
-                                    onClick={() => handleDelete(course.id)}
-                                    disabled={deleteLoading}
-                                >
-                                    <FaTrash className="me-1" /> Delete
-                                </Button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
+            <Row className="mb-4">
+                <Col>
+                    <Button
+                        variant="primary"
+                        onClick={() => navigate('/admin/course-management/course-list/create')}
+                        className="me-2"
+                    >
+                        <FaPlus /> Add New Course
+                    </Button>
+                    <Button
+                        variant="outline-secondary"
+                        onClick={() => setShowFilters(!showFilters)}
+                    >
+                        <FaFilter /> {showFilters ? 'Hide Filters' : 'Show Filters'}
+                    </Button>
+                </Col>
+            </Row>
+
+            {showFilters && (
+                <Row className="mb-4">
+                    <Col>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Sort By</Form.Label>
+                            <Form.Select
+                                value={sortConfig.key}
+                                onChange={(e) => handleSort(e.target.value)}
+                            >
+                                <option value="title">Title</option>
+                                <option value="created_at">Date Created</option>
+                                <option value="enrollment_count">Enrollment Count</option>
+                                <option value="average_rating">Average Rating</option>
+                            </Form.Select>
+                        </Form.Group>
+                    </Col>
+                </Row>
+            )}
+
+            <Row>
+                <Col>
+                    <Table striped hover responsive>
+                        <thead>
+                            <tr>
+                                <th onClick={() => handleSort('title')}>
+                                    Title
+                                    {sortConfig.key === 'title' && (
+                                        sortConfig.direction === 'asc' ? '↑' : '↓'
+                                    )}
+                                </th>
+                                <th onClick={() => handleSort('category_name')}>
+                                    Category
+                                    {sortConfig.key === 'category_name' && (
+                                        sortConfig.direction === 'asc' ? '↑' : '↓'
+                                    )}
+                                </th>
+                                <th onClick={() => handleSort('instructor_name')}>
+                                    Instructor
+                                    {sortConfig.key === 'instructor_name' && (
+                                        sortConfig.direction === 'asc' ? '↑' : '↓'
+                                    )}
+                                </th>
+                                <th onClick={() => handleSort('status')}>
+                                    Status
+                                    {sortConfig.key === 'status' && (
+                                        sortConfig.direction === 'asc' ? '↑' : '↓'
+                                    )}
+                                </th>
+                                <th onClick={() => handleSort('price')}>
+                                    Price
+                                    {sortConfig.key === 'price' && (
+                                        sortConfig.direction === 'asc' ? '↑' : '↓'
+                                    )}
+                                </th>
+                                <th onClick={() => handleSort('enrollment_count')}>
+                                    Enrollments
+                                    {sortConfig.key === 'enrollment_count' && (
+                                        sortConfig.direction === 'asc' ? '↑' : '↓'
+                                    )}
+                                </th>
+                                <th onClick={() => handleSort('average_rating')}>
+                                    Rating
+                                    {sortConfig.key === 'average_rating' && (
+                                        sortConfig.direction === 'asc' ? '↑' : '↓'
+                                    )}
+                                </th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {loading ? (
+                                <tr>
+                                    <td colSpan="8" className="text-center py-4">
+                                        <Spinner animation="border" role="status">
+                                            <span className="visually-hidden">Loading...</span>
+                                        </Spinner>
+                                    </td>
+                                </tr>
+                            ) : courses.length === 0 ? (
+                                <tr>
+                                    <td colSpan="8" className="text-center py-4">
+                                        No courses found
+                                    </td>
+                                </tr>
+                            ) : (
+                                courses.map(course => (
+                                    <tr key={course.id}>
+                                        <td>
+                                            <div className="d-flex align-items-center">
+                                                {course.image_url && (
+                                                    <img
+                                                        src={course.image_url}
+                                                        alt={course.title}
+                                                        style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', marginRight: '10px' }}
+                                                    />
+                                                )}
+                                                <span>{course.title}</span>
+                                            </div>
+                                        </td>
+                                        <td>{course.category_name}</td>
+                                        <td>{course.instructor_name}</td>
+                                        <td>{getStatusBadge(course.status)}</td>
+                                        <td>${course.price}</td>
+                                        <td>{course.enrollment_count}</td>
+                                        <td>{course.average_rating ? `${course.average_rating}★` : 'N/A'}</td>
+                                        <td>
+                                            <Button
+                                                variant="link"
+                                                size="sm"
+                                                onClick={() => navigate(`/admin/course-management/course-list/${course.id}`)}
+                                                title="View Details"
+                                            >
+                                                <FaEye />
+                                            </Button>
+                                            <Button
+                                                variant="link"
+                                                size="sm"
+                                                onClick={() => navigate('/admin/course-management/course-list/create', { state: { course } })}
+                                                title="Edit"
+                                            >
+                                                <FaEdit />
+                                            </Button>
+                                            <Button
+                                                variant="link"
+                                                size="sm"
+                                                onClick={() => handleDelete(course.id)}
+                                                title="Delete"
+                                            >
+                                                <FaTrash />
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </Table>
+                </Col>
+            </Row>
         </Container>
     );
-};
-
-const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-        case 'published':
-            return 'success';
-        case 'draft':
-            return 'warning';
-        case 'archived':
-            return 'secondary';
-        default:
-            return 'primary';
-    }
 };
 
 export default CourseList;

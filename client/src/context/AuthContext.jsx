@@ -42,7 +42,6 @@ export const AuthProvider = ({ children }) => {
 
             // Try to get user profile
             const response = await authAPI.getProfile();
-            console.log('Profile response:', response);
             
             if (response.success) {
                 const userData = {
@@ -98,32 +97,14 @@ export const AuthProvider = ({ children }) => {
                     
                     // Set up axios interceptors
                     authAPI.setupAxiosInterceptors();
-                    setLoading(false);
-                    setInitialized(true);
-                    return;
                 }
                 
-                if (!token) {
-                    // No token, clear any stale data
-                    setUser(null);
-                    setLoading(false);
-                    setInitialized(true);
-                    return;
-                }
-                
-                // Set up axios interceptors
-                authAPI.setupAxiosInterceptors();
-                
-                // Try to get user data
-                const success = await refreshUser();
-                if (!success) {
-                    // Token is invalid, clear it
-                    authAPI.clearToken();
-                    setUser(null);
+                // Try to refresh user if token exists
+                if (token) {
+                    await refreshUser();
                 }
             } catch (error) {
-                console.error('Error initializing auth:', error);
-                // Clear invalid token
+                console.error('Auth initialization error:', error);
                 authAPI.clearToken();
                 setUser(null);
             } finally {
@@ -135,97 +116,69 @@ export const AuthProvider = ({ children }) => {
         initializeAuth();
     }, []);
 
-    const login = async (email, password) => {
+    const login = async (credentials, isAdminLogin = false) => {
         try {
-            const response = await authAPI.login(email, password);
+            setLoading(true);
+            const response = await authAPI.login(credentials, isAdminLogin);
+            
             if (response.success) {
-                // Store token and user data
                 const userData = {
                     ...response.user,
                     token: response.token
                 };
-                authAPI.setToken(response.token);
-                setUser(userData);
                 
-                // Store user data
+                // Update localStorage
                 localStorage.setItem('userData', JSON.stringify(userData));
-                
-                return { success: true, user: userData };
-            }
-            return { success: false, message: response.message };
-        } catch (error) {
-            console.error('Login error:', error);
-            return { 
-                success: false, 
-                message: error.response?.data?.message || 
-                         error.message || 
-                         'Login failed. Please try again.' 
-            };
-        }
-    };
-
-    const adminLogin = async (username, password) => {
-        try {
-            console.log('AuthContext: Attempting admin login');
-            const response = await authAPI.adminLogin(username, password);
-            console.log('AuthContext: Admin login response:', response);
-            
-            if (response.success) {
-                // Set user with admin role
-                const adminData = response.admin || {};
-                let token = response.token;
-                
-                // Remove Bearer prefix if present
-                if (token && token.startsWith('Bearer ')) {
-                    token = token.slice(7);
+                if (isAdminLogin || userData.role === 'admin') {
+                    localStorage.setItem('adminData', JSON.stringify(userData));
+                    localStorage.setItem('isAdmin', 'true');
                 }
                 
-                const userData = {
-                    ...adminData,
-                    role: 'admin',
-                    isAdmin: true,
-                    token: token
-                };
-                
-                console.log('AuthContext: Setting user with admin data:', userData);
+                // Update state
                 setUser(userData);
                 
-                // Set up axios interceptors with the new token
+                // Set up axios interceptors
                 authAPI.setupAxiosInterceptors();
                 
-                return response;
+                return true;
             }
-            return response;
+            return false;
         } catch (error) {
-            console.error('Admin login error in context:', error);
-            return { 
-                success: false, 
-                message: error.response?.data?.message || 
-                         error.message || 
-                         'Admin login failed. Please try again.' 
-            };
+            console.error('Login error:', error);
+            throw error;
+        } finally {
+            setLoading(false);
         }
     };
 
-    const logout = () => {
-        authAPI.clearToken();
-        setUser(null);
+    const logout = async () => {
+        try {
+            setLoading(true);
+            await authAPI.logout();
+            authAPI.clearToken();
+            localStorage.removeItem('userData');
+            localStorage.removeItem('adminData');
+            localStorage.removeItem('isAdmin');
+            setUser(null);
+            return true;
+        } catch (error) {
+            console.error('Logout error:', error);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <AuthContext.Provider 
-            value={{
-                user,
-                loading,
-                initialized,
-                isAdmin,
-                login,
-                adminLogin,
-                logout,
-                refreshUser
-            }}
-        >
-            {children}
+        <AuthContext.Provider value={{
+            user,
+            loading,
+            isAdmin,
+            login,
+            logout,
+            refreshUser
+        }}>
+            {initialized ? children : null}
         </AuthContext.Provider>
     );
 };

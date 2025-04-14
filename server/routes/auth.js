@@ -26,11 +26,12 @@ router.post('/verify-email', authController.verifyEmail);
 router.post('/resend-otp', authController.resendOTP);
 router.post('/forgot-password', authController.forgotPassword);
 router.post('/reset-password', authController.resetPassword);
-router.post('/google-login', authController.googleLogin);
+router.post('/admin/login', authController.adminLogin);
 
 // Protected routes - require authentication
 router.use(auth);
 router.get('/me', authController.getMe);
+router.get('/profile', authController.getProfile);
 router.post('/change-password', [
   body('currentPassword').notEmpty().withMessage('Current password is required'),
   body('newPassword')
