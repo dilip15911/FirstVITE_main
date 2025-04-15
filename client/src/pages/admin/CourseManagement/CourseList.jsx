@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Badge, Form, Row, Col, Card, Spinner, Alert, InputGroup } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaEdit, FaTrash, FaEye, FaPlus, FaSearch, FaFilter } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEye, FaPlus, FaSearch } from 'react-icons/fa';
 import { fetchCourses, deleteCourse, fetchCategories, fetchCoursesWithFilters } from '../../../services/courseService';
 import { toast } from 'react-toastify';
 
 const CourseList = () => {
-    const navigate = useNavigate();
     const [courses, setCourses] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);

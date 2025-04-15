@@ -6,7 +6,6 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const rateLimit = require('express-rate-limit');
 const fileUpload = require('express-fileupload');
-const mysql = require('mysql2/promise');
 require('dotenv').config();
 
 // Set default JWT secret if not defined in env
@@ -16,28 +15,8 @@ if (!process.env.JWT_SECRET) {
 
 const path = require('path');
 
-// Database connection
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',  // XAMPP MySQL default has no password
-  database: process.env.DB_NAME || 'firstvite_app',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
-
-// Test database connection
-pool.getConnection()
-  .then(connection => {
-    console.log('Database connected successfully');
-    connection.release();
-  })
-  .catch(err => {
-    console.error('Error connecting to the database:', err);
-    console.log('Please make sure XAMPP MySQL service is running');
-    process.exit(1); // Exit process if database connection fails
-  });
+// Import database pool configuration
+const pool = require('./config/db');
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
@@ -49,6 +28,8 @@ const supportRoutes = require('./routes/supportRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const userPaymentRoutes = require('./routes/userPaymentRoutes');
 const courseRoutes = require('./routes/courseRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+const refreshTokenRoutes = require('./routes/refreshTokenRoutes');
 
 // Initialize express app
 const app = express();
@@ -108,6 +89,7 @@ app.use('/api/admin/support', supportRoutes);
 app.use('/api/admin/payments', paymentRoutes);
 app.use('/api/user/payments', userPaymentRoutes);
 app.use('/api/courses', courseRoutes);
+app.use('/api/categories', categoryRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {

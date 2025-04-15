@@ -12,13 +12,11 @@ import {
     Spinner,
     ListGroup,
     Image,
-    Modal,
-    FloatingLabel,
-    InputGroup
+    Modal
 } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FaSave, FaUpload, FaEye, FaTimes, FaCheck, FaPlus, FaTrash, FaEdit, FaArrowLeft } from 'react-icons/fa';
+import { FaSave, FaEye, FaCheck, FaPlus, FaTrash, FaEdit, FaArrowLeft } from 'react-icons/fa';
 import { useAuth } from '../../../context/AuthContext';
 import axios from 'axios';
 
@@ -208,90 +206,55 @@ const CourseForm = () => {
         setLoading(true);
         setError(null);
 
-        try {
-            // Prepare course data
-            const courseData = {
-                title: course.title,
-                description: course.description,
-                category_id: course.category_id,
-                instructor_id: user?.id || 1, // Fallback to ID 1 if user object is not available
-                price: parseFloat(course.price) || 0,
-                status: course.status || 'draft',
-                duration: parseInt(course.duration) || 0,
-                level: course.level,
-                language: course.language,
-                requirements: course.requirements.filter(req => req.trim() !== '').map(req => req.trim()),
-                learning_outcomes: course.learning_outcomes.filter(outcome => outcome.trim() !== '').map(outcome => outcome.trim()),
-                prerequisites: course.prerequisites.filter(prereq => prereq.trim() !== '').map(prereq => prereq.trim())
-            };
+        // Prepare course data (move outside try block)
+        const courseData = {
+            title: course.title,
+            description: course.description,
+            category_id: parseInt(course.category_id), // Convert to number
+            instructor_id: user?.id,
+            price: parseFloat(course.price) || 0,
+            status: course.status || 'draft',
+            duration: parseInt(course.duration) || 0,
+            level: course.level,
+            language: course.language,
+            requirements: course.requirements.filter(req => req.trim() !== '').map(req => req.trim()),
+            learning_outcomes: course.learning_outcomes.filter(outcome => outcome.trim() !== '').map(outcome => outcome.trim()),
+            prerequisites: course.prerequisites.filter(prereq => prereq.trim() !== '').map(prereq => prereq.trim()),
+            image_url: course.image_url,
+            preview_video_url: course.preview_video_url
+        };
 
-            console.log('Submitting course data:', courseData);
+        try {
+            // Get the current token
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+            // Defensive: remove accidental 'Bearer ' prefix if present
+            const cleanToken = token.replace(/^Bearer\s+/i, '');
 
             let response;
+
+            // Set up common headers
+            const headers = {
+                'Authorization': `Bearer ${cleanToken}`,
+                'Content-Type': 'application/json'
+            };
 
             if (courseId) {
                 console.log('Updating existing course');
                 response = await axios.put(
                     `${API_BASE}${API_PREFIX}/admin/courses/${courseId}`,
                     courseData,
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                            'Content-Type': 'application/json'
-                        }
-                    }
+                    { headers }
                 );
             } else {
                 console.log('Creating new course');
-                
-                // Use a simple direct endpoint without authentication
-                try {
-                    console.log('Using courses/create endpoint for direct course creation');
-                    response = await axios.post(
-                        `${API_BASE}${API_PREFIX}/courses/create`,
-                        courseData,
-                        {
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        }
-                    );
-                    console.log('Course creation successful:', response.data);
-                } catch (directError) {
-                    console.error('Direct endpoint failed:', directError);
-                    
-                    // Try the admin/courses/direct endpoint as a fallback
-                    try {
-                        console.log('Trying admin/courses/direct endpoint');
-                        response = await axios.post(
-                            `${API_BASE}${API_PREFIX}/admin/courses/direct`,
-                            courseData,
-                            {
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                }
-                            }
-                        );
-                        console.log('Course creation successful via admin route:', response.data);
-                    } catch (adminError) {
-                        console.error('Admin endpoint failed:', adminError);
-                        
-                        // Fallback to using a mock response for testing
-                        console.log('Using mock response for testing');
-                        response = {
-                            data: {
-                                success: true,
-                                message: 'Course created successfully (mock)',
-                                data: {
-                                    id: Math.floor(Math.random() * 1000) + 1,
-                                    ...courseData,
-                                    created_at: new Date().toISOString()
-                                }
-                            }
-                        };
-                        console.log('Mock course creation successful:', response.data);
-                    }
-                }
+                response = await axios.post(
+                    `${API_BASE}${API_PREFIX}/courses`,
+                    courseData,
+                    { headers }
+                );
             }
 
             if (response.data && response.data.success) {
@@ -302,11 +265,51 @@ const CourseForm = () => {
             }
         } catch (err) {
             console.error('Course submission error:', err);
-            setError(err.response?.data?.message || 'Failed to save course');
-            toast.error(err.message || 'Failed to save course');
+            // Handle token expiration
+            if (err.response?.status === 401 && err.response?.data?.message?.includes('jwt expired')) {
+                try {
+                    // Try to refresh the token
+                    const refreshToken = localStorage.getItem('refreshToken');
+                    if (refreshToken) {
+                        const refreshResponse = await axios.post(`${API_BASE}${API_PREFIX}/auth/refresh`, { refreshToken });
+                        if (refreshResponse.data.success) {
+                            localStorage.setItem('token', refreshResponse.data.token);
+                            // Retry the original request with new token
+                            await axios.post(`${API_BASE}${API_PREFIX}/courses`, courseData, {
+                                headers: { Authorization: `Bearer ${refreshResponse.data.token}` }
+                            });
+                            toast.success('Course created successfully!');
+                            navigate('/admin/courses');
+                        } else {
+                            // Refresh failed, redirect to login
+                            toast.error('Session expired. Please log in again.');
+                            localStorage.removeItem('token');
+                            localStorage.removeItem('refreshToken');
+                            navigate('/login');
+                        }
+                    } else {
+                        // No refresh token, redirect to login
+                        toast.error('Session expired. Please log in again.');
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('refreshToken');
+                        navigate('/login');
+                    }
+                } catch (refreshError) {
+                    console.error('Token refresh failed:', refreshError);
+                    toast.error('Session expired. Please log in again.');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('refreshToken');
+                    navigate('/login');
+                }
+            } else {
+                setError(err.response?.data?.message || 'Failed to save course');
+                toast.error(err.response?.data?.message || 'Failed to save course');
+            }
         } finally {
             setLoading(false);
         }
+
+
     };
 
     const handlePreview = () => {

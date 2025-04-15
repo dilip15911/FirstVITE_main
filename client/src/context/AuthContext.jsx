@@ -44,25 +44,25 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const loadUser = async () => {
-    try {
-      const response = await authAPI.getProfile();
-      if (response.success) {
-        setUser(response.user);
-        // Update localStorage with fresh user data
-        localStorage.setItem('userData', JSON.stringify(response.user));
-      }
-    } catch (error) {
-      console.error('Error loading user:', error);
-      // Clear invalid token and user data
-      authAPI.clearToken();
-      localStorage.removeItem('userData');
-      localStorage.removeItem('adminData');
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const loadUser = async () => {
+  //   try {
+  //     const response = await authAPI.getProfile();
+  //     if (response.success) {
+  //       setUser(response.user);
+  //       // Update localStorage with fresh user data
+  //       localStorage.setItem('userData', JSON.stringify(response.user));
+  //     }
+  //   } catch (error) {
+  //     console.error('Error loading user:', error);
+  //     // Clear invalid token and user data
+  //     authAPI.clearToken();
+  //     localStorage.removeItem('userData');
+  //     localStorage.removeItem('adminData');
+  //     setUser(null);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const login = async (email, password) => {
     try {
