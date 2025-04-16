@@ -62,12 +62,13 @@ const courseRoutes = require('./routes/courseRoutes');
 const studentRoutes = require('./routes/studentsRoutes');
 const adminCourseRoutes = require('./routes/adminCourseRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
+const refreshTokenRoutes = require('./routes/refreshTokenRoutes');
 
 // Initialize express app
 const app = express();
 
 // Set database connection on app
-app.set('db', db.pool);
+app.set('db', pool);
 
 // Security middleware
 app.use(helmet());
@@ -123,7 +124,6 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/admin/courses', adminCourseRoutes);
-app.use('/api/categories', categoryRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {

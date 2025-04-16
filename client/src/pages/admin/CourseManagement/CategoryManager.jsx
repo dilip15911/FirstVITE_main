@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
     Container,
-    Row,
-    Col,
     Card,
     Button,
     Modal,
@@ -10,27 +8,21 @@ import {
     Alert,
     Table,
     Image,
-    Spinner,
-    Badge,
-    OverlayTrigger,
-    Tooltip
+    Spinner
 } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { FaPlus, FaEdit, FaTrash, FaEye, FaUpload, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const CategoryManager = () => {
-    const navigate = useNavigate();
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
-    const [previewImage, setPreviewImage] = useState(null);
 
     // Form states
     const [categoryName, setCategoryName] = useState('');

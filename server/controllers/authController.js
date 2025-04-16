@@ -38,15 +38,13 @@ module.exports.adminLogin = async (req, res) => {
       expiresIn: "24h" 
     });
 
-    // Add Bearer prefix to token
-    const tokenWithBearer = `Bearer ${token}`;
-
+    // Return only the raw JWT string (no 'Bearer ' prefix) for frontend compatibility
     console.log('Admin login successful for:', username);
 
     // Return success response with all necessary data
     res.json({ 
       success: true,
-      token: tokenWithBearer, 
+      token, // Only the raw JWT string
       message: "Admin login successful",
       admin: {
         id: admin.id,

@@ -10,15 +10,11 @@ import {
     Tab,
     Tabs,
     Spinner,
-    ListGroup,
-    Image,
-    Modal,
-    FloatingLabel,
-    InputGroup
+    Image
 } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FaSave, FaUpload, FaEye, FaTimes, FaCheck, FaPlus, FaTrash, FaEdit, FaArrowLeft } from 'react-icons/fa';
+import { FaSave, FaEye, FaCheck, FaArrowLeft } from 'react-icons/fa';
 import { useAuth } from '../../../context/AuthContext';
 import axios from 'axios';
 
@@ -46,10 +42,7 @@ const CourseForm = () => {
         description: '',
         category_id: '',
         status: 'draft',
-        language: 'en',
         level: 'beginner',
-        duration: 0,
-        price: 0,
         preview_video_url: '',
         image_url: '',
         requirements: [],
@@ -208,90 +201,52 @@ const CourseForm = () => {
         setLoading(true);
         setError(null);
 
-        try {
-            // Prepare course data
-            const courseData = {
-                title: course.title,
-                description: course.description,
-                category_id: course.category_id,
-                instructor_id: user?.id || 1, // Fallback to ID 1 if user object is not available
-                price: parseFloat(course.price) || 0,
-                status: course.status || 'draft',
-                duration: parseInt(course.duration) || 0,
-                level: course.level,
-                language: course.language,
-                requirements: course.requirements.filter(req => req.trim() !== '').map(req => req.trim()),
-                learning_outcomes: course.learning_outcomes.filter(outcome => outcome.trim() !== '').map(outcome => outcome.trim()),
-                prerequisites: course.prerequisites.filter(prereq => prereq.trim() !== '').map(prereq => prereq.trim())
-            };
+        // Prepare course data (move outside try block)
+        const courseData = {
+            title: course.title,
+            description: course.description,
+            category_id: parseInt(course.category_id), // Convert to number
+            instructor_id: user?.id,
+            status: course.status || 'draft',
+            level: course.level,
+            requirements: course.requirements.filter(req => req.trim() !== '').map(req => req.trim()),
+            learning_outcomes: course.learning_outcomes.filter(outcome => outcome.trim() !== '').map(outcome => outcome.trim()),
+            prerequisites: course.prerequisites.filter(prereq => prereq.trim() !== '').map(prereq => prereq.trim()),
+            image_url: course.image_url,
+            preview_video_url: course.preview_video_url
+        };
 
-            console.log('Submitting course data:', courseData);
+        try {
+            // Get the current token
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+            // Defensive: remove accidental 'Bearer ' prefix if present
+            const cleanToken = token.replace(/^Bearer\s+/i, '');
 
             let response;
+
+            // Set up common headers
+            const headers = {
+                'Authorization': `Bearer ${cleanToken}`,
+                'Content-Type': 'application/json'
+            };
 
             if (courseId) {
                 console.log('Updating existing course');
                 response = await axios.put(
                     `${API_BASE}${API_PREFIX}/admin/courses/${courseId}`,
                     courseData,
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                            'Content-Type': 'application/json'
-                        }
-                    }
+                    { headers }
                 );
             } else {
                 console.log('Creating new course');
-                
-                // Use a simple direct endpoint without authentication
-                try {
-                    console.log('Using courses/create endpoint for direct course creation');
-                    response = await axios.post(
-                        `${API_BASE}${API_PREFIX}/courses/create`,
-                        courseData,
-                        {
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        }
-                    );
-                    console.log('Course creation successful:', response.data);
-                } catch (directError) {
-                    console.error('Direct endpoint failed:', directError);
-                    
-                    // Try the admin/courses/direct endpoint as a fallback
-                    try {
-                        console.log('Trying admin/courses/direct endpoint');
-                        response = await axios.post(
-                            `${API_BASE}${API_PREFIX}/admin/courses/direct`,
-                            courseData,
-                            {
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                }
-                            }
-                        );
-                        console.log('Course creation successful via admin route:', response.data);
-                    } catch (adminError) {
-                        console.error('Admin endpoint failed:', adminError);
-                        
-                        // Fallback to using a mock response for testing
-                        console.log('Using mock response for testing');
-                        response = {
-                            data: {
-                                success: true,
-                                message: 'Course created successfully (mock)',
-                                data: {
-                                    id: Math.floor(Math.random() * 1000) + 1,
-                                    ...courseData,
-                                    created_at: new Date().toISOString()
-                                }
-                            }
-                        };
-                        console.log('Mock course creation successful:', response.data);
-                    }
-                }
+                response = await axios.post(
+                    `${API_BASE}${API_PREFIX}/courses`,
+                    courseData,
+                    { headers }
+                );
             }
 
             if (response.data && response.data.success) {
@@ -302,11 +257,51 @@ const CourseForm = () => {
             }
         } catch (err) {
             console.error('Course submission error:', err);
-            setError(err.response?.data?.message || 'Failed to save course');
-            toast.error(err.message || 'Failed to save course');
+            // Handle token expiration
+            if (err.response?.status === 401 && err.response?.data?.message?.includes('jwt expired')) {
+                try {
+                    // Try to refresh the token
+                    const refreshToken = localStorage.getItem('refreshToken');
+                    if (refreshToken) {
+                        const refreshResponse = await axios.post(`${API_BASE}${API_PREFIX}/auth/refresh`, { refreshToken });
+                        if (refreshResponse.data.success) {
+                            localStorage.setItem('token', refreshResponse.data.token);
+                            // Retry the original request with new token
+                            await axios.post(`${API_BASE}${API_PREFIX}/courses`, courseData, {
+                                headers: { Authorization: `Bearer ${refreshResponse.data.token}` }
+                            });
+                            toast.success('Course created successfully!');
+                            navigate('/admin/courses');
+                        } else {
+                            // Refresh failed, redirect to login
+                            toast.error('Session expired. Please log in again.');
+                            localStorage.removeItem('token');
+                            localStorage.removeItem('refreshToken');
+                            navigate('/login');
+                        }
+                    } else {
+                        // No refresh token, redirect to login
+                        toast.error('Session expired. Please log in again.');
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('refreshToken');
+                        navigate('/login');
+                    }
+                } catch (refreshError) {
+                    console.error('Token refresh failed:', refreshError);
+                    toast.error('Session expired. Please log in again.');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('refreshToken');
+                    navigate('/login');
+                }
+            } else {
+                setError(err.response?.data?.message || 'Failed to save course');
+                toast.error(err.response?.data?.message || 'Failed to save course');
+            }
         } finally {
             setLoading(false);
         }
+
+
     };
 
     const handlePreview = () => {
@@ -433,6 +428,7 @@ const CourseForm = () => {
                     >
                         <Tab eventKey="details" title="Course Details">
                             <Form onSubmit={handleSubmit}>
+                                {/* Course Title & Category */}
                                 <Row>
                                     <Col md={8}>
                                         <Form.Group controlId="title" className="mb-3">
@@ -487,6 +483,7 @@ const CourseForm = () => {
                                     </Col>
                                 </Row>
 
+                                {/* Course Description */}
                                 <Form.Group controlId="description" className="mb-3">
                                     <Form.Label>Description</Form.Label>
                                     <Form.Control
@@ -500,22 +497,8 @@ const CourseForm = () => {
                                     />
                                 </Form.Group>
 
+                                {/* Course Details */}
                                 <Row>
-                                    <Col md={3}>
-                                        <Form.Group controlId="language" className="mb-3">
-                                            <Form.Label>Language</Form.Label>
-                                            <Form.Select
-                                                name="language"
-                                                value={course.language}
-                                                onChange={handleChange}
-                                            >
-                                                <option value="en">English</option>
-                                                <option value="es">Spanish</option>
-                                                <option value="fr">French</option>
-                                                <option value="de">German</option>
-                                            </Form.Select>
-                                        </Form.Group>
-                                    </Col>
                                     <Col md={3}>
                                         <Form.Group controlId="level" className="mb-3">
                                             <Form.Label>Level</Form.Label>
@@ -530,63 +513,43 @@ const CourseForm = () => {
                                             </Form.Select>
                                         </Form.Group>
                                     </Col>
-                                    <Col md={3}>
-                                        <Form.Group controlId="duration" className="mb-3">
-                                            <Form.Label>Duration (minutes)</Form.Label>
+                                    <Col md={5}>
+                                        <Form.Group controlId="previewVideo" className="mb-3">
+                                            <Form.Label>Preview Video URL</Form.Label>
                                             <Form.Control
-                                                type="number"
-                                                name="duration"
-                                                value={course.duration}
+                                                type="url"
+                                                name="preview_video_url"
+                                                value={course.preview_video_url}
                                                 onChange={handleChange}
-                                                min="1"
+                                                placeholder="Enter preview video URL"
                                             />
                                         </Form.Group>
                                     </Col>
-                                    <Col md={3}>
-                                        <Form.Group controlId="price" className="mb-3">
-                                            <Form.Label>Price ($)</Form.Label>
-                                            <Form.Control
-                                                type="number"
-                                                name="price"
-                                                value={course.price}
-                                                onChange={handleChange}
-                                                min="0"
-                                                step="0.01"
-                                            />
+                                    <Col md={4}>
+                                        <Form.Group controlId="image" className="mb-3">
+                                            <Form.Label>Course Image</Form.Label>
+                                            <div className="d-flex align-items-center">
+                                                <Form.Control
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleImageUpload}
+                                                    className="me-2"
+                                                />
+                                                {previewImage && (
+                                                    <Image
+                                                        src={previewImage}
+                                                        thumbnail
+                                                        style={{ maxWidth: '100px', maxHeight: '100px' }}
+                                                    />
+                                                )}
+                                            </div>
                                         </Form.Group>
                                     </Col>
                                 </Row>
 
-                                <Form.Group controlId="previewVideo" className="mb-3">
-                                    <Form.Label>Preview Video URL</Form.Label>
-                                    <Form.Control
-                                        type="url"
-                                        name="preview_video_url"
-                                        value={course.preview_video_url}
-                                        onChange={handleChange}
-                                        placeholder="Enter preview video URL"
-                                    />
-                                </Form.Group>
 
-                                <Form.Group controlId="image" className="mb-3">
-                                    <Form.Label>Course Image</Form.Label>
-                                    <div className="d-flex align-items-center">
-                                        <Form.Control
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleImageUpload}
-                                            className="me-2"
-                                        />
-                                        {previewImage && (
-                                            <Image
-                                                src={previewImage}
-                                                thumbnail
-                                                style={{ maxWidth: '100px', maxHeight: '100px' }}
-                                            />
-                                        )}
-                                    </div>
-                                </Form.Group>
 
+                                {/* Submit Button */}
                                 <div className="d-flex justify-content-end mt-3">
                                     <Button 
                                         variant="secondary" 
@@ -614,379 +577,9 @@ const CourseForm = () => {
                                 </div>
                             </Form>
                         </Tab>
-
-                        <Tab eventKey="requirements" title="Requirements">
-                            <div className="d-flex justify-content-between align-items-center mb-3">
-                                <h4>Course Requirements</h4>
-                                <Button 
-                                    variant="primary"
-                                    onClick={() => setShowRequirementsModal(true)}
-                                >
-                                    <FaPlus className="me-2" /> Add Requirement
-                                </Button>
-                            </div>
-                            <ListGroup>
-                                {(course.requirements || []).map((req, index) => (
-                                    <ListGroup.Item key={index} className="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <strong>Requirement {index + 1}:</strong>
-                                            <p className="mb-0">{req}</p>
-                                        </div>
-                                        <Button 
-                                            variant="danger" 
-                                            size="sm"
-                                            onClick={() => handleRemoveFromArray('requirements', index)}
-                                        >
-                                            <FaTrash />
-                                        </Button>
-                                    </ListGroup.Item>
-                                ))}
-                            </ListGroup>
-                        </Tab>
-
-                        <Tab eventKey="outcomes" title="Learning Outcomes">
-                            <div className="d-flex justify-content-between align-items-center mb-3">
-                                <h4>Learning Outcomes</h4>
-                                <Button 
-                                    variant="primary"
-                                    onClick={() => setShowOutcomesModal(true)}
-                                >
-                                    <FaPlus className="me-2" /> Add Outcome
-                                </Button>
-                            </div>
-                            <ListGroup>
-                                {(course.learning_outcomes || []).map((outcome, index) => (
-                                    <ListGroup.Item key={index} className="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <strong>Outcome {index + 1}:</strong>
-                                            <p className="mb-0">{outcome}</p>
-                                        </div>
-                                        <Button 
-                                            variant="danger" 
-                                            size="sm"
-                                            onClick={() => handleRemoveFromArray('learning_outcomes', index)}
-                                        >
-                                            <FaTrash />
-                                        </Button>
-                                    </ListGroup.Item>
-                                ))}
-                            </ListGroup>
-                        </Tab>
-
-                        <Tab eventKey="prerequisites" title="Prerequisites">
-                            <div className="d-flex justify-content-between align-items-center mb-3">
-                                <h4>Prerequisites</h4>
-                                <Button 
-                                    variant="primary"
-                                    onClick={() => setShowPrerequisitesModal(true)}
-                                >
-                                    <FaPlus className="me-2" /> Add Prerequisite
-                                </Button>
-                            </div>
-                            <ListGroup>
-                                {(course.prerequisites || []).map((prereq, index) => (
-                                    <ListGroup.Item key={index} className="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <strong>Prerequisite {index + 1}:</strong>
-                                            <p className="mb-0">{prereq}</p>
-                                        </div>
-                                        <Button 
-                                            variant="danger" 
-                                            size="sm"
-                                            onClick={() => handleRemoveFromArray('prerequisites', index)}
-                                        >
-                                            <FaTrash />
-                                        </Button>
-                                    </ListGroup.Item>
-                                ))}
-                            </ListGroup>
-                        </Tab>
-
-                        <Tab eventKey="resources" title="Resources">
-                            <div className="d-flex justify-content-between align-items-center mb-3">
-                                <h4>Course Resources</h4>
-                                <Button 
-                                    variant="primary"
-                                    onClick={() => setShowResourcesModal(true)}
-                                >
-                                    <FaPlus className="me-2" /> Add Resource
-                                </Button>
-                            </div>
-                            <ListGroup>
-                                {(course.resources || []).map((resource, index) => (
-                                    <ListGroup.Item key={index} className="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <strong>{resource.title}</strong>
-                                            <p className="mb-0">{resource.description}</p>
-                                            <p className="mb-0">Type: {resource.resource_type}</p>
-                                        </div>
-                                        <Button 
-                                            variant="danger" 
-                                            size="sm"
-                                            onClick={() => handleRemoveFromArray('resources', index)}
-                                        >
-                                            <FaTrash />
-                                        </Button>
-                                    </ListGroup.Item>
-                                ))}
-                            </ListGroup>
-                        </Tab>
-
-                        <Tab eventKey="sections" title="Course Sections">
-                            <div className="d-flex justify-content-between align-items-center mb-3">
-                                <h4>Course Sections</h4>
-                                <Button 
-                                    variant="primary"
-                                    onClick={() => setShowSectionsModal(true)}
-                                >
-                                    <FaPlus className="me-2" /> Add Section
-                                </Button>
-                            </div>
-                            <ListGroup>
-                                {(course.sections || []).map((section, index) => (
-                                    <ListGroup.Item key={index} className="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <strong>Section {index + 1}:</strong>
-                                            <p className="mb-0">{section.title}</p>
-                                            <p className="mb-0">Lessons: {(section.lessons || []).length}</p>
-                                        </div>
-                                        <div>
-                                            <Button 
-                                                variant="warning" 
-                                                size="sm"
-                                                className="me-2"
-                                                onClick={() => handleEditSection(section)}
-                                            >
-                                                <FaEdit />
-                                            </Button>
-                                            <Button 
-                                                variant="danger" 
-                                                size="sm"
-                                                onClick={() => handleRemoveSection(index)}
-                                            >
-                                                <FaTrash />
-                                            </Button>
-                                        </div>
-                                    </ListGroup.Item>
-                                ))}
-                            </ListGroup>
-                        </Tab>
                     </Tabs>
                 </Card.Body>
             </Card>
-
-            {/* Preview Modal */}
-            <Modal show={showPreview} onHide={() => setShowPreview(false)} size="lg">
-                <Modal.Header closeButton>
-                    <Modal.Title>Course Preview</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <div className="text-center mb-4">
-                        {previewImage && (
-                            <Image
-                                src={previewImage}
-                                thumbnail
-                                style={{ maxWidth: '100%', maxHeight: '300px' }}
-                            />
-                        )}
-                    </div>
-                    <h2>{course.title}</h2>
-                    <p className="text-muted">{course.description}</p>
-                    <div className="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <span className="badge bg-primary">{course.level}</span>
-                            <span className="badge bg-secondary ms-2">{course.language}</span>
-                        </div>
-                        <div>
-                            <span className="text-primary">${course.price}</span>
-                        </div>
-                    </div>
-                    <div className="mb-3">
-                        <h4>Requirements</h4>
-                        <ul>
-                            {(course.requirements || []).map((req, index) => (
-                                <li key={index}>{req}</li>
-                            ))}
-                        </ul>
-                    </div>
-                    <div className="mb-3">
-                        <h4>Learning Outcomes</h4>
-                        <ul>
-                            {(course.learning_outcomes || []).map((outcome, index) => (
-                                <li key={index}>{outcome}</li>
-                            ))}
-                        </ul>
-                    </div>
-                </Modal.Body>
-            </Modal>
-
-            {/* Add Requirement Modal */}
-            <Modal show={showRequirementsModal} onHide={() => setShowRequirementsModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Add Course Requirement</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form.Group controlId="requirement">
-                        <Form.Control
-                            type="text"
-                            placeholder="Enter requirement"
-                            onChange={(e) => handleArrayChange('requirements', course.requirements.length, e.target.value)}
-                        />
-                    </Form.Group>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowRequirementsModal(false)}>
-                        Cancel
-                    </Button>
-                    <Button variant="primary" onClick={handleAddToArray.bind(null, 'requirements')}>
-                        Add Requirement
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            {/* Add Outcome Modal */}
-            <Modal show={showOutcomesModal} onHide={() => setShowOutcomesModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Add Learning Outcome</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form.Group controlId="outcome">
-                        <Form.Control
-                            type="text"
-                            placeholder="Enter learning outcome"
-                            onChange={(e) => handleArrayChange('learning_outcomes', course.learning_outcomes.length, e.target.value)}
-                        />
-                    </Form.Group>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowOutcomesModal(false)}>
-                        Cancel
-                    </Button>
-                    <Button variant="primary" onClick={handleAddToArray.bind(null, 'learning_outcomes')}>
-                        Add Outcome
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            {/* Add Prerequisite Modal */}
-            <Modal show={showPrerequisitesModal} onHide={() => setShowPrerequisitesModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Add Prerequisite</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form.Group controlId="prerequisite">
-                        <Form.Control
-                            type="text"
-                            placeholder="Enter prerequisite"
-                            onChange={(e) => handleArrayChange('prerequisites', course.prerequisites.length, e.target.value)}
-                        />
-                    </Form.Group>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowPrerequisitesModal(false)}>
-                        Cancel
-                    </Button>
-                    <Button variant="primary" onClick={handleAddToArray.bind(null, 'prerequisites')}>
-                        Add Prerequisite
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            {/* Add Resource Modal */}
-            <Modal show={showResourcesModal} onHide={() => setShowResourcesModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Add Course Resource</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form.Group controlId="resourceTitle">
-                        <Form.Label>Title</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Enter resource title"
-                            onChange={(e) => handleArrayChange('resources', course.resources.length, {
-                                ...course.resources[course.resources.length - 1],
-                                title: e.target.value
-                            })}
-                        />
-                    </Form.Group>
-                    <Form.Group controlId="resourceDescription" className="mb-3">
-                        <Form.Label>Description</Form.Label>
-                        <Form.Control
-                            as="textarea"
-                            rows={3}
-                            placeholder="Enter resource description"
-                            onChange={(e) => handleArrayChange('resources', course.resources.length, {
-                                ...course.resources[course.resources.length - 1],
-                                description: e.target.value
-                            })}
-                        />
-                    </Form.Group>
-                    <Form.Group controlId="resourceType">
-                        <Form.Label>Type</Form.Label>
-                        <Form.Select
-                            onChange={(e) => handleArrayChange('resources', course.resources.length, {
-                                ...course.resources[course.resources.length - 1],
-                                resource_type: e.target.value
-                            })}
-                        >
-                            <option value="pdf">PDF Document</option>
-                            <option value="doc">Word Document</option>
-                            <option value="ppt">PowerPoint Presentation</option>
-                            <option value="video">Video</option>
-                            <option value="audio">Audio</option>
-                            <option value="zip">Compressed File</option>
-                        </Form.Select>
-                    </Form.Group>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowResourcesModal(false)}>
-                        Cancel
-                    </Button>
-                    <Button variant="primary" onClick={handleAddToArray.bind(null, 'resources')}>
-                        Add Resource
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            {/* Add Section Modal */}
-            <Modal show={showSectionsModal} onHide={() => setShowSectionsModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Add Course Section</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form.Group controlId="sectionTitle">
-                        <Form.Label>Section Title</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Enter section title"
-                            onChange={(e) => handleArrayChange('sections', course.sections.length, {
-                                title: e.target.value,
-                                lessons: []
-                            })}
-                        />
-                    </Form.Group>
-                    <Form.Group controlId="sectionDescription" className="mb-3">
-                        <Form.Label>Description</Form.Label>
-                        <Form.Control
-                            as="textarea"
-                            rows={3}
-                            placeholder="Enter section description"
-                            onChange={(e) => handleArrayChange('sections', course.sections.length, {
-                                ...course.sections[course.sections.length - 1],
-                                description: e.target.value
-                            })}
-                        />
-                    </Form.Group>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowSectionsModal(false)}>
-                        Cancel
-                    </Button>
-                    <Button variant="primary" onClick={handleAddToArray.bind(null, 'sections')}>
-                        Add Section
-                    </Button>
-                </Modal.Footer>
-            </Modal>
         </Container>
     );
 };
