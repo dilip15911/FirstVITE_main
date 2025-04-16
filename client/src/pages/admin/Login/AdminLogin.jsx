@@ -11,9 +11,9 @@ const AdminLogin = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    
+
     const { user, adminLogin, refreshUser } = useAuth();
-    
+
     // Check if already logged in as admin
     useEffect(() => {
         // If user exists and has admin role, redirect to dashboard
@@ -34,14 +34,14 @@ const AdminLogin = () => {
             for (let i = 0; i < 10; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
-                
+
                 // Random position
                 const x = Math.random() * 100;
                 const y = Math.random() * 100;
-                
+
                 particle.style.left = `${x}%`;
                 particle.style.top = `${y}%`;
-                
+
                 particles.appendChild(particle);
             }
         }
@@ -59,22 +59,22 @@ const AdminLogin = () => {
         e.preventDefault();
         setError("");
         setLoading(true);
-        
+
         try {
             console.log('Attempting admin login with:', { username });
-            
+
             // Use the adminLogin function from AuthContext
             const response = await adminLogin(username, password);
             console.log('Admin login response:', response);
-            
+
             if (response.success) {
                 console.log('Login successful, redirecting to dashboard');
                 console.log('Token in localStorage:', localStorage.getItem('token'));
                 console.log('AdminData in localStorage:', localStorage.getItem('adminData'));
-                
+
                 // Always redirect to the admin dashboard after successful login
                 console.log('Redirecting to: /admin/dashboard');
-                
+
                 // Wait a moment for token to be properly set and context to update
                 setTimeout(() => {
                     // Force refresh user data before navigation

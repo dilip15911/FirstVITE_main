@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { API_URL } from '../config/api';
+// import { API_URL } from '../config/api';
 
 // Base URL for API calls - includes the /api prefix
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -189,25 +189,25 @@ export const fetchInstructors = async () => {
 };
 
 // Get all courses for admin
-export const fetchCourses = async () => {
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            throw new Error('No authentication token found');
-        }
+// export const fetchCourses = async () => {
+//     try {
+//         const token = localStorage.getItem('token');
+//         if (!token) {
+//             throw new Error('No authentication token found');
+//         }
 
-        const response = await axios.get(`${API_URL}/courses`, {
-            headers: {
-                'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`
-            }
-        });
-        return response.data.data;
-    } catch (error) {
-        console.error('Error fetching courses:', error);
-        toast.error(error.response?.data?.message || 'Failed to fetch courses');
-        throw error;
-    }
-};
+//         const response = await axios.get(`${API_URL}/courses`, {
+//             headers: {
+//                 'Authorization': token.startsWith('Bearer ') ? token : `Bearer ${token}`
+//             }
+//         });
+//         return response.data.data;
+//     } catch (error) {
+//         console.error('Error fetching courses:', error);
+//         toast.error(error.response?.data?.message || 'Failed to fetch courses');
+//         throw error;
+//     }
+// };
 
 // Delete a course
 export const deleteCourse = async (courseId) => {

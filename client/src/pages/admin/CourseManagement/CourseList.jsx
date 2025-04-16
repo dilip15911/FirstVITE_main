@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Table, Button, Badge, Form, Row, Col, Card, Spinner, Alert, InputGroup } from 'react-bootstrap';
+import { Container, Table, Button, Form, Row, Col, Spinner, Alert, Dropdown, Navigation} from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaEdit, FaTrash, FaEye, FaPlus, FaSearch } from 'react-icons/fa';
-import { fetchCourses, deleteCourse, fetchCategories, fetchCoursesWithFilters } from '../../../services/courseService';
+import { FaEdit, FaTrash, FaEye, FaPlus, FaFilter } from 'react-icons/fa';
+import { fetchCourses, deleteCourse, fetchCategories } from '../../../services/courseService';
 import { toast } from 'react-toastify';
-import { fetchCourses, fetchCategories, deleteCourse } from '../../../services/courseService';
 
 const CourseList = () => {
+    const navigate = useNavigate();
     const [courses, setCourses] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -148,17 +148,10 @@ const CourseList = () => {
 
             <Row className="mb-4">
                 <Col>
-                    <Button
-                        variant="primary"
-                        onClick={() => navigate('/admin/course-management/course-list/create')}
-                        className="me-2"
-                    >
+                    <Button variant="primary" onClick={() => navigate('/admin/course-management/course-list/create')} className="me-2">
                         <FaPlus /> Add New Course
                     </Button>
-                    <Button
-                        variant="outline-secondary"
-                        onClick={() => setShowFilters(!showFilters)}
-                    >
+                    <Button variant="outline-secondary" onClick={() => setShowFilters(!showFilters)}>
                         <FaFilter /> {showFilters ? 'Hide Filters' : 'Show Filters'}
                     </Button>
                 </Col>
