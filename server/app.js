@@ -19,14 +19,49 @@ if (!process.env.JWT_SECRET) {
 
 const path = require('path');
 
-// Import database connection
-const db = require('./db');
+// Database connection
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',  // XAMPP MySQL default has no password
+  database: process.env.DB_NAME || 'firstvite_app',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
+
+// Test database connection
+pool.getConnection()
+  .then(connection => {
+    console.log('Database connected successfully');
+    connection.query('SELECT 1 + 1 as test')
+      .then(([results]) => {
+        console.log('Test query successful:', results);
+      })
+      .catch(error => {
+        console.error('Error executing test query:', error);
+      });
+    connection.release();
+  })
+  .catch(err => {
+    console.error('Error connecting to the database:', err);
+    console.log('Please make sure XAMPP MySQL service is running');
+    process.exit(1); // Exit process if database connection fails
+  });
 
 // Import routes
-const authRoutes = require('./routes/auth');
-const categoryRoutes = require('./routes/categories');
-const courseRoutes = require('./routes/courses');
-const studentRoutes = require('./routes/students');
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const guestTeachersRoutes = require('./routes/guestTeachersRoutes');
+const contentRoutes = require('./routes/contentRoutes');
+const supportRoutes = require('./routes/supportRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const userPaymentRoutes = require('./routes/userPaymentRoutes');
+const courseRoutes = require('./routes/courseRoutes');
+const studentRoutes = require('./routes/studentsRoutes');
+const adminCourseRoutes = require('./routes/adminCourseRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
 
 // Initialize express app
 const app = express();
@@ -87,6 +122,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/students', studentRoutes);
+app.use('/api/admin/courses', adminCourseRoutes);
+app.use('/api/categories', categoryRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {
